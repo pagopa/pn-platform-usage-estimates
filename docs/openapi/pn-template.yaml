@@ -83,6 +83,42 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /template/v1/estimate/{paId}:
+    put:
+      tags:
+        - Estimate
+      operationId: updateEstimate
+      x-api-permissions:
+        - 'estimate-write'
+      summary: Aggiorna stima.
+      description: API che consente di aggiornare la stima
+      parameters:
+        - $ref: '#/components/parameters/queryPaId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstimateDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstimateDto'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
 
 components:
   schemas:
