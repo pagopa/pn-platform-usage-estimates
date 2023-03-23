@@ -1,6 +1,6 @@
 package it.pagopa.pn.template.model;
 
-import it.pagopa.pn.paperchannel.utils.Utility;
+import it.pagopa.pn.template.utils.Utility;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,5 +54,6 @@ public class NotificationForecast {
                 Utility.convertToHash(this.totalPaperInternationalNotif.toString()) +
                 Utility.convertToHash(this.lastModifiedTimestamp.toString()) ;
     }
+
 
 }
