@@ -47,6 +47,110 @@ paths:
         '500':
             description: InternalServerError
 
+
+  /template/v1/estimate:
+    post:
+      tags:
+        - Estimate
+      operationId: createEstimate
+      x-api-permissions:
+        - 'estimate-write'
+      summary: Inserimento di una stima.
+      description: API che consente di aggiungere i dettagli di una stima.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstimateDto'
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstimateDto'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+
+components:
+  schemas:
+    EstimateDto:
+      type: object
+      properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
+        status:
+          type: string
+          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+        deadlineDate:
+          type: string
+          format: byte
+        referenceMonth:
+          type: string
+        totalDigitalNotif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        totalPaper890Notif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        totalPaperNationalNotif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        totalPaperInternationalNotif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        lastModifiedTimestamp:
+          type: string
+          format: date
+      required:
+        - paId
+
+
+  parameters:
+    queryPaId:
+      name: paId
+      in: query
+      required: true
+      schema:
+        type: string
+
+  responses:
+    Forbidden:
+      description: Forbidden
+    NotFound:
+      description: Not found
+    Invalid:
+      description: Bad Request
+    NotAllowed:
+      description: Method not allowed
+    InternalError:
+      description: Internal Server Error
+    Unauthorized:
+      description: Unauthorized
+
 #  securitySchemes:                                      # ONLY EXTERNAL
 #    bearerAuth:                                         # ONLY EXTERNAL
 #      type: http                                        # ONLY EXTERNAL
