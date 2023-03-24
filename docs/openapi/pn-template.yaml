@@ -52,11 +52,11 @@ paths:
     post:
       tags:
         - Estimate
-      operationId: createEstimate
+      operationId: createOrUpdateEstimate
       x-api-permissions:
         - 'estimate-write'
-      summary: Inserimento di una stima.
-      description: API che consente di aggiungere i dettagli di una stima.
+      summary: Inserimento o modifica di una stima.
+      description: API che consente di aggiungere o di modificare i dettagli di una stima.
       requestBody:
         content:
           application/json:
@@ -83,22 +83,52 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /template/v1/estimate/{paId}:
-    put:
+  /template/v1/estimates:
+    get:
       tags:
         - Estimate
-      operationId: updateEstimate
+      operationId: getAllEstimate
       x-api-permissions:
-        - 'estimate-write'
-      summary: Aggiorna stima.
-      description: API che consente di aggiornare la stima
+        - 'estimate-read'
+      summary: ritorna elenco di stime in base alla partita iva o al nome della pa.
+      description: API che estrae la lista di stime
       parameters:
         - $ref: '#/components/parameters/queryPaId'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EstimateDto'
+        - $ref: '#/components/parameters/queryTaxId'
+        - $ref: '#/components/parameters/queryNumberPage'
+        - $ref: '#/components/parameters/querySizePage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableEstimateResponseDto'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /template/v1/estimate/{paId}/detail/{referenceMonth}:
+    get:
+      tags:
+        - Estimate
+      operationId: getEstimateDetail
+      x-api-permissions:
+        - 'estimate-read'
+      summary: ritorna il dettaglio delle stime in base al mese di riferimento e al paId.
+      description: API che ritorna il dettaglio di una stima.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceMonth'
       responses:
         '200':
           description: OK
@@ -119,6 +149,36 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+  /template/v1/estimate/file-download:
+    get:
+      tags:
+        - Estimate
+      operationId: downloadEstimateFile
+      x-api-permissions:
+        - 'estimate-read'
+      summary: Download fatture delle stime
+      description: API che consente il download dell'elenco fatture delle stime.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoDownloadDTO'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 components:
   schemas:
@@ -164,14 +224,185 @@ components:
       required:
         - paId
 
+    EstimateSearchTableDTO:
+      type: object
+      properties:
+        referenceMonth:
+          type: string
+        lastModifiedTimestamp:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+        checkPDND:
+          type: boolean
+
+
+    PageableEstimateResponseDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Page'
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/EstimateSearchTableDTO'
+          maxItems: 999999999
+          minItems: 1
+      additionalProperties: false
+      required:
+        - content
+
+    Pageable:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+          maximum: 999999999
+          minimum: 1
+        pageNumber:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        pageSize:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        paged:
+          type: boolean
+        sort:
+          $ref: '#/components/schemas/Sort'
+        unpaged:
+          type: boolean
+      additionalProperties: false
+
+    Sort:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+      additionalProperties: false
+
+    Page:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        numberOfElements:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        size:
+          type: integer
+          format: int32
+          maximum: 1024
+          minimum: 1
+        sort:
+          $ref: '#/components/schemas/Sort'
+        totalElements:
+          type: integer
+          format: int64
+          maximum: 1
+          minimum: 1
+        totalPages:
+          type: integer
+          format: int64
+          maximum: 999999999
+          minimum: 1
+      additionalProperties: false
+      required:
+        - number
+        - numberOfElements
+        - size
+        - totalElements
+        - totalPages
+
+    InfoDownloadDTO:
+      type: object
+      properties:
+        paId:
+          type: string
+          example: 'A12C34D56789E0'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        status:
+          type: string
+          enum:
+            - UPLOADING
+            - UPLOADED
 
   parameters:
+    pathPaId:
+      name: paId
+      in: path
+      required: true
+      schema:
+        type: string
+
     queryPaId:
       name: paId
       in: query
       required: true
       schema:
         type: string
+
+    queryTaxId:
+      name: taxId
+      in: query
+      required: true
+      schema:
+        type: string
+
+    pathReferenceMonth:
+      name: referenceMonth
+      in: path
+      required: true
+      schema:
+        type: string
+
+    querySizePage:
+      name: size
+      in: query
+      description: Numero di elementi per pagina.
+      required: false
+      schema:
+        type: integer
+        default: 5
+        format: int32
+        maximum: 999999999
+        minimum: 1
+
+    queryNumberPage:
+      name: page
+      in: query
+      description: Risultati di pagina che si vuole ottenere (0..N)
+      required: false
+      schema:
+        type: integer
+        default: 0
+        format: int32
+        maximum: 999999999
+        minimum: 0
 
   responses:
     Forbidden:
