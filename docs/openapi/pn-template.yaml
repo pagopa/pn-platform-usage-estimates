@@ -95,6 +95,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/queryPaId'
         - $ref: '#/components/parameters/queryTaxId'
+        - $ref: '#/components/parameters/queryIpaId'
         - $ref: '#/components/parameters/queryNumberPage'
         - $ref: '#/components/parameters/querySizePage'
       responses:
@@ -149,7 +150,38 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /template/v1/estimate/{paId}/file-download:
+  /template/v1/estimate/{paId}/files:
+    get:
+      tags:
+        - Estimate
+      operationId: getAllEstimateFile
+      x-api-permissions:
+        - 'estimate-read'
+      summary: estrae tutte le fatture delle stime associate al pa
+      description: API che consente di estrarre l'elenco fatture delle stime.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/listEstimateFile'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /template/v1/estimate/{paId}/file/{fileId}:
     get:
       tags:
         - Estimate
@@ -160,6 +192,7 @@ paths:
       description: API che consente il download dell'elenco fatture delle stime.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathFileId'
       responses:
         '200':
           description: OK
@@ -189,6 +222,54 @@ components:
           type: string
           example: '12345678900'
           format: '/^[0-9]{11}$/'
+          maxLength: 32
+        paName:
+          type: string
+          example: 'Comune di Roma'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        taxId:
+          type: string
+          example: '3242214145'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
+        address:
+          type: string
+          example: 'piazza gaeaulenti 56, Milano'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        fiscalCode:
+          type: string
+          example: 'AV78ABJD123KC9'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        ipaCode:
+          type: string
+          example: 'abc12324'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        sdiCode:
+          type: string
+          example: 'abc1334324'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        splitPayment:
+          type: boolean
+          example: 'true'
+        description:
+          type: string
+          example: 'altre info'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        pec:
+          type: string
+          example: 'test@pec.it'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        mailAddress:
+          type: string
+          example: 'test@comune.milano.it'
+          format: '/[^A-Za-z0-9]+/'
           maxLength: 32
         status:
           type: string
@@ -237,6 +318,13 @@ components:
           enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
         checkPDND:
           type: boolean
+
+    listEstimateFile:
+      type: array
+      items:
+        $ref: '#/components/schemas/InfoDownloadDTO'
+      maxItems: 999999999
+      minItems: 1
 
 
     PageableEstimateResponseDto:
@@ -340,6 +428,11 @@ components:
     InfoDownloadDTO:
       type: object
       properties:
+        idFile:
+          type: string
+          example: 'A12C34D56789E0'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
         paId:
           type: string
           example: 'A12C34D56789E0'
@@ -359,17 +452,31 @@ components:
       schema:
         type: string
 
+    pathFileId:
+      name: fileId
+      in: path
+      required: true
+      schema:
+        type: string
+
     queryPaId:
       name: paId
       in: query
-      required: true
+      required: false
       schema:
         type: string
 
     queryTaxId:
       name: taxId
       in: query
-      required: true
+      required: false
+      schema:
+        type: string
+
+    queryIpaId:
+      name: ipaId
+      in: query
+      required: false
       schema:
         type: string
 
