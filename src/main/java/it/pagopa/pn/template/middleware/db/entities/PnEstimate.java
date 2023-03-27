@@ -38,31 +38,31 @@ public class PnEstimate {
     public static final String COL_LAST_MODIFIED_TIMESTAMP = "lastModifiedTimestamp" ;
 
     @Getter(onMethod = @__({@DynamoDbPartitionKey,@DynamoDbAttribute(COL_PA_ID)}))
-    public String paId;
+    private String paId;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_STATUS)}))
-    public Instant status;
+    private Instant status;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_DEADLINE_DATE)}))
-    public Instant deadlineDate;
+    private Instant deadlineDate;
 
     @Getter(onMethod = @__({@DynamoDbSortKey, @DynamoDbAttribute(COL_REFERENCE_MONTH)}))
-    public String referenceMonth;
+    private String referenceMonth;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_TOTAL_DIGITAL_NOTIF)}))
-    public Integer totalDigitalNotif;
+    private Integer totalDigitalNotif;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_TOTAL_PAPER_890_NOTIF)}))
-    public Integer totalPaper890Notif;
+    private Integer totalPaper890Notif;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_TOTAL_PAPER_NATIONAL_NOTIF)}))
-    public Integer totalPaperNationalNotif;
+    private Integer totalPaperNationalNotif;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_TOTAL_PAPER_INTERNATIONAL_NOTIF)}))
-    public Integer totalPaperInternationalNotif;
+    private Integer totalPaperInternationalNotif;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_LAST_MODIFIED_TIMESTAMP)}))
-    public Instant lastModifiedTimestamp;
+    private Instant lastModifiedTimestamp;
 
 
 }
