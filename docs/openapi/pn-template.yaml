@@ -438,6 +438,9 @@ components:
           example: 'A12C34D56789E0'
           format: '/[^A-Za-z0-9]+/'
           maxLength: 32
+        url:
+          type: string
+          example: 'http://file.com'
         status:
           type: string
           enum:
