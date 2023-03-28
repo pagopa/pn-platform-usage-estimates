@@ -1,4 +1,4 @@
-package it.pagopa.pn.template.rest;
+package it.pagopa.pn.platform.rest;
 
 
 import org.junit.jupiter.api.Assertions;

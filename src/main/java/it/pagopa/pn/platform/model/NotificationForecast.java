@@ -1,6 +1,6 @@
-package it.pagopa.pn.template.model;
+package it.pagopa.pn.platform.model;
 
-import it.pagopa.pn.template.utils.Utility;
+import it.pagopa.pn.platform.utils.Utility;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

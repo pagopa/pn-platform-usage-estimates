@@ -90,7 +90,7 @@ paths:
       operationId: getAllEstimate
       x-api-permissions:
         - 'estimate-read'
-      summary: ritorna elenco di stime in base alla partita iva o al nome della pa.
+      summary: ritorna elenco di stime in base alla partita iva, al nome della pa o al codice Ipa.
       description: API che estrae la lista di stime
       parameters:
         - $ref: '#/components/parameters/queryPaId'
@@ -189,7 +189,7 @@ paths:
       x-api-permissions:
         - 'estimate-read'
       summary: Download fatture delle stime
-      description: API che consente il download dell'elenco fatture delle stime.
+      description: API che consente il download della fattura del mese di riferimento.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
         - $ref: '#/components/parameters/pathFileId'

@@ -1,4 +1,4 @@
-package it.pagopa.pn.template.middleware.db.entities;
+package it.pagopa.pn.platform.middleware.db.entities;
 
 
 import lombok.Getter;

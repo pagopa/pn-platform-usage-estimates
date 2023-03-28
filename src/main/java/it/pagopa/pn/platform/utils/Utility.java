@@ -1,4 +1,4 @@
-package it.pagopa.pn.template.utils;
+package it.pagopa.pn.platform.utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
 

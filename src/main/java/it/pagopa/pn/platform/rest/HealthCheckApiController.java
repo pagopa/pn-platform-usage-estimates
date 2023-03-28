@@ -1,6 +1,6 @@
-package it.pagopa.pn.template.rest;
+package it.pagopa.pn.platform.rest;
 
-import it.pagopa.pn.template.rest.v1.api.HealthCheckApi;
+import it.pagopa.pn.platform.rest.v1.api.HealthCheckApi;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;

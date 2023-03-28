@@ -1,4 +1,4 @@
-package it.pagopa.pn.template.middleware.db.entities;
+package it.pagopa.pn.platform.middleware.db.entities;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
 
 import java.time.Instant;
-import java.util.Date;
 
 @DynamoDbBean
 @Getter
