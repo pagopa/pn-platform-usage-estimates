@@ -9,8 +9,6 @@ import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -44,11 +42,33 @@ public class EstimateMapper {
         return estimatesList;
     }
 
-    public static EstimateDto estimateDetailToDto(PnEstimate pnEstimate) {
+    public static EstimateDto estimateDetailToDto(PnEstimate pnEstimate, PnPublicAdministration pnPublicAdministration) {
         EstimateDto estimateDto = new EstimateDto();
+//        INFO PUBLICA AMMINISTRAZIONE
+        estimateDto.setPaName(pnPublicAdministration.getPaName());
+        estimateDto.setAddress(pnPublicAdministration.getAddress());
+        estimateDto.setTaxId(pnPublicAdministration.getTaxId());
+        estimateDto.setFiscalCode(pnPublicAdministration.getFiscalCode());
+        estimateDto.setIpaCode(pnPublicAdministration.getIpaCode());
+        estimateDto.setPec(pnPublicAdministration.getPec());
         estimateDto.setPaId(pnEstimate.getPaId());
-        estimateDto.setStatus(EstimateDto.StatusEnum.fromValue(pnEstimate.getStatus()));
+//        PERIODO
         estimateDto.setReferenceMonth(pnEstimate.getReferenceMonth());
+        estimateDto.setDeadlineDate(Date.from(pnEstimate.getDeadlineDate()));
+        estimateDto.setStatus(EstimateDto.StatusEnum.fromValue(pnEstimate.getStatus()));
+        estimateDto.setLastModifiedTimestamp(Date.from(pnEstimate.getLastModifiedTimestamp()));
+//        DATI AGGIUNTIVI PER FATTURAZIONE
+        estimateDto.setSdiCode(pnPublicAdministration.getSdiCode());
+        estimateDto.setSplitPayment(pnPublicAdministration.getSplitPayment().equalsIgnoreCase("true"));
+        estimateDto.setDescription(pnPublicAdministration.getDescription());
+        estimateDto.setMailAddress(pnPublicAdministration.getMailAddress());
+//        PREVISIONI
+        estimateDto.setTotalDigitalNotif(pnEstimate.getTotalDigitalNotif());
+        estimateDto.setTotalPaper890Notif(pnEstimate.getTotalPaper890Notif());
+        estimateDto.setTotalPaperInternationalNotif(pnEstimate.getTotalPaperInternationalNotif());
+        estimateDto.setTotalPaperNationalNotif(pnEstimate.getTotalPaperNationalNotif());
+
+
         return estimateDto;
     }
 
