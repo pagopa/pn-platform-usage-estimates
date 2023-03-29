@@ -276,7 +276,7 @@ components:
           enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
         deadlineDate:
           type: string
-          format: byte
+          format: date
         referenceMonth:
           type: string
         totalDigitalNotif:

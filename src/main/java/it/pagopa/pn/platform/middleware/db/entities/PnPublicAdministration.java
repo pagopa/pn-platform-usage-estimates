@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 @DynamoDbBean
 @Getter
@@ -18,6 +15,8 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecon
 public class PnPublicAdministration {
     public static final String COL_PA_ID = "paId" ;
     public static final String COL_PA_NAME = "paName" ;
+    public static final String COL_REFERENCE_MONTH = "referenceMonth";
+    public static final String COL_STATUS = "status";
     public static final String COL_PA_NAME_INDEX = "pa-name-index";
     public static final String COL_TAX_ID = "taxId" ;
     public static final String COL_ADDRESS = "address" ;
@@ -30,12 +29,16 @@ public class PnPublicAdministration {
     public static final String COL_MAIL_ADDRESS = "mailAddress" ;
     @Getter(onMethod = @__({@DynamoDbPartitionKey,@DynamoDbAttribute(COL_PA_ID)}))
     private String paId;
+    @Getter(onMethod = @__({@DynamoDbSortKey, @DynamoDbAttribute(COL_REFERENCE_MONTH)}))
+    private String referenceMonth;
     @Getter(onMethod = @__({@DynamoDbSecondaryPartitionKey(indexNames = COL_PA_NAME_INDEX),@DynamoDbAttribute(COL_PA_NAME)}))
     private String paName;
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_TAX_ID)}))
     private String taxId;
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_ADDRESS)}))
     private String address;
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_STATUS)}))
+    private String status;
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_FISCAL_CODE)}))
     private String fiscalCode;
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_IPA_CODE)}))

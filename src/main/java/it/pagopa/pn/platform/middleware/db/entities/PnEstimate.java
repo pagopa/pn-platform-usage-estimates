@@ -1,5 +1,6 @@
 package it.pagopa.pn.platform.middleware.db.entities;
 
+import it.pagopa.pn.platform.rest.v1.dto.EstimateSearchTableDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,32 +20,23 @@ import java.time.Instant;
 public class PnEstimate {
 
     public static final String COL_PA_ID = "paId" ;
-
     public static final String COL_STATUS = "status";
-
     public static final String COL_DEADLINE_DATE = "deadlineDate";
-
     public static final String COL_REFERENCE_MONTH = "referenceMonth";
-
     public static final String COL_TOTAL_DIGITAL_NOTIF = "totalDigitalNotif";
-
     public static final String COL_TOTAL_PAPER_890_NOTIF = "totalPaper890Notif" ;
-
     public static final String COL_TOTAL_PAPER_NATIONAL_NOTIF = "totalPaperNationalNotif" ;
-
     public static final String COL_TOTAL_PAPER_INTERNATIONAL_NOTIF = "totalPaperInternationalNotif" ;
-
     public static final String COL_LAST_MODIFIED_TIMESTAMP = "lastModifiedTimestamp" ;
 
     @Getter(onMethod = @__({@DynamoDbPartitionKey,@DynamoDbAttribute(COL_PA_ID)}))
     private String paId;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_STATUS)}))
-    private Instant status;
+    private String status;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_DEADLINE_DATE)}))
     private Instant deadlineDate;
-
     @Getter(onMethod = @__({@DynamoDbSortKey, @DynamoDbAttribute(COL_REFERENCE_MONTH)}))
     private String referenceMonth;
 

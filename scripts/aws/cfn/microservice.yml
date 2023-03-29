@@ -67,6 +67,22 @@ Parameters:
     Type: String
     Description: 'keep track of used projects commitIds'
 
+  EstimateDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing request'
+
+  EstimateDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing request'
+
+  PublicAdministrationDynamoTable:
+    Type: String
+    Description: 'Name of dynamodb table containing file request'
+
+  PublicAdministrationDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing file request'
+
 Resources:
 
   # PN-TemplateBeMs microservice
