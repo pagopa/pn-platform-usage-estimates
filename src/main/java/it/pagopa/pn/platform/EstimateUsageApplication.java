@@ -3,25 +3,23 @@ package it.pagopa.pn.platform;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
-public class TemplateApplication {
-
+public class EstimateUsageApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TemplateApplication.class, args);
+        SpringApplication.run(EstimateUsageApplication.class, args);
     }
 
 
     @RestController
-    @RequestMapping("/")
-    public static class RootController {
+    public static class HomeController {
 
-        @GetMapping("/")
+        @GetMapping("")
         public String home() {
-            return "";
+            return "Ok";
         }
     }
+
 }
