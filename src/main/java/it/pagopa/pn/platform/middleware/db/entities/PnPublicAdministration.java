@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.ToString;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
+import java.time.Instant;
+
 @DynamoDbBean
 @Getter
 @Setter
@@ -27,6 +29,7 @@ public class PnPublicAdministration {
     public static final String COL_DESCRIPTION = "description" ;
     public static final String COL_PEC = "pec" ;
     public static final String COL_MAIL_ADDRESS = "mailAddress" ;
+    public static final String COL_ON_BOARDING_DATE = "onBoardingDate" ;
     @Getter(onMethod = @__({@DynamoDbPartitionKey,@DynamoDbAttribute(COL_PA_ID)}))
     private String paId;
     @Getter(onMethod = @__({@DynamoDbSortKey, @DynamoDbAttribute(COL_REFERENCE_MONTH)}))
@@ -53,5 +56,7 @@ public class PnPublicAdministration {
     private String pec;
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_MAIL_ADDRESS)}))
     private String mailAddress;
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_ON_BOARDING_DATE)}))
+    private Instant onBoardingDate;
 
 }

@@ -217,8 +217,8 @@ paths:
   /pn-usage-estimates/v1/profilation/:
     post:
       tags:
-        - Profilation
-      operationId: createOrUpadateProfilation
+        - Billing
+      operationId: createOrUpdateProfilation
       x-api-permissions:
         - 'profilation-write'
       summary: inserimento dati della PA.
@@ -244,11 +244,11 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/billing/{paId}/insertProfilation:
+  /pn-usage-estimates/v1/billing/{paId}/profilation:
     get:
       tags:
         - Billing
-      operationId: getBillingDetailProfilation
+      operationId: getProfilationDetail
       x-api-permissions:
         - 'profilation-read'
       summary: ritorna il dettaglio della profilazione in base al paId.
@@ -279,7 +279,7 @@ paths:
     post:
       tags:
         - Billing
-      operationId: createOrUpadateBilling
+      operationId: createOrUpdateBilling
       x-api-permissions:
         - 'billing-write'
       summary: inserimento dati aggiuntivi per la fatturazione.
@@ -297,7 +297,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfilationDTO'
+                $ref: '#/components/schemas/BillingDTO'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':
@@ -659,7 +659,7 @@ components:
         deadlineDate:
           type: string
           format: date
-        referenceMonth:
+        referenceYear:
           type: string
 
     ProfiliationAndBillingDTO:
@@ -729,7 +729,7 @@ components:
         lastModifiedTimestamp:
           type: string
           format: date
-        onboardingDate:
+        onBoardingDate:
           type: string
           format: date
       required:
