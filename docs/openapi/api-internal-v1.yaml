@@ -27,7 +27,8 @@ paths:
           description: Ok
         '500':
           description: Internal Server Error
-  /template/api/httpheaders:
+
+  /pn-usage-estimates/api/httpheaders:
     get:
       summary: Build a map of all the Http Header for the request
       operationId: getHttpHeadersMap
@@ -48,7 +49,7 @@ paths:
             description: InternalServerError
 
 
-  /template/v1/estimate:
+  /pn-usage-estimates/v1/estimate:
     post:
       tags:
         - Estimate
@@ -83,7 +84,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /template/v1/estimates:
+  /pn-usage-estimates/v1/estimates:
     get:
       tags:
         - Estimate
@@ -118,7 +119,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /template/v1/estimate/{paId}/detail/{referenceMonth}:
+  /pn-usage-estimates/v1/estimate/{paId}/detail/{referenceMonth}:
     get:
       tags:
         - Estimate
@@ -150,7 +151,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /template/v1/estimate/{paId}/files:
+  /pn-usage-estimates/v1/estimate/{paId}/files:
     get:
       tags:
         - Estimate
@@ -181,7 +182,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /template/v1/estimate/{paId}/file/{fileId}:
+  /pn-usage-estimates/v1/estimate/{paId}/file/{fileId}:
     get:
       tags:
         - Estimate
@@ -200,6 +201,134 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InfoDownloadDTO'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pn-usage-estimates/v1/profilation/:
+    post:
+      tags:
+        - Profilation
+      operationId: createOrUpadateProfilation
+      x-api-permissions:
+        - 'profilation-write'
+      summary: inserimento dati della PA.
+      description: API che consente di aggiungere i dati della PA
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfilationDTO'
+      responses:
+        '200':
+          description: OK
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pn-usage-estimates/v1/billing/{paId}/insertProfilation:
+    get:
+      tags:
+        - Billing
+      operationId: getBillingDetailProfilation
+      x-api-permissions:
+        - 'profilation-read'
+      summary: ritorna il dettaglio della profilazione in base al paId.
+      description: API che ritorna il dettaglio della profilazione.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilationDTO'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pn-usage-estimates/v1/{paId}/billing:
+    post:
+      tags:
+        - Billing
+      operationId: createOrUpadateBilling
+      x-api-permissions:
+        - 'billing-write'
+      summary: inserimento dati aggiuntivi per la fatturazione.
+      description: API che consente di aggiungere i dati per la fatturazione
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BillingDTO'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilationDTO'
+        '400':
+          $ref: '#/components/responses/Invalid'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pn-usage-estimates/v1/billing/{paId}/detail:
+    get:
+      tags:
+        - Billing
+      operationId: getProfilationAndBillingDetail
+      x-api-permissions:
+        - 'billing-read'
+      summary: ritorna il dettaglio della profilazione e della fatturazione in base al paId.
+      description: API che ritorna il dettaglio della profilazione e della fatturazione.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfiliationAndBillingDTO'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':
@@ -446,6 +575,165 @@ components:
           enum:
             - UPLOADING
             - UPLOADED
+
+    ProfilationDTO:
+      type: object
+      properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
+        paName:
+          type: string
+          example: 'Comune di Roma'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        taxId:
+          type: string
+          example: '3242214145'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
+        address:
+          type: string
+          example: 'piazza gaeaulenti 56, Milano'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        fiscalCode:
+          type: string
+          example: 'AV78ABJD123KC9'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        ipaCode:
+          type: string
+          example: 'abc12324'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        pec:
+          type: string
+          example: 'test@pec.it'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        deadlineDate:
+          type: string
+          format: date
+        referenceMonth:
+          type: string
+        lastModifiedTimestamp:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+        listBilling:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingDTO'
+          maxItems: 999999999
+          minItems: 1
+
+    BillingDTO:
+      type: object
+      properties:
+        sdiCode:
+          type: string
+          example: 'abc1334324'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        splitPayment:
+          type: boolean
+          example: 'true'
+        description:
+          type: string
+          example: 'altre info'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        mailAddress:
+          type: string
+          example: 'test@comune.milano.it'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        status:
+          type: string
+          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+        deadlineDate:
+          type: string
+          format: date
+        referenceMonth:
+          type: string
+
+    ProfiliationAndBillingDTO:
+      type: object
+      properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
+        paName:
+          type: string
+          example: 'Comune di Roma'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        taxId:
+          type: string
+          example: '3242214145'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
+        address:
+          type: string
+          example: 'piazza gaeaulenti 56, Milano'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        fiscalCode:
+          type: string
+          example: 'AV78ABJD123KC9'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        ipaCode:
+          type: string
+          example: 'abc12324'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        sdiCode:
+          type: string
+          example: 'abc1334324'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        splitPayment:
+          type: boolean
+          example: 'true'
+        description:
+          type: string
+          example: 'altre info'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        pec:
+          type: string
+          example: 'test@pec.it'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        mailAddress:
+          type: string
+          example: 'test@comune.milano.it'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        status:
+          type: string
+          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+        deadlineDate:
+          type: string
+          format: date
+        referenceMonth:
+          type: string
+        lastModifiedTimestamp:
+          type: string
+          format: date
+        onboardingDate:
+          type: string
+          format: date
+      required:
+        - paId
 
   parameters:
     pathPaId:
