@@ -19,14 +19,12 @@ import java.util.List;
 
 @Repository
 public class EstimateDAOImpl extends BaseDAO<PnEstimate> implements EstimateDAO {
-    private final DynamoDbAsyncTable<PnEstimate> estimateTable;
 
     public EstimateDAOImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient,
                            DynamoDbAsyncClient dynamoDbAsyncClient,
                            AwsPropertiesConfig awsPropertiesConfig) {
         super(dynamoDbEnhancedAsyncClient, dynamoDbAsyncClient,
                 awsPropertiesConfig.getDynamodbEstimateTable(), PnEstimate.class);
-        this.estimateTable = dynamoDbEnhancedAsyncClient.table(awsPropertiesConfig.getDynamodbEstimateTable(), TableSchema.fromBean(PnEstimate.class));
     }
 
     @Override

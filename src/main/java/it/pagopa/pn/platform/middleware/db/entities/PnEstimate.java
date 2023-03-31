@@ -1,6 +1,5 @@
 package it.pagopa.pn.platform.middleware.db.entities;
 
-import it.pagopa.pn.platform.rest.v1.dto.EstimateSearchTableDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

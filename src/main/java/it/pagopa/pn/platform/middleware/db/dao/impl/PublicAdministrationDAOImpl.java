@@ -16,14 +16,16 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 @Repository
 public class PublicAdministrationDAOImpl extends BaseDAO<PnPublicAdministration> implements PublicAdministrationDAO {
 
-    private final DynamoDbAsyncTable<PnPublicAdministration> publicAdministrationTable;
-
     public PublicAdministrationDAOImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient,
                            DynamoDbAsyncClient dynamoDbAsyncClient,
                            AwsPropertiesConfig awsPropertiesConfig) {
         super(dynamoDbEnhancedAsyncClient, dynamoDbAsyncClient,
-                awsPropertiesConfig.getDynamodbEstimateTable(), PnPublicAdministration.class);
-        this.publicAdministrationTable = dynamoDbEnhancedAsyncClient.table(awsPropertiesConfig.getDynamodbPublicAdministrationTable(), TableSchema.fromBean(PnPublicAdministration.class));
+                awsPropertiesConfig.getDynamodbPublicAdministrationTable(), PnPublicAdministration.class);
+    }
+
+    @Override
+    public Mono<PnPublicAdministration> createOrUpdate(PnPublicAdministration pnPublicAdministration) {
+        return Mono.fromFuture(this.put(pnPublicAdministration).thenApply(item -> pnPublicAdministration));
     }
 
     @Override

@@ -4,6 +4,7 @@ import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.middleware.db.dao.PublicAdministrationDAO;
+import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.middleware.db.entities.PnPublicAdministration;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateDto;
 import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
@@ -30,9 +31,12 @@ public class EstimateServiceImpl implements EstimateService {
     @Autowired
     private PublicAdministrationDAO publicAdministrationDAO;
 
+
     @Override
-    public Mono<EstimateDto> createOrUpdateEstimate(EstimateDto dto) {
-        return null;
+    public Mono<EstimateDto> createOrUpdateEstimate(EstimateDto estimateDto) {
+        return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(estimateDto))
+                .zipWhen(pnEstimate -> publicAdministrationDAO.createOrUpdate(EstimateMapper.dtoToPnPublicAdministration(estimateDto)))
+                .flatMap(entities -> Mono.just(EstimateMapper.estimateDetailToDto(entities.getT1(), entities.getT2())));
     }
 
     @Override
@@ -51,7 +55,7 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Override
     public Mono<EstimateDto> getEstimateDetail(String paId, String referenceMonth) {
-        return this.estimateDAO.getEstimate(paId)
+        return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
                 .switchIfEmpty(Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage())))
                 .zipWhen(pnEstimate -> publicAdministrationDAO.getPaDetail(paId, referenceMonth)
                         .map(publicAdmin -> publicAdmin)

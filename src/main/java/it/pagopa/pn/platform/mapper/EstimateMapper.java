@@ -7,6 +7,7 @@ import it.pagopa.pn.platform.rest.v1.dto.EstimateDto;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateSearchTableDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
 import org.springframework.data.domain.Pageable;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Date;
@@ -70,6 +71,42 @@ public class EstimateMapper {
 
 
         return estimateDto;
+    }
+
+    public static PnEstimate dtoToPnEstimate(EstimateDto estimateDto) {
+        PnEstimate pnEstimate = new PnEstimate();
+
+        pnEstimate.setStatus(estimateDto.getStatus().getValue());
+        pnEstimate.setPaId(estimateDto.getPaId());
+        pnEstimate.setDeadlineDate(estimateDto.getDeadlineDate().toInstant());
+        pnEstimate.setReferenceMonth(estimateDto.getReferenceMonth());
+        pnEstimate.setLastModifiedTimestamp(estimateDto.getLastModifiedTimestamp().toInstant());
+        pnEstimate.setTotalDigitalNotif(estimateDto.getTotalDigitalNotif());
+        pnEstimate.setTotalPaper890Notif(estimateDto.getTotalPaper890Notif());
+        pnEstimate.setTotalPaperInternationalNotif(estimateDto.getTotalPaperInternationalNotif());
+        pnEstimate.setTotalPaperNationalNotif(estimateDto.getTotalPaperNationalNotif());
+
+        return pnEstimate;
+    }
+
+    public static PnPublicAdministration dtoToPnPublicAdministration(EstimateDto estimateDto) {
+        PnPublicAdministration pnPublicAdministration = new PnPublicAdministration();
+
+        pnPublicAdministration.setPaId(estimateDto.getPaId());
+        pnPublicAdministration.setReferenceMonth(estimateDto.getReferenceMonth());
+        pnPublicAdministration.setPaName(estimateDto.getPaName());
+        pnPublicAdministration.setTaxId(estimateDto.getTaxId());
+        pnPublicAdministration.setAddress(estimateDto.getAddress());
+        pnPublicAdministration.setStatus(estimateDto.getStatus().getValue());
+        pnPublicAdministration.setFiscalCode(estimateDto.getFiscalCode());
+        pnPublicAdministration.setIpaCode(estimateDto.getIpaCode());
+        pnPublicAdministration.setSdiCode(estimateDto.getSdiCode());
+        pnPublicAdministration.setSplitPayment(estimateDto.getSplitPayment().toString());
+        pnPublicAdministration.setDescription(estimateDto.getDescription());
+        pnPublicAdministration.setPec(estimateDto.getPec());
+        pnPublicAdministration.setMailAddress(estimateDto.getMailAddress());
+
+        return pnPublicAdministration;
     }
 
     public static PageModel<PnEstimate> toPagination(Pageable pageable, List<PnEstimate> list){
