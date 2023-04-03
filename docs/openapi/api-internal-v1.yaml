@@ -151,17 +151,18 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/estimate/{paId}/files:
+  /pn-usage-estimates/v1/estimate/{paId}/files/{referenceMonth}:
     get:
       tags:
         - Estimate
       operationId: getAllEstimateFile
       x-api-permissions:
         - 'estimate-read'
-      summary: estrae tutte le fatture delle stime associate al pa
+      summary: estrae tutte le fatture delle stime associate al pa e al mese di riferimento.
       description: API che consente di estrarre l'elenco fatture delle stime.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceMonth'
       responses:
         '200':
           description: OK
@@ -617,7 +618,7 @@ components:
         deadlineDate:
           type: string
           format: date
-        referenceMonth:
+        referenceYear:
           type: string
         lastModifiedTimestamp:
           type: string
