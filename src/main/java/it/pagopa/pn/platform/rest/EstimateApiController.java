@@ -7,7 +7,6 @@ import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
 import it.pagopa.pn.platform.service.EstimateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -37,8 +36,8 @@ public class EstimateApiController implements EstimateApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<InfoDownloadDTO>>> getAllEstimateFile(String paId, ServerWebExchange exchange) {
-        return this.estimateService.getAllEstimateFile(paId).map(ResponseEntity::ok);
+    public Mono<ResponseEntity<Flux<InfoDownloadDTO>>> getAllEstimateFile(String paId, String referenceMonth, ServerWebExchange exchange) {
+        return this.estimateService.getAllEstimateFile(paId, referenceMonth).map(ResponseEntity::ok);
     }
 
     @Override

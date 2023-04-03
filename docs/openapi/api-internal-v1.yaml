@@ -312,7 +312,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/billing/{paId}/detail:
+  /pn-usage-estimates/v1/billing/{paId}/detail/{referenceYear}:
     get:
       tags:
         - Billing
@@ -323,6 +323,7 @@ paths:
       description: API che ritorna il dettaglio della profilazione e della fatturazione.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
       responses:
         '200':
           description: OK
@@ -725,7 +726,7 @@ components:
         deadlineDate:
           type: string
           format: date
-        referenceMonth:
+        referenceYear:
           type: string
         lastModifiedTimestamp:
           type: string
@@ -774,6 +775,13 @@ components:
 
     pathReferenceMonth:
       name: referenceMonth
+      in: path
+      required: true
+      schema:
+        type: string
+
+    pathReferenceYear:
+      name: referenceYear
       in: path
       required: true
       schema:

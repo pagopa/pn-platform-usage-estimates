@@ -4,7 +4,6 @@ import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.middleware.db.dao.PublicAdministrationDAO;
-import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.middleware.db.entities.PnPublicAdministration;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateDto;
 import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
@@ -65,7 +64,7 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
     @Override
-    public Mono<Flux<InfoDownloadDTO>> getAllEstimateFile(String paId) {
+    public Mono<Flux<InfoDownloadDTO>> getAllEstimateFile(String paId, String referenceMonth) {
         return null;
     }
 }

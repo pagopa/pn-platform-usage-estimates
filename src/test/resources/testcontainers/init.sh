@@ -9,7 +9,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
         AttributeName=paId,KeyType=HASH \
         AttributeName=referenceMonth,KeyType=RANGE \
     --provisioned-throughput \
-        ReadCapacityUnits=10,WriteCapacityUnits=5 \
+        ReadCapacityUnits=10,WriteCapacityUnits=5
 
 aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb create-table \

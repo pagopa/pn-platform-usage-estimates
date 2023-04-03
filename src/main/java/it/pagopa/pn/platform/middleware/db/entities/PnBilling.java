@@ -36,7 +36,7 @@ public class PnBilling {
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_SDI_CODE)}))
     private String sdiCode;
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_SPLIT_PAYMENT)}))
-    private String splitPayment;
+    private Boolean splitPayment;
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_DESCRIPTION)}))
     private String description;
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_MAIL_ADDRESS)}))
