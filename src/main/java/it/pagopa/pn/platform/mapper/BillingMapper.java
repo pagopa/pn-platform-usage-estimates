@@ -10,7 +10,7 @@ public class BillingMapper {
         throw new IllegalCallerException();
     }
 
-    public static PnBilling dtoToBilling (String paId, String referenceYear, BillingDTO billingDTO){
+    public static PnBilling dtoToBilling (BillingDTO billingDTO){
         PnBilling billing = new PnBilling();
         billing.setPaId(billingDTO.getPaId());
         billing.setDescription(billingDTO.getDescription());

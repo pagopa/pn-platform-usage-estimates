@@ -7,7 +7,6 @@ import it.pagopa.pn.platform.rest.v1.dto.EstimateDto;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateSearchTableDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
 import org.springframework.data.domain.Pageable;
-import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Date;

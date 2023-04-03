@@ -4,14 +4,9 @@ import it.pagopa.pn.platform.config.AwsPropertiesConfig;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.middleware.db.dao.common.BaseDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
-import it.pagopa.pn.platform.middleware.db.entities.PnPublicAdministration;
-import it.pagopa.pn.platform.utils.Const;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 
