@@ -10,9 +10,9 @@ public class BillingMapper {
         throw new IllegalCallerException();
     }
 
-    public static PnBilling dtoToBilling (String paId, BillingDTO billingDTO){
+    public static PnBilling dtoToBilling (String paId, String referenceYear, BillingDTO billingDTO){
         PnBilling billing = new PnBilling();
-        billing.setPaId(paId);
+        billing.setPaId(billingDTO.getPaId());
         billing.setDescription(billingDTO.getDescription());
         billing.setStatus(billingDTO.getStatus().getValue());
         billing.setSdiCode(billingDTO.getSdiCode());
@@ -25,6 +25,7 @@ public class BillingMapper {
 
     public static BillingDTO billingToDTO (PnBilling billing){
         BillingDTO billingDTO = new BillingDTO();
+        billingDTO.setPaId(billing.getPaId());
         billingDTO.setDescription(billing.getDescription());
         billingDTO.setDeadlineDate(Date.from(billing.getDeadlineDate()));
         billingDTO.setMailAddress(billing.getMailAddress());

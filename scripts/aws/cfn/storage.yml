@@ -55,9 +55,13 @@ Resources:
             AttributeType: "S"
           - AttributeName: "paName"
             AttributeType: "S"
+          - AttributeName: "referenceYear"
+            AttributeType: "S"
         KeySchema:
           - AttributeName: "paId"
             KeyType: "HASH"
+          - AttributeName: "referenceYear"
+            KeyType: "SORT"
         GlobalSecondaryIndexes:
           - IndexName: "pa-name-index"
             KeySchema:
@@ -65,6 +69,28 @@ Resources:
                 KeyType: "HASH"
             Projection:
               ProjectionType: "ALL"
+        KinesisStreamSpecification:
+          StreamArn: !Ref CdcKinesisSourceStreamArn
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+        BillingMode: "PAY_PER_REQUEST"
+        PointInTimeRecoverySpecification:
+          PointInTimeRecoveryEnabled: true
+
+    BillingDynamoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: !Sub '${ProjectName}-PnBilling'
+        AttributeDefinitions:
+          - AttributeName: "paId"
+            AttributeType: "S"
+          - AttributeName: "referenceYear"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "paId"
+            KeyType: "HASH"
+          - AttributeName: "referenceYear"
+            KeyType: "SORT"
         KinesisStreamSpecification:
           StreamArn: !Ref CdcKinesisSourceStreamArn
         StreamSpecification:
@@ -93,6 +119,14 @@ Outputs:
     PublicAdministrationDynamoTableArn:
       Description: ARN of dynamodb table containing request
       Value: !Sub '${PublicAdministrationDynamoTable.Arn}'
+
+    BillingDynamoTable:
+      Description: Name of dynamodb table containing request
+      Value: !Ref BillingDynamoTable
+
+    BillingDynamoTableArn:
+      Description: ARN of dynamodb table containing request
+      Value: !Sub '${BillingDynamoTable.Arn}'
 
 
 

@@ -37,6 +37,17 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
             }
         }
 	]"
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    dynamodb create-table \
+    --table-name BillingDynamoTable \
+    --attribute-definitions \
+        AttributeName=paId,AttributeType=S \
+		AttributeName=referenceYear,AttributeType=S \
+    --key-schema \
+        AttributeName=paId,KeyType=HASH \
+		AttributeName=referenceYear,KeyType=SORT \
+    --provisioned-throughput \
+        ReadCapacityUnits=5,WriteCapacityUnits=5
 
 
 echo "Initialization terminated"

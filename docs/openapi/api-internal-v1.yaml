@@ -276,7 +276,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/{paId}/billing:
+  /pn-usage-estimates/v1/{paId}/billing/{referenceYear}:
     post:
       tags:
         - Billing
@@ -287,6 +287,7 @@ paths:
       description: API che consente di aggiungere i dati per la fatturazione
       parameters:
         - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
       requestBody:
         content:
           application/json:
@@ -637,6 +638,11 @@ components:
     BillingDTO:
       type: object
       properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
         sdiCode:
           type: string
           example: 'abc1334324'

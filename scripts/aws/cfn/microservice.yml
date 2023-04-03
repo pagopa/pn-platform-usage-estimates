@@ -83,6 +83,14 @@ Parameters:
     Type: String
     Description: 'ARN of dynamodb table containing file request'
 
+  BillingDynamoTable:
+    Type: String
+    Description: 'Name of dynamodb table containing file request'
+
+  BillingDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing file request'
+
 Resources:
 
   # PN-TemplateBeMs microservice

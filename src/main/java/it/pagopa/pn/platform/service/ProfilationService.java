@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 public interface ProfilationService {
 
-    Mono<BillingDTO> createOrUpdateBilling(String paId, BillingDTO data);
+    Mono<BillingDTO> createOrUpdateBilling(String paId, String referenceYear, BillingDTO data);
 
     Mono<ProfilationDTO> getProfilationDetail(String paId);
 

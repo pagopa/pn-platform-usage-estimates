@@ -2,10 +2,8 @@ package it.pagopa.pn.platform.middleware.db.dao.impl;
 
 import it.pagopa.pn.platform.config.AwsPropertiesConfig;
 import it.pagopa.pn.platform.middleware.db.dao.BillingDAO;
-import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.middleware.db.dao.common.BaseDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnBilling;
-import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
@@ -17,7 +15,7 @@ public class BillingDAOImpl  extends BaseDAO<PnBilling> implements BillingDAO {
                            DynamoDbAsyncClient dynamoDbAsyncClient,
                            AwsPropertiesConfig awsPropertiesConfig) {
         super(dynamoDbEnhancedAsyncClient, dynamoDbAsyncClient,
-                awsPropertiesConfig.getDynamodbEstimateTable(), PnBilling.class);
+                awsPropertiesConfig.getDynamodbBillingTable(), PnBilling.class);
     }
 
     @Override

@@ -16,9 +16,9 @@ public class ProfilationApiController implements BillingApi {
     @Autowired
     private ProfilationService profilationService;
     @Override
-    public Mono<ResponseEntity<BillingDTO>> createOrUpdateBilling(String paId, Mono<BillingDTO> billingDTO, final ServerWebExchange exchange){
+    public Mono<ResponseEntity<BillingDTO>> createOrUpdateBilling(String paId, String referenceYear, Mono<BillingDTO> billingDTO, final ServerWebExchange exchange){
         return billingDTO
-                .flatMap(request-> this.profilationService.createOrUpdateBilling(paId, request))
+                .flatMap(request-> this.profilationService.createOrUpdateBilling(paId, referenceYear, request))
                 .map(ResponseEntity::ok);
     }
 

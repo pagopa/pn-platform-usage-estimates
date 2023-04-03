@@ -19,8 +19,8 @@ public class ProfilationServiceImpl implements ProfilationService {
     private BillingDAO billingDAO;
 
     @Override
-    public Mono<BillingDTO> createOrUpdateBilling(String paId, BillingDTO data) {
-        return billingDAO.createOrUpdate(BillingMapper.dtoToBilling(paId, data)).map(BillingMapper::billingToDTO);
+    public Mono<BillingDTO> createOrUpdateBilling(String paId, String referenceYear, BillingDTO data) {
+        return billingDAO.createOrUpdate(BillingMapper.dtoToBilling(paId, referenceYear, data)).map(BillingMapper::billingToDTO);
     }
 
     @Override
