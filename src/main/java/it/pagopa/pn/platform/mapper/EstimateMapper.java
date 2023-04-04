@@ -1,11 +1,9 @@
 package it.pagopa.pn.platform.mapper;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
-import it.pagopa.pn.platform.middleware.db.entities.PnPublicAdministration;
 import it.pagopa.pn.platform.model.PageModel;
-import it.pagopa.pn.platform.rest.v1.dto.Estimate;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateSearchTableDTO;
-import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
+import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
+import it.pagopa.pn.platform.rest.v1.dto.*;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
@@ -42,16 +40,32 @@ public class EstimateMapper {
         return estimatesList;
     }
 
-    public static Estimate estimateDetailToDto(PnEstimate pnEstimate, PnPublicAdministration pnPublicAdministration) {
+    public static EstimateDetail estimateDetailToDto(PnEstimate pnEstimate, PaInfoDto paInfoDto) {
+        EstimateDetail estimateDetail = new EstimateDetail();
         Estimate estimate = new Estimate();
+        PAInfo paInfo = new PAInfo();
 
+        //INFO PA
+        paInfo.setPaId(paInfoDto.getId());
+        paInfo.setPaName(paInfoDto.getName());
+        paInfo.setTaxId(paInfoDto.getTaxId());
+
+        //STIME
         estimate.setTotalDigitalNotif(pnEstimate.getTotalDigitalNotif());
         estimate.setTotalPaper890Notif(pnEstimate.getTotalPaper890Notif());
         estimate.setTotalPaperInternationalNotif(pnEstimate.getTotalPaperInternationalNotif());
         estimate.setTotalPaperNationalNotif(pnEstimate.getTotalPaperNationalNotif());
 
+        //PERIODO
+        estimateDetail.setEstimate(estimate);
+        estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
+        estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());
+        estimateDetail.setLastModifiedTimestamp(Date.from(Instant.now()));
+        estimateDetail.setDeadlineDate(Date.from(Instant.now()));
+        estimateDetail.showEdit(true);
+        estimateDetail.setPaInfo(paInfo);
 
-        return estimate;
+        return estimateDetail;
     }
 
     public static PnEstimate dtoToPnEstimate(String status, String paId, String referenceMonth, Estimate estimate) {
