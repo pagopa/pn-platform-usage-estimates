@@ -49,7 +49,7 @@ paths:
             description: InternalServerError
 
 
-  /pn-usage-estimates/v1/estimate:
+  /pn-usage-estimates/v1/{paId}/estimate/{referenceMonth}:
     post:
       tags:
         - Estimate
@@ -58,19 +58,19 @@ paths:
         - 'estimate-write'
       summary: Inserimento o modifica di una stima.
       description: API che consente di aggiungere o di modificare i dettagli di una stima.
+      parameters:
+        - $ref: '#/components/parameters/queryStatus'
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceMonth'
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EstimateDto'
+              $ref: '#/components/schemas/Estimate'
 
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EstimateDto'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':
@@ -137,7 +137,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EstimateDto'
+                $ref: '#/components/schemas/EstimateDetail'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':
@@ -215,36 +215,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/profilation/:
-    post:
-      tags:
-        - Billing
-      operationId: createOrUpdateProfilation
-      x-api-permissions:
-        - 'profilation-write'
-      summary: inserimento dati della PA.
-      description: API che consente di aggiungere i dati della PA
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProfilationDTO'
-      responses:
-        '200':
-          description: OK
-        '400':
-          $ref: '#/components/responses/Invalid'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '405':
-          $ref: '#/components/responses/NotAllowed'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
   /pn-usage-estimates/v1/billing/{paId}/profilation:
     get:
       tags:
@@ -262,7 +232,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfilationDTO'
+                $ref: '#/components/schemas/Profiling'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':
@@ -288,50 +258,19 @@ paths:
       parameters:
         - $ref: '#/components/parameters/pathPaId'
         - $ref: '#/components/parameters/pathReferenceYear'
+        - $ref: '#/components/parameters/queryStatus'
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BillingDTO'
+              $ref: '#/components/schemas/Billing'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BillingDTO'
-        '400':
-          $ref: '#/components/responses/Invalid'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '405':
-          $ref: '#/components/responses/NotAllowed'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
-  /pn-usage-estimates/v1/billing/{paId}/detail/{referenceYear}:
-    get:
-      tags:
-        - Billing
-      operationId: getProfilationAndBillingDetail
-      x-api-permissions:
-        - 'billing-read'
-      summary: ritorna il dettaglio della profilazione e della fatturazione in base al paId.
-      description: API che ritorna il dettaglio della profilazione e della fatturazione.
-      parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceYear'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProfiliationAndBillingDTO'
+                $ref: '#/components/schemas/ProfilingDetail'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':
@@ -347,7 +286,37 @@ paths:
 
 components:
   schemas:
-    EstimateDto:
+    EstimateDetail:
+      type: object
+      properties:
+        paInfo:
+          $ref: '#/components/schemas/PAInfo'
+        billing:
+          $ref: '#/components/schemas/Billing'
+        status:
+          type: string
+          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+        deadlineDate:
+          type: string
+          format: date
+        referenceMonth:
+          type: string
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+        lastModifiedTimestamp:
+          type: string
+          format: date
+        showEdit:
+          type: boolean
+      required:
+        - paInfo
+        - billing
+        - status
+        - referenceMonth
+        - estimate
+        - showEdit
+
+    PAInfo:
       type: object
       properties:
         paId:
@@ -370,6 +339,11 @@ components:
           example: 'piazza gaeaulenti 56, Milano'
           format: '/[^A-Za-z0-9]+/'
           maxLength: 32
+        pec:
+          type: string
+          example: 'test@pec.it'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
         fiscalCode:
           type: string
           example: 'AV78ABJD123KC9'
@@ -380,37 +354,10 @@ components:
           example: 'abc12324'
           format: '/[^A-Za-z0-9]+/'
           maxLength: 32
-        sdiCode:
-          type: string
-          example: 'abc1334324'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        splitPayment:
-          type: boolean
-          example: 'true'
-        description:
-          type: string
-          example: 'altre info'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        pec:
-          type: string
-          example: 'test@pec.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        mailAddress:
-          type: string
-          example: 'test@comune.milano.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        status:
-          type: string
-          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
-        deadlineDate:
-          type: string
-          format: date
-        referenceMonth:
-          type: string
+
+    Estimate:
+      type: object
+      properties:
         totalDigitalNotif:
           type: integer
           format: int32
@@ -431,11 +378,12 @@ components:
           format: int32
           maximum: 999999999
           minimum: 1
-        lastModifiedTimestamp:
-          type: string
-          format: date
       required:
-        - paId
+        - totalDigitalNotif
+        - totalPaper890Notif
+        - totalPaperNationalNotif
+        - totalPaperInternationalNotif
+
 
     EstimateSearchTableDTO:
       type: object
@@ -579,88 +527,23 @@ components:
             - UPLOADING
             - UPLOADED
 
-    ProfilationDTO:
+    Profiling:
       type: object
       properties:
-        paId:
-          type: string
-          example: '12345678900'
-          format: '/^[0-9]{11}$/'
-          maxLength: 32
-        paName:
-          type: string
-          example: 'Comune di Roma'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        taxId:
-          type: string
-          example: '3242214145'
-          format: '/^[0-9]{11}$/'
-          maxLength: 32
-        address:
-          type: string
-          example: 'piazza gaeaulenti 56, Milano'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        fiscalCode:
-          type: string
-          example: 'AV78ABJD123KC9'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        ipaCode:
-          type: string
-          example: 'abc12324'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        pec:
-          type: string
-          example: 'test@pec.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        deadlineDate:
-          type: string
-          format: date
-        referenceYear:
-          type: string
-        lastModifiedTimestamp:
-          type: string
-          format: date
-        status:
-          type: string
-          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
-        listBilling:
+        paInfo:
+          $ref: '#/components/schemas/PAInfo'
+        profiles:
           type: array
           items:
-            $ref: '#/components/schemas/BillingDTO'
+            $ref: '#/components/schemas/ProfilingDetail'
           maxItems: 999999999
           minItems: 1
 
-    BillingDTO:
+    ProfilingDetail:
       type: object
       properties:
-        paId:
-          type: string
-          example: '12345678900'
-          format: '/^[0-9]{11}$/'
-          maxLength: 32
-        sdiCode:
-          type: string
-          example: 'abc1334324'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        splitPayment:
-          type: boolean
-          example: 'true'
-        description:
-          type: string
-          example: 'altre info'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        mailAddress:
-          type: string
-          example: 'test@comune.milano.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
+        billing:
+          $ref: '#/components/schemas/Billing'
         status:
           type: string
           enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
@@ -669,79 +552,39 @@ components:
           format: date
         referenceYear:
           type: string
-
-    ProfiliationAndBillingDTO:
-      type: object
-      properties:
-        paId:
-          type: string
-          example: '12345678900'
-          format: '/^[0-9]{11}$/'
-          maxLength: 32
-        paName:
-          type: string
-          example: 'Comune di Roma'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        taxId:
-          type: string
-          example: '3242214145'
-          format: '/^[0-9]{11}$/'
-          maxLength: 32
-        address:
-          type: string
-          example: 'piazza gaeaulenti 56, Milano'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        fiscalCode:
-          type: string
-          example: 'AV78ABJD123KC9'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        ipaCode:
-          type: string
-          example: 'abc12324'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        sdiCode:
-          type: string
-          example: 'abc1334324'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        splitPayment:
+        showEdit:
           type: boolean
-          example: 'true'
-        description:
-          type: string
-          example: 'altre info'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        pec:
-          type: string
-          example: 'test@pec.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        mailAddress:
-          type: string
-          example: 'test@comune.milano.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        status:
-          type: string
-          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
-        deadlineDate:
-          type: string
-          format: date
-        referenceYear:
-          type: string
-        lastModifiedTimestamp:
-          type: string
-          format: date
-        onBoardingDate:
-          type: string
-          format: date
       required:
-        - paId
+        - billing
+        - status
+        - referenceYear
+        - showEdit
+
+    Billing:
+      type: object
+      properties:
+        sdiCode:
+          type: string
+          example: 'abc1334324'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        splitPayment:
+          type: boolean
+          example: 'true'
+        description:
+          type: string
+          example: 'altre info'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        mailAddress:
+          type: string
+          example: 'test@comune.milano.it'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+      required:
+        - sdiCode
+        - splitPayment
+        - mailAddress
 
   parameters:
     pathPaId:
@@ -778,6 +621,16 @@ components:
       required: false
       schema:
         type: string
+
+    queryStatus:
+      name: status
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - CREATED
+          - VALIDATED
 
     pathReferenceMonth:
       name: referenceMonth

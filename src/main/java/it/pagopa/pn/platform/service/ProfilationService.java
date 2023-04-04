@@ -1,16 +1,15 @@
 package it.pagopa.pn.platform.service;
 
-import it.pagopa.pn.platform.rest.v1.dto.BillingDTO;
-import it.pagopa.pn.platform.rest.v1.dto.ProfilationDTO;
-import it.pagopa.pn.platform.rest.v1.dto.ProfiliationAndBillingDTO;
+
+import it.pagopa.pn.platform.rest.v1.dto.Billing;
+import it.pagopa.pn.platform.rest.v1.dto.Profiling;
+import it.pagopa.pn.platform.rest.v1.dto.ProfilingDetail;
 import reactor.core.publisher.Mono;
 
 public interface ProfilationService {
 
-    Mono<BillingDTO> createOrUpdateBilling(String paId, String referenceYear, BillingDTO data);
+    Mono<ProfilingDetail> createOrUpdateBilling(String paId, String referenceYear, String status, Billing data);
 
-    Mono<ProfilationDTO> getProfilationDetail(String paId);
-
-    Mono<ProfiliationAndBillingDTO> getProfilationAndBillingDetail(String paId, String referenceYear);
+    Mono<Profiling> getProfilationDetail(String paId);
 
 }

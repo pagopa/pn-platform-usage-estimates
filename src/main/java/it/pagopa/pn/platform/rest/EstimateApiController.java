@@ -1,7 +1,8 @@
 package it.pagopa.pn.platform.rest;
 
 import it.pagopa.pn.platform.rest.v1.api.EstimateApi;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDto;
+import it.pagopa.pn.platform.rest.v1.dto.Estimate;
+import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
 import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
 import it.pagopa.pn.platform.service.EstimateService;
@@ -18,10 +19,10 @@ public class EstimateApiController implements EstimateApi {
     @Autowired
     private EstimateService estimateService;
 
+
     @Override
-    public Mono<ResponseEntity<EstimateDto>> createOrUpdateEstimate(Mono<EstimateDto> estimateDto, ServerWebExchange exchange) {
-        return estimateDto
-                .flatMap(request-> this.estimateService.createOrUpdateEstimate(request))
+    public Mono<ResponseEntity<Void>> createOrUpdateEstimate(String status, String paId, String referenceMonth, Mono<Estimate> estimate, ServerWebExchange exchange) {
+        return estimate.flatMap(request -> this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, request))
                 .map(ResponseEntity::ok);
     }
 
@@ -41,7 +42,7 @@ public class EstimateApiController implements EstimateApi {
     }
 
     @Override
-    public Mono<ResponseEntity<EstimateDto>> getEstimateDetail(String paId, String referenceMonth, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<EstimateDetail>> getEstimateDetail(String paId, String referenceMonth, ServerWebExchange exchange) {
         return this.estimateService.getEstimateDetail(paId, referenceMonth).map(ResponseEntity::ok);
     }
 }

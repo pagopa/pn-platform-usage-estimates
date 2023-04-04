@@ -2,9 +2,9 @@ package it.pagopa.pn.platform.service.impl;
 
 import it.pagopa.pn.platform.mapper.BillingMapper;
 import it.pagopa.pn.platform.middleware.db.dao.BillingDAO;
-import it.pagopa.pn.platform.rest.v1.dto.BillingDTO;
-import it.pagopa.pn.platform.rest.v1.dto.ProfilationDTO;
-import it.pagopa.pn.platform.rest.v1.dto.ProfiliationAndBillingDTO;
+import it.pagopa.pn.platform.rest.v1.dto.Billing;
+import it.pagopa.pn.platform.rest.v1.dto.Profiling;
+import it.pagopa.pn.platform.rest.v1.dto.ProfilingDetail;
 import it.pagopa.pn.platform.service.ProfilationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +19,13 @@ public class ProfilationServiceImpl implements ProfilationService {
     private BillingDAO billingDAO;
 
     @Override
-    public Mono<BillingDTO> createOrUpdateBilling(String paId, String referenceYear, BillingDTO data) {
-        return billingDAO.createOrUpdate(BillingMapper.dtoToBilling(data)).map(BillingMapper::billingToDTO);
+    public Mono<ProfilingDetail> createOrUpdateBilling(String paId, String referenceYear, String status, Billing data) {
+        return billingDAO.createOrUpdate(BillingMapper.dtoToBilling(paId, referenceYear, status, data))
+                .map(entity -> BillingMapper.billingToDTO(entity, data));
     }
 
     @Override
-    public Mono<ProfilationDTO> getProfilationDetail(String paId) {
-        return null;
-    }
-
-    @Override
-    public Mono<ProfiliationAndBillingDTO> getProfilationAndBillingDetail(String paId, String referenceYear) {
+    public Mono<Profiling> getProfilationDetail(String paId) {
         return null;
     }
 }

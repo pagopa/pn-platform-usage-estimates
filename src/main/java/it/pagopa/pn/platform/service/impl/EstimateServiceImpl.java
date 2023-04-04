@@ -5,7 +5,8 @@ import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.middleware.db.dao.PublicAdministrationDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnPublicAdministration;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDto;
+import it.pagopa.pn.platform.rest.v1.dto.Estimate;
+import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
 import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
 import it.pagopa.pn.platform.service.EstimateService;
@@ -32,10 +33,8 @@ public class EstimateServiceImpl implements EstimateService {
 
 
     @Override
-    public Mono<EstimateDto> createOrUpdateEstimate(EstimateDto estimateDto) {
-        return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(estimateDto))
-                .zipWhen(pnEstimate -> publicAdministrationDAO.createOrUpdate(EstimateMapper.dtoToPnPublicAdministration(estimateDto)))
-                .flatMap(entities -> Mono.just(EstimateMapper.estimateDetailToDto(entities.getT1(), entities.getT2())));
+    public Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, Estimate estimate) {
+        return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate)).flatMap(item-> Mono.empty());
     }
 
     @Override
@@ -53,14 +52,15 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
     @Override
-    public Mono<EstimateDto> getEstimateDetail(String paId, String referenceMonth) {
-        return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
-                .switchIfEmpty(Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage())))
-                .zipWhen(pnEstimate -> publicAdministrationDAO.getPaDetail(paId, referenceMonth)
-                        .map(publicAdmin -> publicAdmin)
-                        .switchIfEmpty(Mono.just(new PnPublicAdministration())))
-                .map(detailEstimateAndPublicAdmin ->
-                        EstimateMapper.estimateDetailToDto(detailEstimateAndPublicAdmin.getT1(), detailEstimateAndPublicAdmin.getT2()));
+    public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
+        return null;
+//                this.estimateDAO.getEstimateDetail(paId, referenceMonth)
+//                .switchIfEmpty(Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage())))
+//                .zipWhen(pnEstimate -> publicAdministrationDAO.getPaDetail(paId, referenceMonth)
+//                        .map(publicAdmin -> publicAdmin)
+//                        .switchIfEmpty(Mono.just(new PnPublicAdministration())))
+//                .map(detailEstimateAndPublicAdmin ->
+//                        EstimateMapper.estimateDetailToDto(detailEstimateAndPublicAdmin.getT1(), detailEstimateAndPublicAdmin.getT2()));
     }
 
     @Override
