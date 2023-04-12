@@ -84,40 +84,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/{paId}/billing/{referenceMonth}:
-    post:
-      tags:
-        - Estimate
-      operationId: createOrUpdateBilling
-      x-api-permissions:
-        - 'billing-write'
-      summary: inserimento dati aggiuntivi per la fatturazione.
-      description: API che consente di aggiungere i dati per la fatturazione
-      parameters:
-        - $ref: '#/components/parameters/queryStatus'
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceMonth'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Billing'
-      responses:
-        '200':
-          description: OK
-        '400':
-          $ref: '#/components/responses/Invalid'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '405':
-          $ref: '#/components/responses/NotAllowed'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
   /pn-usage-estimates/v1/estimates:
     get:
       tags:
@@ -376,11 +342,14 @@ components:
           format: int32
           maximum: 999999999
           minimum: 1
+        billing:
+          $ref: '#/components/schemas/Billing'
       required:
         - totalDigitalNotif
         - totalPaper890Notif
         - totalPaperNationalNotif
         - totalPaperInternationalNotif
+        - billing
 
 
     EstimateSearchTableDTO:

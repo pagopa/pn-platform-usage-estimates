@@ -24,12 +24,6 @@ public class EstimateApiController implements EstimateApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> createOrUpdateBilling(String status, String paId, String referenceMonth, Mono<Billing> billing, ServerWebExchange exchange){
-        return billing.flatMap(request -> this.estimateService.createOrUpdateBilling(status, paId, referenceMonth, request))
-                .map(ResponseEntity::ok);
-    }
-
-    @Override
     public Mono<ResponseEntity<InfoDownloadDTO>> downloadEstimateFile(String paId, String fileId, ServerWebExchange exchange) {
         return this.estimateService.downloadEstimateFile(paId, fileId).map(ResponseEntity::ok);
     }

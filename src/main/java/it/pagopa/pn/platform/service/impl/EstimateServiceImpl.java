@@ -34,12 +34,6 @@ public class EstimateServiceImpl implements EstimateService {
         return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate))
                 .flatMap(item-> Mono.empty());
     }
-    @Override
-    public Mono<Void> createOrUpdateBilling(String status, String paId, String referenceMonth, Billing data) {
-        return this.estimateDAO.createOrUpdate(EstimateMapper.dtoToPnBilling(status, paId, referenceMonth, data))
-                .flatMap(item-> Mono.empty());
-
-    }
 
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {

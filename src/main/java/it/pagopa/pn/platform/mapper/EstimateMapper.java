@@ -89,22 +89,11 @@ public class EstimateMapper {
         pnEstimate.setTotalPaperInternationalNotif(estimate.getTotalPaperInternationalNotif());
         pnEstimate.setTotalPaperNationalNotif(estimate.getTotalPaperNationalNotif());
 
-
-        return pnEstimate;
-    }
-
-    public static PnEstimate dtoToPnBilling (String status, String paId, String referenceMonth, Billing billing){
-        PnEstimate pnEstimate = new PnEstimate();
-
-        pnEstimate.setStatus(status);
-        pnEstimate.setPaId(paId);
-        pnEstimate.setReferenceMonth(referenceMonth);
-
-        //dati fatturazione
-        pnEstimate.setDescription(billing.getDescription());
-        pnEstimate.setMailAddress(billing.getMailAddress());
-        pnEstimate.setSdiCode(billing.getSdiCode());
-        pnEstimate.setSplitPayment(billing.getSplitPayment());
+        //dati di fatturazione
+        pnEstimate.setDescription(estimate.getBilling().getDescription());
+        pnEstimate.setSdiCode(estimate.getBilling().getSdiCode());
+        pnEstimate.setMailAddress(estimate.getBilling().getMailAddress());
+        pnEstimate.setSplitPayment(estimate.getBilling().getSplitPayment());
 
         return pnEstimate;
     }
