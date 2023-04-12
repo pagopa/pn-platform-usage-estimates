@@ -4,10 +4,7 @@ import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
-import it.pagopa.pn.platform.rest.v1.dto.Estimate;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
-import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,23 +24,21 @@ public class EstimateServiceImpl implements EstimateService {
     @Autowired
     private EstimateDAO estimateDAO;
 
+
     @Autowired
     private ExternalRegistriesClient externalRegistriesClient;
 
 
     @Override
     public Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, Estimate estimate) {
-        return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate)).flatMap(item-> Mono.empty());
+        return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate))
+                .flatMap(item-> Mono.empty());
     }
-
-
     @Override
-    public Mono<PageableEstimateResponseDto> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page-1, size);
+    public Mono<Void> createOrUpdateBilling(String status, String paId, String referenceMonth, Billing data) {
+        return this.estimateDAO.createOrUpdate(EstimateMapper.dtoToPnBilling(status, paId, referenceMonth, data))
+                .flatMap(item-> Mono.empty());
 
-        return estimateDAO.getAllEstimates(paId)
-                .map(list -> EstimateMapper.toPagination(pageable, list))
-                .map(EstimateMapper::toPageableResponse);
     }
 
     @Override
@@ -57,6 +52,20 @@ public class EstimateServiceImpl implements EstimateService {
                         EstimateMapper.estimateDetailToDto(detailEstimateAndPublicAdmin.getT1(), detailEstimateAndPublicAdmin.getT2()));
     }
 
+
+    //PER HELP DESK
+    @Override
+    public Mono<PageableEstimateResponseDto> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
+
+        return estimateDAO.getAllEstimates(paId)
+                .map(list -> EstimateMapper.toPagination(pageable, list))
+                .map(EstimateMapper::toPageableResponse);
+    }
+
+
+
+    //PER CONSUNTIVI
     @Override
     public Mono<Flux<InfoDownloadDTO>> getAllEstimateFile(String paId, String referenceMonth) {
         return null;

@@ -1,15 +1,14 @@
 package it.pagopa.pn.platform.service;
 
-import it.pagopa.pn.platform.rest.v1.dto.Estimate;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
-import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.*;
+import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface EstimateService {
 
     Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, Estimate estimate);
+    Mono<Void> createOrUpdateBilling(String status, String paId, String referenceMonth, Billing billing);
     Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileId);
     Mono<PageableEstimateResponseDto> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size);
     Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth);

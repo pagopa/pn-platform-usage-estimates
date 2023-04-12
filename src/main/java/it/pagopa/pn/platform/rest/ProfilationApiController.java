@@ -15,15 +15,16 @@ import reactor.core.publisher.Mono;
 public class ProfilationApiController implements BillingApi {
     @Autowired
     private ProfilationService profilationService;
-    @Override
+
+    /*@Override
     public Mono<ResponseEntity<ProfilingDetail>> createOrUpdateBilling(String paId, String referenceYear, String status, Mono<Billing> billing, final ServerWebExchange exchange){
         return billing
                 .flatMap(request-> this.profilationService.createOrUpdateBilling(paId, referenceYear, status, request))
                 .map(ResponseEntity::ok);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public Mono<ResponseEntity<Profiling>> getProfilationDetail(String paId, final ServerWebExchange exchange){
         return this.profilationService.getProfilationDetail(paId).map(ResponseEntity::ok);
-    }
+    }*/
 }

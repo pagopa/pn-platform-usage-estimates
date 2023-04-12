@@ -1,6 +1,7 @@
 package it.pagopa.pn.platform.mapper;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnBilling;
+import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import it.pagopa.pn.platform.rest.v1.dto.Billing;
 import it.pagopa.pn.platform.rest.v1.dto.PAInfo;
@@ -16,15 +17,18 @@ public class BillingMapper {
         throw new IllegalCallerException();
     }
 
-    public static PnBilling dtoToBilling (String paId, String referenceYear, String status, Billing billing){
-        PnBilling pnBilling = new PnBilling();
+    public static PnEstimate dtoToBilling (String paId, String referenceMonth, String status, Billing billing){
+        PnEstimate pnBilling = new PnEstimate();
         pnBilling.setPaId(paId);
-        pnBilling.setDescription(billing.getDescription());
         pnBilling.setStatus(status);
+        pnBilling.setReferenceMonth(referenceMonth);
+
         pnBilling.setSdiCode(billing.getSdiCode());
         pnBilling.setMailAddress(billing.getMailAddress());
         pnBilling.setSplitPayment(billing.getSplitPayment());
-        pnBilling.setReferenceYear(referenceYear);
+        pnBilling.setDescription(billing.getDescription());
+
+
         return pnBilling;
     }
 

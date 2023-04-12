@@ -25,7 +25,7 @@ public class ProfilationServiceImpl implements ProfilationService {
     private ExternalRegistriesClient externalRegistriesClient;
 
 
-    @Override
+    /*@Override
     public Mono<ProfilingDetail> createOrUpdateBilling(String paId, String referenceYear, String status, Billing data) {
         return this.billingDAO.createOrUpdate(BillingMapper.dtoToBilling(paId, referenceYear, status, data))
                 .switchIfEmpty(Mono.error(new PnGenericException(BILLING_NOT_EXIST, BILLING_NOT_EXIST.getMessage())))
@@ -42,5 +42,5 @@ public class ProfilationServiceImpl implements ProfilationService {
                     .switchIfEmpty(Mono.error(new PnGenericException(PA_ID_NOT_EXIST, PA_ID_NOT_EXIST.getMessage())))
                 .map(BillingAndPublicAdmin -> BillingMapper.billingsToDto(BillingAndPublicAdmin.getT1(), BillingAndPublicAdmin.getT2()));
 
-    }
+    }*/
 }

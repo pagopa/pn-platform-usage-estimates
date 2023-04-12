@@ -44,6 +44,7 @@ public class EstimateMapper {
         EstimateDetail estimateDetail = new EstimateDetail();
         Estimate estimate = new Estimate();
         PAInfo paInfo = new PAInfo();
+        Billing billing = new Billing();
 
         //INFO PA
         paInfo.setPaId(paInfoDto.getId());
@@ -56,14 +57,21 @@ public class EstimateMapper {
         estimate.setTotalPaperInternationalNotif(pnEstimate.getTotalPaperInternationalNotif());
         estimate.setTotalPaperNationalNotif(pnEstimate.getTotalPaperNationalNotif());
 
+        //FATTURAZIONE
+        billing.setMailAddress(pnEstimate.getMailAddress());
+        billing.setDescription(pnEstimate.getDescription());
+        billing.setSdiCode(pnEstimate.getSdiCode());
+        billing.setSplitPayment(pnEstimate.getSplitPayment());
+
         //PERIODO
         estimateDetail.setEstimate(estimate);
+        estimateDetail.setPaInfo(paInfo);
+        estimateDetail.setBilling(billing);
         estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());
         estimateDetail.setLastModifiedTimestamp(Date.from(Instant.now()));
         estimateDetail.setDeadlineDate(Date.from(Instant.now()));
         estimateDetail.showEdit(true);
-        estimateDetail.setPaInfo(paInfo);
 
         return estimateDetail;
     }
@@ -74,10 +82,29 @@ public class EstimateMapper {
         pnEstimate.setStatus(status);
         pnEstimate.setPaId(paId);
         pnEstimate.setReferenceMonth(referenceMonth);
+
+        //dati stima
         pnEstimate.setTotalDigitalNotif(estimate.getTotalDigitalNotif());
         pnEstimate.setTotalPaper890Notif(estimate.getTotalPaper890Notif());
         pnEstimate.setTotalPaperInternationalNotif(estimate.getTotalPaperInternationalNotif());
         pnEstimate.setTotalPaperNationalNotif(estimate.getTotalPaperNationalNotif());
+
+
+        return pnEstimate;
+    }
+
+    public static PnEstimate dtoToPnBilling (String status, String paId, String referenceMonth, Billing billing){
+        PnEstimate pnEstimate = new PnEstimate();
+
+        pnEstimate.setStatus(status);
+        pnEstimate.setPaId(paId);
+        pnEstimate.setReferenceMonth(referenceMonth);
+
+        //dati fatturazione
+        pnEstimate.setDescription(billing.getDescription());
+        pnEstimate.setMailAddress(billing.getMailAddress());
+        pnEstimate.setSdiCode(billing.getSdiCode());
+        pnEstimate.setSplitPayment(billing.getSplitPayment());
 
         return pnEstimate;
     }

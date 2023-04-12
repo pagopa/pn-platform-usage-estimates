@@ -1,10 +1,7 @@
 package it.pagopa.pn.platform.rest;
 
 import it.pagopa.pn.platform.rest.v1.api.EstimateApi;
-import it.pagopa.pn.platform.rest.v1.dto.Estimate;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
-import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +20,12 @@ public class EstimateApiController implements EstimateApi {
     @Override
     public Mono<ResponseEntity<Void>> createOrUpdateEstimate(String status, String paId, String referenceMonth, Mono<Estimate> estimate, ServerWebExchange exchange) {
         return estimate.flatMap(request -> this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, request))
+                .map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Void>> createOrUpdateBilling(String status, String paId, String referenceMonth, Mono<Billing> billing, ServerWebExchange exchange){
+        return billing.flatMap(request -> this.estimateService.createOrUpdateBilling(status, paId, referenceMonth, request))
                 .map(ResponseEntity::ok);
     }
 

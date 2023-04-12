@@ -27,6 +27,10 @@ public class PnEstimate {
     public static final String COL_TOTAL_PAPER_NATIONAL_NOTIF = "totalPaperNationalNotif" ;
     public static final String COL_TOTAL_PAPER_INTERNATIONAL_NOTIF = "totalPaperInternationalNotif" ;
     public static final String COL_LAST_MODIFIED_TIMESTAMP = "lastModifiedTimestamp" ;
+    public static final String COL_SDI_CODE = "sdiCode" ;
+    public static final String COL_SPLIT_PAYMENT = "splitPayment" ;
+    public static final String COL_DESCRIPTION = "description" ;
+    public static final String COL_MAIL_ADDRESS = "mailAddress" ;
 
     @Getter(onMethod = @__({@DynamoDbPartitionKey,@DynamoDbAttribute(COL_PA_ID)}))
     private String paId;
@@ -53,6 +57,18 @@ public class PnEstimate {
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_LAST_MODIFIED_TIMESTAMP)}))
     private Instant lastModifiedTimestamp;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_SDI_CODE)}))
+    private String sdiCode;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_SPLIT_PAYMENT)}))
+    private Boolean splitPayment;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_DESCRIPTION)}))
+    private String description;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_MAIL_ADDRESS)}))
+    private String mailAddress;
 
 
 }
