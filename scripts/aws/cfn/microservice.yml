@@ -93,18 +93,15 @@ Parameters:
 
 Resources:
 
-  # PN-TemplateBeMs microservice
-  TemplateBeMsMicroservice:
+  PlatformUsageEstimatesMicroservice:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-template-ms-be'
+        MicroServiceUniqueName: !Sub '${ProjectName}-platform-usage-path'
         CpuValue: 512
         MemoryAmount: 2GB
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
-        ContainerImageURI: !Sub '${ContainerImageUri}'
-        ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         MappedPaths: '/template-ms-be/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -113,3 +110,48 @@ Resources:
         LoadBalancerListenerArn: !Ref ApplicationLoadBalancerListenerArn
         LoadbalancerRulePriority: !Ref MicroserviceNumber
         CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
+        ContainerImageURI: !Sub '${ContainerImageUri}'
+        ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
+        ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}, http://localhost:3000'
+        ContainerEnvEntry3: !Sub 'AWS_DYNAMODBESTIMATETABLE=${EstimateDynamoTableName}'
+        ContainerEnvEntry4: !Sub 'AWS_DYNAMODBPUBLICADMINISTRATIONTABLE=${PublicAdministrationDynamoTable}'
+        ContainerEnvEntry5: !Sub 'AWS_DYNAMODBBILLINGTABLE=${BillingDynamoTable}'
+        ContainerEnvEntry6: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
+
+
+  PlatformUsageEstimatesMicroserviceTaskPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:BatchGetItem
+              - dynamodb:BatchWriteItem
+              - dynamodb:ExecuteTransaction
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:DeleteItem
+              - dynamodb:Query
+              - dynamodb:TransactGetItems
+              - dynamodb:TransactWriteItems
+              - dynamodb:UpdateItem
+            Resource:
+              - !Sub "${EstimateDynamoTableArn}"
+              - !Sub "${EstimateDynamoTableArn}/*"
+              - !Sub "${PublicAdministrationDynamoTableArn}"
+              - !Sub "${PublicAdministrationDynamoTableArn}/*"
+              - !Sub "${BillingDynamoTableArn}"
+              - !Sub "${BillingDynamoTableArn}/*"
+
+  PlatformUsageEstimatesMicroserviceCloudWatchDashboard:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
+      Parameters:
+        DashboardName: !Sub "${ProjectName}-platform-usage-estimates"
+        AlarmArns: !Join
+          - ','
+          - - !GetAtt PlatformUsageEstimatesMicroservice.Outputs.FatalLogsMetricAlarmArn
+
