@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 public interface EstimateService {
 
-    Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, Estimate estimate);
+    Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate);
     Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileId);
     Mono<PageableEstimateResponseDto> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size);
     Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth);

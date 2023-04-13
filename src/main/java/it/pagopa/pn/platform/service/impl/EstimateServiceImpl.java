@@ -30,7 +30,7 @@ public class EstimateServiceImpl implements EstimateService {
 
 
     @Override
-    public Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, Estimate estimate) {
+    public Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
         return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate))
                 .flatMap(item-> Mono.empty());
     }
@@ -38,6 +38,9 @@ public class EstimateServiceImpl implements EstimateService {
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
         return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
+                //basarsi su data di onboarding per prendere data scadenza, mese di riferimento
+                //due casi per IN AGGIORNAMENTO e per CONSOLIDATO
+                //caso assente se data scadenza scaduta
                 .switchIfEmpty(Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage())))
                 .zipWhen(pnEstimate -> externalRegistriesClient.getOnePa(paId)
                         .map(publicAdmin -> publicAdmin)

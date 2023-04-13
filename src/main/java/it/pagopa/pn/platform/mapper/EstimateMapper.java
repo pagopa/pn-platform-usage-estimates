@@ -7,6 +7,7 @@ import it.pagopa.pn.platform.rest.v1.dto.*;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.time.Period;
 import java.util.Date;
 import java.util.List;
 
@@ -67,16 +68,36 @@ public class EstimateMapper {
         estimateDetail.setEstimate(estimate);
         estimateDetail.setPaInfo(paInfo);
         estimateDetail.setBilling(billing);
+
         estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());
         estimateDetail.setLastModifiedTimestamp(Date.from(Instant.now()));
         estimateDetail.setDeadlineDate(Date.from(Instant.now()));
-        estimateDetail.showEdit(true);
+
+        if ((pnEstimate.getDeadlineDate().isAfter(Instant.now())))
+            estimateDetail.showEdit(false);
+        if ((pnEstimate.getDeadlineDate().isBefore(Instant.now())))
+            estimateDetail.showEdit(true);
+
 
         return estimateDetail;
     }
 
-    public static PnEstimate dtoToPnEstimate(String status, String paId, String referenceMonth, Estimate estimate) {
+
+    public static PnEstimate dtoToPnEstimateDefault(String paId, String referenceMonth){
+        PnEstimate pnEstimate = new PnEstimate();
+        pnEstimate.setPaId(paId);
+        pnEstimate.setReferenceMonth(referenceMonth);
+        pnEstimate.setLastModifiedTimestamp(Instant.now());
+        //data di scadenza sulla base di data odierna
+        pnEstimate.setDeadlineDate(Instant.now().plus(Period.ofDays(30)));
+        pnEstimate.setStatus("IN_PROGRESS");
+
+        return pnEstimate;
+    }
+
+
+    public static PnEstimate dtoToPnEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
         PnEstimate pnEstimate = new PnEstimate();
 
         pnEstimate.setStatus(status);
@@ -90,10 +111,10 @@ public class EstimateMapper {
         pnEstimate.setTotalPaperNationalNotif(estimate.getTotalPaperNationalNotif());
 
         //dati di fatturazione
-        pnEstimate.setDescription(estimate.getBilling().getDescription());
-        pnEstimate.setSdiCode(estimate.getBilling().getSdiCode());
-        pnEstimate.setMailAddress(estimate.getBilling().getMailAddress());
-        pnEstimate.setSplitPayment(estimate.getBilling().getSplitPayment());
+        pnEstimate.setDescription(estimate.getDescription());
+        pnEstimate.setSdiCode(estimate.getSdiCode());
+        pnEstimate.setMailAddress(estimate.getMailAddress());
+        pnEstimate.setSplitPayment(estimate.getSplitPayment());
 
         return pnEstimate;
     }
@@ -101,4 +122,5 @@ public class EstimateMapper {
     public static PageModel<PnEstimate> toPagination(Pageable pageable, List<PnEstimate> list){
         return PageModel.builder(list, pageable);
     }
+
 }
