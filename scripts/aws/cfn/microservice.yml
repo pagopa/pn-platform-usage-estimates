@@ -98,11 +98,11 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-platform-usage-path'
+        MicroServiceUniqueName: !Sub '${ProjectName}-platform-usage-estimates'
         CpuValue: 512
         MemoryAmount: 2GB
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
-        MappedPaths: '/template-ms-be/*'
+        MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
         VpcId: !Ref VpcId
