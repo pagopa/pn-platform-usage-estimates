@@ -3,12 +3,14 @@ package it.pagopa.pn.platform.utils;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDto;
+import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
 
 
 import java.time.Instant;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class TimelineGenerator {
@@ -23,15 +25,16 @@ public class TimelineGenerator {
 
     public TimelineGenerator(String paId, List<PnEstimate> dbList){
         this.paId = paId;
-        this.dbList = dbList;
+        this.dbList = new ArrayList<>(dbList);
     }
 
     public List<PnEstimate> extractAllEstimates(Instant onboardingDate) {
         //fare get ad external registries per prendere data di onboarding
         //calcolare data di inserimento (data di onboarding + 30gg)
-        //calcolare data scadenza
+        //data scadenza -> sempre 15 del mese corrente o successivo?
         //fare get all e salvare dati db dentro dbList (mesi)
         //fare controlli per popolare timelineList (controlli tra data inserimento e data scadenza)
+        Collections.sort(dbList);
         Instant now = Instant.now();
         if (this.dbList == null || this.dbList.isEmpty()) return missingGenerator(now, onboardingDate);
 
@@ -49,7 +52,7 @@ public class TimelineGenerator {
             }
             i++;
         }
-
+        Collections.sort(timelineList);
         return timelineList;
     }
 
@@ -100,13 +103,16 @@ public class TimelineGenerator {
         }
 
 
-        estimate.setStatus(EstimateDto.StatusEnum.IN_PROGRESS.getValue());
+        estimate.setStatus(EstimateDetail.StatusEnum.DRAFT.getValue());
         if (estimate.getDeadlineDate().isBefore(Instant.now())){
-            estimate.setStatus(EstimateDto.StatusEnum.ENDED.getValue());
+            estimate.setStatus(EstimateDetail.StatusEnum.ABSENT.getValue());
         }
 
         return estimate;
     }
+
+    //metodo che ti torna la singola PnEstimate con il nuovo periodo di riferimento settato
+    
 
 
 }

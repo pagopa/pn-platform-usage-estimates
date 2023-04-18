@@ -23,7 +23,6 @@ public class BillingMapper {
         pnBilling.setStatus(status);
         pnBilling.setReferenceMonth(referenceMonth);
 
-        pnBilling.setSdiCode(billing.getSdiCode());
         pnBilling.setMailAddress(billing.getMailAddress());
         pnBilling.setSplitPayment(billing.getSplitPayment());
         pnBilling.setDescription(billing.getDescription());
@@ -38,7 +37,6 @@ public class BillingMapper {
 
         billing.setDescription(pnBilling.getDescription());
         billing.setMailAddress(pnBilling.getMailAddress());
-        billing.setSdiCode(pnBilling.getSdiCode());
         billing.setSplitPayment(pnBilling.getSplitPayment());
         profilingDetail.setBilling(billing);
 
@@ -61,7 +59,6 @@ public class BillingMapper {
         //FATTURAZIONE
         billing.setSplitPayment(pnBilling.getSplitPayment());
         billing.setDescription(pnBilling.getDescription());
-        billing.setSdiCode(pnBilling.getSdiCode());
         billing.setMailAddress(pnBilling.getMailAddress());
 
         //PERIODO

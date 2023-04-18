@@ -6,6 +6,8 @@ import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
+import it.pagopa.pn.platform.utils.DateUtils;
+import it.pagopa.pn.platform.utils.TimelineGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.time.Instant;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
@@ -37,16 +41,19 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
-        return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
-                //basarsi su data di onboarding per prendere data scadenza, mese di riferimento
-                //due casi per IN AGGIORNAMENTO e per CONSOLIDATO
-                //caso assente se data scadenza scaduta
-                .switchIfEmpty(Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage())))
-                .zipWhen(pnEstimate -> externalRegistriesClient.getOnePa(paId)
-                        .map(publicAdmin -> publicAdmin)
-                        .switchIfEmpty(Mono.error(new PnGenericException(PA_ID_NOT_EXIST, PA_ID_NOT_EXIST.getMessage()))))
-                .map(detailEstimateAndPublicAdmin ->
-                        EstimateMapper.estimateDetailToDto(detailEstimateAndPublicAdmin.getT1(), detailEstimateAndPublicAdmin.getT2()));
+        //check referenceMonth NON deve essere precedente a data di onboarding
+        //Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()))
+        //check per vedere se referenceMonth è compatibile
+        //Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()))
+        return this.externalRegistriesClient.getOnePa(paId)
+                .zipWhen(paInfo -> {
+                    //Instant refMonth = DateUtils.addOneMonth(paInfo.getMonth());
+                    //if (refMonth <)
+                    return this.estimateDAO.getEstimateDetail(paId,referenceMonth)
+                            .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)));
+                })
+                .map(paInfoAndEstimate -> EstimateMapper.estimateDetailToDto(paInfoAndEstimate.getT2(), paInfoAndEstimate.getT1()));
+
     }
 
 

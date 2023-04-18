@@ -35,7 +35,7 @@ public class EstimateMapper {
     public static EstimateSearchTableDTO estimatesToDto(PnEstimate estimates){
         EstimateSearchTableDTO estimatesList = new EstimateSearchTableDTO();
         estimatesList.setReferenceMonth(estimates.getReferenceMonth());
-        estimatesList.setLastModifiedTimestamp(Date.from(Instant.now()));
+        estimatesList.setLastModifiedDate(Date.from(Instant.now()));
         estimatesList.setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(estimates.getStatus()));
         //estimatesList.setCheckPDND(true);
         return estimatesList;
@@ -54,14 +54,13 @@ public class EstimateMapper {
 
         //STIME
         estimate.setTotalDigitalNotif(pnEstimate.getTotalDigitalNotif());
-        estimate.setTotalPaper890Notif(pnEstimate.getTotalPaper890Notif());
-        estimate.setTotalPaperInternationalNotif(pnEstimate.getTotalPaperInternationalNotif());
-        estimate.setTotalPaperNationalNotif(pnEstimate.getTotalPaperNationalNotif());
+        estimate.setTotal890Notif(pnEstimate.getTotal890Notif());
+        estimate.setTotalAnalogNotif(pnEstimate.getTotalAnalogNotif());
+
 
         //FATTURAZIONE
         billing.setMailAddress(pnEstimate.getMailAddress());
         billing.setDescription(pnEstimate.getDescription());
-        billing.setSdiCode(pnEstimate.getSdiCode());
         billing.setSplitPayment(pnEstimate.getSplitPayment());
 
         //PERIODO
@@ -71,7 +70,7 @@ public class EstimateMapper {
 
         estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());
-        estimateDetail.setLastModifiedTimestamp(Date.from(Instant.now()));
+        estimateDetail.setLastModifiedDate(Date.from(Instant.now()));
         estimateDetail.setDeadlineDate(Date.from(Instant.now()));
 
         if ((pnEstimate.getDeadlineDate().isAfter(Instant.now())))
@@ -106,13 +105,11 @@ public class EstimateMapper {
 
         //dati stima
         pnEstimate.setTotalDigitalNotif(estimate.getTotalDigitalNotif());
-        pnEstimate.setTotalPaper890Notif(estimate.getTotalPaper890Notif());
-        pnEstimate.setTotalPaperInternationalNotif(estimate.getTotalPaperInternationalNotif());
-        pnEstimate.setTotalPaperNationalNotif(estimate.getTotalPaperNationalNotif());
+        pnEstimate.setTotal890Notif(estimate.getTotal890Notif());
+        pnEstimate.setTotalAnalogNotif(estimate.getTotalAnalogNotif());
 
         //dati di fatturazione
         pnEstimate.setDescription(estimate.getDescription());
-        pnEstimate.setSdiCode(estimate.getSdiCode());
         pnEstimate.setMailAddress(estimate.getMailAddress());
         pnEstimate.setSplitPayment(estimate.getSplitPayment());
 
