@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
@@ -16,7 +17,7 @@ import java.time.Instant;
 @Setter
 @ToString
 @NoArgsConstructor
-public class PnEstimate {
+public class PnEstimate implements Comparable<PnEstimate> {
 
     public static final String COL_PA_ID = "paId" ;
     public static final String COL_STATUS = "status";
@@ -40,6 +41,7 @@ public class PnEstimate {
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_DEADLINE_DATE)}))
     private Instant deadlineDate;
+
     @Getter(onMethod = @__({@DynamoDbSortKey, @DynamoDbAttribute(COL_REFERENCE_MONTH)}))
     private String referenceMonth;
 
@@ -71,4 +73,8 @@ public class PnEstimate {
     private String mailAddress;
 
 
+    @Override
+    public int compareTo(@NotNull PnEstimate o) {
+        return this.deadlineDate.compareTo(o.deadlineDate);
+    }
 }
