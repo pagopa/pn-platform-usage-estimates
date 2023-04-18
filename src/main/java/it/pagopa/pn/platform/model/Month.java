@@ -5,7 +5,19 @@ import java.util.List;
 
 public enum Month {
     GENNAIO("GEN", 1),
-    FEBBRAIO("FEBB", 2);
+    FEBBRAIO("FEBB", 2),
+    MARZO("MAR",3),
+    APRILE("APR",4),
+    MAGGIO("MAG",5),
+    GIUGNO("GIU",6),
+    LUGLIO("LUGL",7),
+    AGOSTO("AGOS",8),
+    SETTEMBRE("SETT",9),
+    OTTOBRE("OTT",10),
+    NOVEMBRE("NOV",11),
+    DICEMBRE("DIC",12);
+
+
 
 
     private String value;
