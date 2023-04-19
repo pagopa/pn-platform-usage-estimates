@@ -3,6 +3,7 @@ package it.pagopa.pn.platform.utils;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
+import it.pagopa.pn.platform.model.TimelineEstimate;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
 
 
@@ -24,21 +25,22 @@ public class TimelineGenerator {
         this.dbList = new ArrayList<>(dbList);
     }
 
-    public List<PnEstimate> extractAllEstimates(Instant onboardingDate) {
+    public TimelineEstimate extractAllEstimates(Instant onboardingDate, String paId) {
         Collections.sort(dbList);
-        Instant currentDate = getStartDeadLineDate();
+        Instant currentDate = DateUtils.getStartDeadLineDate();
         int lastMonth = 0;
         while (currentDate.isAfter(onboardingDate)){
-            if (this.dbList != null && !this.dbList.isEmpty() && lastMonth < this.dbList.size()
-                    && DateUtils.isEqualMonth(currentDate, this.dbList.get(lastMonth).getDeadlineDate())){
-                this.timelineList.add(this.dbList.get(lastMonth));
-                lastMonth++;
-            } else {
-                this.timelineList.add(getEstimate(this.paId, null, currentDate));
-            }
+                if (this.dbList != null && !this.dbList.isEmpty() && lastMonth < this.dbList.size()
+                        && DateUtils.isEqualMonth(currentDate, this.dbList.get(lastMonth).getDeadlineDate())
+                        && paId.equals(dbList.get(lastMonth).getPaId())) {
+                    this.timelineList.add(this.dbList.get(lastMonth));
+                    lastMonth++;
+                } else {
+                    this.timelineList.add(getEstimate(this.paId, null, currentDate));
+                }
             currentDate = DateUtils.minusMonth(currentDate, 1);
         }
-        return timelineList;
+        return new TimelineEstimate(this.timelineList.get(0), timelineList.subList(1, timelineList.size()));
     }
 
     /**
@@ -79,15 +81,6 @@ public class TimelineGenerator {
         return estimate;
     }
 
-    public Instant getStartDeadLineDate (){
 
-        Instant now = Instant.now();
-        int month = DateUtils.getMonth(now);
-        int year = DateUtils.getYear(now);
-        if (DateUtils.getDay(now) > 15){
-            return DateUtils.addOneMonth(DateUtils.fromDayMonthYear(15, month, year));
-        }
-        return DateUtils.fromDayMonthYear(15, month, year);
-    }
 
 }

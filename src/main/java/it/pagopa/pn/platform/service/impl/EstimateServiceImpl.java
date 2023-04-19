@@ -7,6 +7,7 @@ import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
+import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import java.time.Instant;
-import java.time.temporal.ChronoField;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
@@ -46,15 +46,18 @@ public class EstimateServiceImpl implements EstimateService {
         //check per vedere se referenceMonth è compatibile
         //Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()))
         String[] splitMonth = referenceMonth.split("-");
-        if (Month.getNumberMonth(splitMonth[0]) > Instant.now().get(ChronoField.MONTH_OF_YEAR)) {
+        Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
+        int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
+        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1]));
+        if ( refMonthInstant.isAfter(startDeadlineDate)) {
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
         return this.externalRegistriesClient.getOnePa(paId)
                 .zipWhen(paInfo -> {
-                    //Instant refMonth = DateUtils.addOneMonth(paInfo.getMonth());
-                    //if (refMonth < referenceMonth){
-                    //return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
-                    // }
+                    Instant onBoardingDate = DateUtils.addOneMonth(Instant.parse("2022-07-02T10:15:30Z"));
+                    if (refMonthInstant.isBefore(onBoardingDate)){
+                    return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                    }
                     return this.estimateDAO.getEstimateDetail(paId,referenceMonth)
                             .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)));
                 })
@@ -66,11 +69,20 @@ public class EstimateServiceImpl implements EstimateService {
     //PER HELP DESK
     @Override
     public Mono<PageableEstimateResponseDto> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page-1, size);
-
-        return estimateDAO.getAllEstimates(paId)
-                .map(list -> EstimateMapper.toPagination(pageable, list))
-                .map(EstimateMapper::toPageableResponse);
+        Pageable pageable = PageRequest.of(page - 1, size);
+        // getAllEstimate torna lista da db (dblist)
+        // data di onboarding e passarla alla extractAllEstimate
+        // passare dblist tramite costruttore
+        return this.externalRegistriesClient.getOnePa(paId)
+                .flatMap(paInfoDto ->
+                        this.estimateDAO.getAllEstimates(paId)
+                                .map(pnEstimates -> {
+                                            TimelineGenerator timelineGenerator = new TimelineGenerator(paId, pnEstimates);
+                                            return timelineGenerator.extractAllEstimates(Instant.parse("2022-07-02T10:15:30Z"), paId);
+                                        }
+                                )
+                )
+                .map(list -> EstimateMapper.toPageableResponse(pageable, list));
     }
 
 

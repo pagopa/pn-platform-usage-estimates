@@ -2,6 +2,7 @@ package it.pagopa.pn.platform.mapper;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.PageModel;
+import it.pagopa.pn.platform.model.TimelineEstimate;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import org.springframework.data.domain.Pageable;
@@ -17,17 +18,22 @@ public class EstimateMapper {
         throw new IllegalCallerException();
     }
 
-    public static PageableEstimateResponseDto toPageableResponse(PageModel<PnEstimate> pagePnEstimate) {
+    public static PageableEstimateResponseDto toPageableResponse(Pageable pageable, TimelineEstimate timelineEstimate) {
         PageableEstimateResponseDto pageableEstimateResponseDto = new PageableEstimateResponseDto();
-        pageableEstimateResponseDto.setPageable(pagePnEstimate.getPageable());
-        pageableEstimateResponseDto.setNumber(pagePnEstimate.getNumber());
-        pageableEstimateResponseDto.setNumberOfElements(pagePnEstimate.getNumberOfElements());
-        pageableEstimateResponseDto.setSize(pagePnEstimate.getSize());
-        pageableEstimateResponseDto.setTotalElements(pagePnEstimate.getTotalElements());
-        pageableEstimateResponseDto.setTotalPages((long) pagePnEstimate.getTotalPages());
-        pageableEstimateResponseDto.setFirst(pagePnEstimate.isFirst());
-        pageableEstimateResponseDto.setLast(pagePnEstimate.isLast());
-        pageableEstimateResponseDto.setEmpty(pagePnEstimate.isEmpty());
+        pageableEstimateResponseDto.getActual().setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
+        pageableEstimateResponseDto.getActual().setReferenceMonth(timelineEstimate.getActual().getReferenceMonth());
+        pageableEstimateResponseDto.getActual().setDeadlineDate(timelineEstimate.getActual().getDeadlineDate().toString());
+        pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedTimestamp()));
+        PageModel<PnEstimate> pagePnEstimate = toPagination(pageable, timelineEstimate.getHistory());
+        pageableEstimateResponseDto.getHistory().setPageable(pagePnEstimate.getPageable());
+        pageableEstimateResponseDto.getHistory().setNumber(pagePnEstimate.getNumber());
+        pageableEstimateResponseDto.getHistory().setNumberOfElements(pagePnEstimate.getNumberOfElements());
+        pageableEstimateResponseDto.getHistory().setSize(pagePnEstimate.getSize());
+        pageableEstimateResponseDto.getHistory().setTotalElements(pagePnEstimate.getTotalElements());
+        pageableEstimateResponseDto.getHistory().setTotalPages((long) pagePnEstimate.getTotalPages());
+        pageableEstimateResponseDto.getHistory().setFirst(pagePnEstimate.isFirst());
+        pageableEstimateResponseDto.getHistory().setLast(pagePnEstimate.isLast());
+        pageableEstimateResponseDto.getHistory().setEmpty(pagePnEstimate.isEmpty());
         pageableEstimateResponseDto.setContent(pagePnEstimate.mapTo(EstimateMapper::estimatesToDto));
         return pageableEstimateResponseDto;
     }
@@ -71,7 +77,7 @@ public class EstimateMapper {
         estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());
         estimateDetail.setLastModifiedDate(Date.from(Instant.now()));
-        estimateDetail.setDeadlineDate(Date.from(Instant.now()));
+        estimateDetail.setDeadlineDate(Date.from(pnEstimate.getDeadlineDate()));
 
 //        if ((pnEstimate.getDeadlineDate().isAfter(Instant.now())))
 //            estimateDetail.showEdit(false);

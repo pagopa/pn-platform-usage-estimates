@@ -1,6 +1,7 @@
 package it.pagopa.pn.platform.utils;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
+import it.pagopa.pn.platform.model.TimelineEstimate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,10 @@ class TimelineGeneratorTest {
     void estimatesGeneratorTest(){
         String paId = "12345";
         TimelineGenerator timelineGenerator = new TimelineGenerator(paId, dbList);
-        timelineList = timelineGenerator.extractAllEstimates(onboardingDate);
+        TimelineEstimate timelineList = timelineGenerator.extractAllEstimates(onboardingDate, paId);
         System.out.println(timelineList);
-        Assertions.assertFalse(timelineList.isEmpty());
-        Assertions.assertEquals(11, timelineList.size());
+        Assertions.assertNotNull(timelineList.getActual());
+        Assertions.assertEquals(10, timelineList.getHistory().size());
     }
 
 

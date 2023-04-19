@@ -51,6 +51,17 @@ public class DateUtils {
                 && localDateTimeUno.getYear() == localDateTimeDue.getYear();
     }
 
+    public static Instant getStartDeadLineDate (){
+
+        Instant now = Instant.now();
+        int month = DateUtils.getMonth(now);
+        int year = DateUtils.getYear(now);
+        if (DateUtils.getDay(now) > 15){
+            return DateUtils.addOneMonth(DateUtils.fromDayMonthYear(15, month, year));
+        }
+        return DateUtils.fromDayMonthYear(15, month, year);
+    }
+
     public static Instant parseStringTOInstant(String date) {
         return Instant.parse(date);
     }

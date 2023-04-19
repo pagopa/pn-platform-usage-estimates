@@ -350,6 +350,8 @@ components:
         - $ref: '#/components/schemas/Billing'
 
 
+
+
     EstimateSearchTableDTO:
       type: object
       properties:
@@ -375,9 +377,11 @@ components:
 
     PageableEstimateResponseDto:
       type: object
-      allOf:
-        - $ref: '#/components/schemas/Page'
       properties:
+        actual:
+          $ref: '#/components/schemas/EstimateSearchTableDTO'
+        history:
+          $ref: '#/components/schemas/Page'
         content:
           type: array
           items:
