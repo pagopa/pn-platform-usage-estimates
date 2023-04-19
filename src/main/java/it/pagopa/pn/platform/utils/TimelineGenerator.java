@@ -31,8 +31,7 @@ public class TimelineGenerator {
         int lastMonth = 0;
         while (currentDate.isAfter(onboardingDate)){
                 if (this.dbList != null && !this.dbList.isEmpty() && lastMonth < this.dbList.size()
-                        && DateUtils.isEqualMonth(currentDate, this.dbList.get(lastMonth).getDeadlineDate())
-                        && paId.equals(dbList.get(lastMonth).getPaId())) {
+                        && DateUtils.isEqualMonth(currentDate, this.dbList.get(lastMonth).getDeadlineDate())) {
                     this.timelineList.add(this.dbList.get(lastMonth));
                     lastMonth++;
                 } else {

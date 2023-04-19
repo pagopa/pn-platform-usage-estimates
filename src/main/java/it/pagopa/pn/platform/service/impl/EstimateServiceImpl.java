@@ -35,7 +35,24 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Override
     public Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
-        return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate))
+        String[] splitMonth = referenceMonth.split("-");
+        Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
+        int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
+        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1]));
+        if ( refMonthInstant.isAfter(startDeadlineDate)) {
+            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+        }
+        this.estimateDAO.getEstimateDetail(paId,referenceMonth)
+                .map(pnEstimate -> {
+                            if (!pnEstimate.getStatus().equals(EstimateDetail.StatusEnum.DRAFT.getValue())){
+                                return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                            }
+                    return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate));
+                })
+                .switchIfEmpty(//controllare se data compatibile con instant now -> se si CREARE
+                        //estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate))
+                        //altrimenti errore );
+                )
                 .flatMap(item-> Mono.empty());
     }
 
