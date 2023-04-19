@@ -73,10 +73,10 @@ public class EstimateMapper {
         estimateDetail.setLastModifiedDate(Date.from(Instant.now()));
         estimateDetail.setDeadlineDate(Date.from(Instant.now()));
 
-        if ((pnEstimate.getDeadlineDate().isAfter(Instant.now())))
-            estimateDetail.showEdit(false);
-        if ((pnEstimate.getDeadlineDate().isBefore(Instant.now())))
-            estimateDetail.showEdit(true);
+//        if ((pnEstimate.getDeadlineDate().isAfter(Instant.now())))
+//            estimateDetail.showEdit(false);
+//        if ((pnEstimate.getDeadlineDate().isBefore(Instant.now())))
+//            estimateDetail.showEdit(true);
 
 
         return estimateDetail;

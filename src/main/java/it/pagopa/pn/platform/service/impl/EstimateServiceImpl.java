@@ -3,10 +3,10 @@ package it.pagopa.pn.platform.service.impl;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
+import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
-import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +15,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
 import java.time.Instant;
+import java.time.temporal.ChronoField;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
@@ -45,10 +45,16 @@ public class EstimateServiceImpl implements EstimateService {
         //Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()))
         //check per vedere se referenceMonth è compatibile
         //Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()))
+        String[] splitMonth = referenceMonth.split("-");
+        if (Month.getNumberMonth(splitMonth[0]) > Instant.now().get(ChronoField.MONTH_OF_YEAR)) {
+            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+        }
         return this.externalRegistriesClient.getOnePa(paId)
                 .zipWhen(paInfo -> {
                     //Instant refMonth = DateUtils.addOneMonth(paInfo.getMonth());
-                    //if (refMonth <)
+                    //if (refMonth < referenceMonth){
+                    //return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                    // }
                     return this.estimateDAO.getEstimateDetail(paId,referenceMonth)
                             .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)));
                 })
@@ -66,7 +72,6 @@ public class EstimateServiceImpl implements EstimateService {
                 .map(list -> EstimateMapper.toPagination(pageable, list))
                 .map(EstimateMapper::toPageableResponse);
     }
-
 
 
     //PER CONSUNTIVI

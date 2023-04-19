@@ -7,20 +7,16 @@ import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
 
 
 import java.time.Instant;
-import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class TimelineGenerator {
 
     private String paId;
 
-    //dati estratti dal db
-    private List<PnEstimate> dbList ;
+    private List<PnEstimate> dbList;
 
-    //output
     private List<PnEstimate> timelineList = new ArrayList<>();
 
     public TimelineGenerator(String paId, List<PnEstimate> dbList){
@@ -29,48 +25,20 @@ public class TimelineGenerator {
     }
 
     public List<PnEstimate> extractAllEstimates(Instant onboardingDate) {
-        //fare get ad external registries per prendere data di onboarding
-        //calcolare data di inserimento (data di onboarding + 30gg)
-        //data scadenza -> sempre 15 del mese corrente o successivo?
-        //fare get all e salvare dati db dentro dbList (mesi)
-        //fare controlli per popolare timelineList (controlli tra data inserimento e data scadenza)
         Collections.sort(dbList);
-        Instant now = Instant.now();
-        if (this.dbList == null || this.dbList.isEmpty()) return missingGenerator(now, onboardingDate);
-
-        if (now.get(ChronoField.MONTH_OF_YEAR) > (DateUtils.addOneMonth(this.dbList.get(0).getDeadlineDate()).get(ChronoField.MONTH_OF_YEAR))){
-            timelineList.addAll(missingGenerator(now, this.dbList.get(0).getDeadlineDate()));
-        }
-
-        int i = 1;
-        for (PnEstimate estimateDB : this.dbList) {
-            timelineList.add(estimateDB);
-            if (this.dbList.size() > (i)){
-                timelineList.addAll(missingGenerator(estimateDB.getDeadlineDate(), this.dbList.get(i).getDeadlineDate()));
+        Instant currentDate = getStartDeadLineDate();
+        int lastMonth = 0;
+        while (currentDate.isAfter(onboardingDate)){
+            if (this.dbList != null && !this.dbList.isEmpty() && lastMonth < this.dbList.size()
+                    && DateUtils.isEqualMonth(currentDate, this.dbList.get(lastMonth).getDeadlineDate())){
+                this.timelineList.add(this.dbList.get(lastMonth));
+                lastMonth++;
             } else {
-                timelineList.addAll(missingGenerator(estimateDB.getDeadlineDate(), onboardingDate));
+                this.timelineList.add(getEstimate(this.paId, null, currentDate));
             }
-            i++;
+            currentDate = DateUtils.minusMonth(currentDate, 1);
         }
-        Collections.sort(timelineList);
         return timelineList;
-    }
-
-    //metodo per generare mesi missing
-    public List<PnEstimate> missingGenerator (Instant start, Instant end){
-        List<PnEstimate> tmpEstimates = new ArrayList<>();
-        int startMonthReference = DateUtils.addOneMonth(start).get(ChronoField.MONTH_OF_YEAR);
-        int lastMonthReference = DateUtils.addOneMonth(end).get(ChronoField.MONTH_OF_YEAR);
-
-
-
-        for (int i = 1; i < Math.abs(lastMonthReference-startMonthReference); i++) {
-            Instant deadlineDate = DateUtils.minusMonth(start, i);
-            tmpEstimates.add(TimelineGenerator.getEstimate(this.paId, null, deadlineDate));
-        }
-
-
-        return tmpEstimates;
     }
 
     /**
@@ -95,8 +63,8 @@ public class TimelineGenerator {
         } else if (referenceMonth == null) {
             Instant refMonthInstant = DateUtils.addOneMonth(deadline);
 
-            String refMonth = Month.getValueFromNumber(refMonthInstant.get(ChronoField.MONTH_OF_YEAR));
-            refMonth += "-"+refMonthInstant.get(ChronoField.YEAR);
+            String refMonth = Month.getValueFromNumber(DateUtils.getMonth(refMonthInstant));
+            refMonth += "-"+DateUtils.getYear(refMonthInstant);
 
             estimate.setDeadlineDate(deadline);
             estimate.setReferenceMonth(refMonth);
@@ -111,8 +79,15 @@ public class TimelineGenerator {
         return estimate;
     }
 
-    //metodo che ti torna la singola PnEstimate con il nuovo periodo di riferimento settato
-    
+    public Instant getStartDeadLineDate (){
 
+        Instant now = Instant.now();
+        int month = DateUtils.getMonth(now);
+        int year = DateUtils.getYear(now);
+        if (DateUtils.getDay(now) > 15){
+            return DateUtils.addOneMonth(DateUtils.fromDayMonthYear(15, month, year));
+        }
+        return DateUtils.fromDayMonthYear(15, month, year);
+    }
 
 }

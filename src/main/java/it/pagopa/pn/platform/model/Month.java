@@ -35,7 +35,9 @@ public enum Month {
     }
 
     public static String getValueFromNumber(int number){
-        return "MAR";
+        List<Month> finded = Arrays.stream(Month.values()).filter(month -> month.number == (number)).toList();
+        if (finded.isEmpty()) return null;
+        return finded.get(0).value;
     }
 
 }

@@ -9,11 +9,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 class TimelineGeneratorTest {
     private List<PnEstimate> dbList ;
-    private List<PnEstimate> timelineList;
-    Instant onboardingDate; //settare in base al test che si vuole fare
+    private List<PnEstimate> timelineList = new ArrayList<>();
+    Instant onboardingDate = Instant.parse("2022-07-02T10:15:30Z"); //settare in base al test che si vuole fare
 
     @BeforeEach
     void setUp(){
@@ -22,15 +21,17 @@ class TimelineGeneratorTest {
 
     @Test
     void estimatesGeneratorTest(){
-        timelineList = TimelineGenerator.extractAllEstimates(onboardingDate);
-        Assertions.assertTrue(timelineList.isEmpty());
-        Assertions.assertEquals(3, timelineList.size());
+        String paId = "12345";
+        TimelineGenerator timelineGenerator = new TimelineGenerator(paId, dbList);
+        timelineList = timelineGenerator.extractAllEstimates(onboardingDate);
+        System.out.println(timelineList);
+        Assertions.assertFalse(timelineList.isEmpty());
+        Assertions.assertEquals(11, timelineList.size());
     }
 
 
     private void initialize() {
         dbList = new ArrayList<>();
-        timelineList = new ArrayList<>();
         PnEstimate estimate = new PnEstimate();
         PnEstimate estimate1 = new PnEstimate();
         PnEstimate estimate2 = new PnEstimate();
@@ -65,7 +66,7 @@ class TimelineGeneratorTest {
         estimate2.setPaId("89025");
         estimate2.setStatus("VALIDATED");
         estimate2.setDeadlineDate(Instant.parse("2022-10-15T10:15:30Z"));
-        estimate2.setReferenceMonth("NOV-2023");
+        estimate2.setReferenceMonth("NOV-2022");
         estimate2.setTotalDigitalNotif(139);
         estimate2.setTotal890Notif(520);
         estimate2.setTotalAnalogNotif(222);
@@ -74,9 +75,9 @@ class TimelineGeneratorTest {
         estimate2.setLastModifiedTimestamp(Instant.now());
         estimate2.setSplitPayment(true);
 
-        timelineList.add(estimate);
-        timelineList.add(estimate1);
-        timelineList.add(estimate2);
+        dbList.add(estimate);
+        dbList.add(estimate1);
+        dbList.add(estimate2);
 
     }
   

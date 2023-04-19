@@ -67,6 +67,6 @@ public class PnEstimate implements Comparable<PnEstimate> {
 
     @Override
     public int compareTo(@NotNull PnEstimate o) {
-        return this.deadlineDate.compareTo(o.deadlineDate);
+        return o.deadlineDate.compareTo(this.deadlineDate);
     }
 }

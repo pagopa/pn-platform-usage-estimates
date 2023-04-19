@@ -3,47 +3,60 @@ package it.pagopa.pn.platform.utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.*;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 
 @Slf4j
 public class DateUtils {
 
+    private static final ZoneId italianZoneId = ZoneId.of("Europe/Rome");
+
     private DateUtils(){}
 
 
-
-
     public static Instant addOneMonth(Instant from) {
-        Instant to = Instant.ofEpochSecond(from.getEpochSecond());
-        return to.plus(1, ChronoUnit.MONTHS);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, italianZoneId);
+        return localDateTime.plusMonths(1).toInstant(ZoneOffset.UTC);
     }
 
     public static Instant minusMonth(Instant from, int months) {
-        Instant to = Instant.ofEpochSecond(from.getEpochSecond());
-        return to.minus(months, ChronoUnit.MONTHS);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, italianZoneId);
+        return localDateTime.minusMonths(months).toInstant(ZoneOffset.UTC);
     }
 
     public static Instant fromDayMonthYear(int day, int month, int year){
-        Date date = new GregorianCalendar(day, month, year).getTime();
-        return date.toInstant();
+
+        return LocalDateTime.of(year, month, day, 1, 0).toInstant(ZoneOffset.UTC);
+
     }
 
+    public static Integer getYear (Instant instant){
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        return localDateTime.getYear();
+    }
 
+    public static Integer getMonth (Instant instant){
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        return localDateTime.getMonth().getValue();
+    }
+
+    public static Integer getDay (Instant instant){
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        return localDateTime.getDayOfMonth();
+    }
+
+    public static boolean isEqualMonth (Instant uno, Instant due){
+        LocalDateTime localDateTimeUno = LocalDateTime.ofInstant(uno, italianZoneId);
+        LocalDateTime localDateTimeDue = LocalDateTime.ofInstant(due, italianZoneId);
+        return localDateTimeUno.getMonth().getValue() == localDateTimeDue.getMonth().getValue()
+                && localDateTimeUno.getYear() == localDateTimeDue.getYear();
+    }
 
     public static Instant parseStringTOInstant(String date) {
         return Instant.parse(date);
     }
 
-
-
     public static Long getTimeStampOfMills(LocalDateTime time){
         return time.toInstant(ZoneOffset.UTC).getEpochSecond();
     }
-
-
-
 
 }
