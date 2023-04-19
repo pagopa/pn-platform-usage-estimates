@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -20,6 +21,10 @@ public class EstimateMapper {
 
     public static PageableEstimateResponseDto toPageableResponse(Pageable pageable, TimelineEstimate timelineEstimate) {
         PageableEstimateResponseDto pageableEstimateResponseDto = new PageableEstimateResponseDto();
+        EstimateSearchTableDTO actual = new EstimateSearchTableDTO();
+        Page page = new Page();
+        pageableEstimateResponseDto.setActual(actual);
+        pageableEstimateResponseDto.setHistory(page);
         pageableEstimateResponseDto.getActual().setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
         pageableEstimateResponseDto.getActual().setReferenceMonth(timelineEstimate.getActual().getReferenceMonth());
         pageableEstimateResponseDto.getActual().setDeadlineDate(timelineEstimate.getActual().getDeadlineDate().toString());
@@ -41,9 +46,9 @@ public class EstimateMapper {
     public static EstimateSearchTableDTO estimatesToDto(PnEstimate estimates){
         EstimateSearchTableDTO estimatesList = new EstimateSearchTableDTO();
         estimatesList.setReferenceMonth(estimates.getReferenceMonth());
+        estimatesList.setDeadlineDate(estimates.getDeadlineDate().toString());
         estimatesList.setLastModifiedDate(Date.from(Instant.now()));
         estimatesList.setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(estimates.getStatus()));
-        //estimatesList.setCheckPDND(true);
         return estimatesList;
     }
 

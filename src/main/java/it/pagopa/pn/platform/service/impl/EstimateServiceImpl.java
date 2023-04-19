@@ -41,10 +41,6 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
-        //check referenceMonth NON deve essere precedente a data di onboarding
-        //Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()))
-        //check per vedere se referenceMonth è compatibile
-        //Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()))
         String[] splitMonth = referenceMonth.split("-");
         Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
         int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
@@ -54,6 +50,7 @@ public class EstimateServiceImpl implements EstimateService {
         }
         return this.externalRegistriesClient.getOnePa(paId)
                 .zipWhen(paInfo -> {
+                    //TODO: passare alla onBoardingDate la data di onboarding presa da paInfoDto
                     Instant onBoardingDate = DateUtils.addOneMonth(Instant.parse("2022-07-02T10:15:30Z"));
                     if (refMonthInstant.isBefore(onBoardingDate)){
                     return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
@@ -70,14 +67,12 @@ public class EstimateServiceImpl implements EstimateService {
     @Override
     public Mono<PageableEstimateResponseDto> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        // getAllEstimate torna lista da db (dblist)
-        // data di onboarding e passarla alla extractAllEstimate
-        // passare dblist tramite costruttore
         return this.externalRegistriesClient.getOnePa(paId)
                 .flatMap(paInfoDto ->
                         this.estimateDAO.getAllEstimates(paId)
                                 .map(pnEstimates -> {
                                             TimelineGenerator timelineGenerator = new TimelineGenerator(paId, pnEstimates);
+                                            //TODO: passare alla extractAllEstimates la data di onboarding presa da paInfoDto
                                             return timelineGenerator.extractAllEstimates(Instant.parse("2022-07-02T10:15:30Z"), paId);
                                         }
                                 )
