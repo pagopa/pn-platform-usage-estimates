@@ -28,27 +28,6 @@ paths:
         '500':
           description: Internal Server Error
 
-  /pn-usage-estimates/api/httpheaders:
-    get:
-      summary: Build a map of all the Http Header for the request
-      operationId: getHttpHeadersMap
-      tags:
-        - TemplateSample
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                  type: object
-                  additionalProperties:
-                    type: array
-                    items:
-                      type: string
-        '500':
-            description: InternalServerError
-
-
   /pn-usage-estimates/v1/{paId}/estimate/{referenceMonth}:
     post:
       tags:
@@ -603,6 +582,7 @@ components:
       name: referenceMonth
       in: path
       required: true
+      example: "MAR-2023"
       schema:
         type: string
 
