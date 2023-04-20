@@ -116,7 +116,7 @@ Resources:
         CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         ContainerImageURI: !Sub '${ContainerImageUri}'
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
-        ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}, http://localhost:3000'
+        ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}, http://localhost:3000, https://portale-pa.dev.pn.pagopa.it'
         ContainerEnvEntry3: !Sub 'AWS_DYNAMODBESTIMATETABLE=${EstimateDynamoTableName}'
         ContainerEnvEntry4: !Sub 'AWS_DYNAMODBPUBLICADMINISTRATIONTABLE=${PublicAdministrationDynamoTable}'
         ContainerEnvEntry5: !Sub 'AWS_DYNAMODBBILLINGTABLE=${BillingDynamoTable}'
