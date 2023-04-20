@@ -36,11 +36,15 @@ public class EstimateServiceImpl implements EstimateService {
     @Override
     public Mono<EstimateDetail> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
         String[] splitMonth = referenceMonth.split("-");
+        if (!(splitMonth.length > 1)) {
+            log.info("ReferenceMonth has not correct format");
+            return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
+        }
         Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
         int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
         Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, DateUtils.getYear(Instant.now()));
         if (refMonthInstant.isAfter(startDeadlineDate)) {
-            log.error("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", startDeadlineDate);
+            log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", startDeadlineDate);
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
         return this.externalRegistriesClient.getOnePa(paId)
