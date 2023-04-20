@@ -166,4 +166,6 @@ Resources:
         AlarmArns: !Join
           - ','
           - - !GetAtt PlatformUsageEstimatesMicroservice.Outputs.FatalLogsMetricAlarmArn
-
+        LogGroupsNames: !Join
+          - ','
+          - - !Sub '/aws/ecs/${ProjectName}-platform-usage-estimates'
