@@ -1,0 +1,79 @@
+components:
+  schemas:
+
+  #   Campi da riportare nel form di inserimento Stime Mensili di creazione notifiche 
+  #   1 Ragione Sociale del soggetto aderente: read-only ottenuto da SelfCare
+  #   2 Sede legale: read-only ottenuto da SelfCare
+  #   3 Partita IVA/Codice fiscale: read-only ottenuto da SelfCare
+  #   4 Codice IPA: read-only ottenuto da SelfCare
+  #   5 SDI: read-only ottenuto da SelfCare
+  #   6 dichiarazione di applicabilità dello split payment ai sensi art. 17-ter D.P.R. 633/1972: booleano rappresentato dalle stringhe “Si” e “No”
+  #   7 Altre informazioni utili alla fatturazione: campo libero max 256 caratteri
+  #   8 Indirizzo PEC: read-only ottenuto da SelfCare
+  #   9 Indirizzo email amministrativo: stringa nel formato valido per un indirizzo email
+  #   10 Data di compilazione: read-only con valore definito nei paragrafi successivi
+  #   11 Data di sottoscrizione dell’accordo: read-only ottenuto da SelfCare
+  #   12 Mese di riferimento: read only ottenuto dalla selezione del mese con le modalità descritte di seguito
+  #   13 Per ciascuna mensilità riferita all’anno solare precedente a quello di invio:
+  #     a. notifiche da processare in via digitale, ovvero che hanno tentato di raggiungere una PEC: valore numerico intero
+  #     b. notifiche da processare in via analogica tramite Raccomandata A/R senza distinzione di destinazione: valore numerico intero
+  #     c. notifiche da processare in via analogica tipo notifica ex L. 890/1982 senza distinzione di destinazione: valore numerico intero
+
+  
+    MonthlyNotificationPreorder:
+      type: object
+      description: |
+        Oggetto che definisce la struttura del file che deve essere scritto nel bucket di destinazione.
+        Requisiti:
+          - il nome del bucket <bucketname> deve essere configurabile, il bucket dovrà essere versionato
+          - All'interno del <bucketname> ad ogni consolidamento del file dovranno essere scritti 2 file: un 
+            1.  Un file 'snapshot' creato ad ogni consolidamento (non verrà mai sovrascritto), path:
+                <prefisso_configurabile>/paid_<selfCarePaId>/month_<referenceMonth>/snapshot/monthlypreorder_<recordCreationDate(senza millisecondi)>_<uuid>.json 
+            2.  Un file 'last' che verrà sovrascritto ad ogni consolidamento
+                (ogni salvataggio aumenterà il numero di versione), path:
+                <prefisso_configurabile>/paid_<selfCarePaId>/month_<referenceMonth>/last/monthlypreorder_<referenceMonth>.json 
+      required:
+        - selfCarePaId
+        - splitPayment
+        - administrativeEmail
+        - recordCreationDate
+        - referenceMonth
+        - digitalNotifications
+        - analogNotificationsAR
+        - analogNotifications890
+        - recordVersion
+        - recordFormatVersion
+      properties:
+        selfCarePaId:
+          type: string
+          description: The PA id used by self care
+        splitPayment:
+          type: string
+          description: Y or N - Campo 6 documento
+        additionalInformation:
+          type: string
+          description: Campo 7 documento
+        administrativeEmail:
+          type: string
+          description: Campo 9 documento
+        recordCreationDate:
+          type: string
+          description: formato ISO YYYY-MM-dd'T'HH:mm:SS.SSS'Z' Campo 10 documento
+        referenceMonth:
+          type: string
+          description: formato YYYY-MM - Campo 12 documento
+        digitalNotifications:
+          type: integer
+          description: Campo 13.a documento
+        analogNotificationsAR:
+          type: integer
+          description: Campo 13.b documento
+        analogNotifications890:
+          type: integer
+          description: Campo 13.c documento
+        recordVersion:
+          type: number
+          description: progressivo del consolidamento
+        recordFormatVersion:
+          type: number
+          description: questo documento descrive la versione 1

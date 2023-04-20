@@ -40,25 +40,27 @@ public class EstimateServiceImpl implements EstimateService {
         int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
         Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, DateUtils.getYear(Instant.now()));
         if (refMonthInstant.isAfter(startDeadlineDate)) {
+            log.error("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", startDeadlineDate);
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
         return this.externalRegistriesClient.getOnePa(paId)
-                .zipWhen(paInfo -> {
+                .flatMap(paInfo -> {
                     Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
                     if (refMonthInstant.isBefore(onBoardingDate)) {
+                        log.error("ReferenceMonth inconsistent with onBoardindate {}", onBoardingDate);
                         return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
                     }
                     return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
                             .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)))
-                            .map(pnEstimate -> {
+                            .flatMap(pnEstimate -> {
                                 if (!pnEstimate.getStatus().equals(EstimateDetail.StatusEnum.DRAFT.getValue())) {
+                                    log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
                                     return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
                                 }
                                 return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate));
-                            });
-                })
-                .map(paInfoAndEstimate ->
-                        EstimateMapper.estimateDetailToDto(paInfoAndEstimate.getT2(), paInfoAndEstimate.getT1()));
+                            })
+                            .map(pnEstimate -> EstimateMapper.estimateDetailToDto(pnEstimate, paInfo));
+                });
     }
 
     @Override
@@ -72,10 +74,13 @@ public class EstimateServiceImpl implements EstimateService {
         }
         return this.externalRegistriesClient.getOnePa(paId)
                 .zipWhen(paInfo -> {
+
                     Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
                     if (refMonthInstant.isBefore(onBoardingDate)){
-                    return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                        log.error("ReferenceMonth inconsistent with onBoardindate {}", onBoardingDate);
+                        return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
                     }
+                    log.debug("Retrieve estimate from db and create it if it's not present.");
                     return this.estimateDAO.getEstimateDetail(paId,referenceMonth)
                             .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)));
                 })
@@ -92,6 +97,7 @@ public class EstimateServiceImpl implements EstimateService {
                 .flatMap(paInfoDto ->
                         this.estimateDAO.getAllEstimates(paId)
                                 .map(pnEstimates -> {
+                                            log.debug("Build timeline.");
                                             TimelineGenerator timelineGenerator = new TimelineGenerator(paId, pnEstimates);
                                             return timelineGenerator.extractAllEstimates(DateUtils.toInstant(paInfoDto.getAgreementDate()), paId);
                                         }
