@@ -67,6 +67,10 @@ Parameters:
     Type: String
     Description: 'keep track of used projects commitIds'
 
+  EstimateUsageBucketName:
+    Type: String
+    Description: 'Name of S3 bucket'
+
   EstimateDynamoTableName:
     Type: String
     Description: 'Name of dynamodb table containing request'
@@ -117,7 +121,7 @@ Resources:
         ContainerEnvEntry4: !Sub 'AWS_DYNAMODBPUBLICADMINISTRATIONTABLE=${PublicAdministrationDynamoTable}'
         ContainerEnvEntry5: !Sub 'AWS_DYNAMODBBILLINGTABLE=${BillingDynamoTable}'
         ContainerEnvEntry6: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
-
+        ContainerEnvEntry7: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
 
   PlatformUsageEstimatesMicroserviceTaskPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -125,6 +129,12 @@ Resources:
       PolicyDocument:
         Version: 2012-10-17
         Statement:
+          - Effect: Allow
+            Action:
+              - s3:*
+            Resource:
+              - !Sub arn:aws:s3:::${EstimateUsageBucketName}
+              - !Sub arn:aws:s3:::${EstimateUsageBucketName}/*
           - Effect: Allow
             Action:
               - dynamodb:BatchGetItem

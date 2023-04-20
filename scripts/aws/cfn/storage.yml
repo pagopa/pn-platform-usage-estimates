@@ -25,6 +25,33 @@ Parameters:
     Description: 'Where to send CDC'
 
 Resources:
+  EstimateUsageBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      ObjectLockEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - "*"
+            AllowedMethods:
+              - GET
+              - PUT
+              - POST
+              - DELETE
+              - HEAD
+            AllowedOrigins:
+              - "*"
+            ExposedHeaders:
+              - "x-amz-version-id"
 
     EstimateDynamoTable:
       Type: AWS::DynamoDB::Table
@@ -98,30 +125,33 @@ Resources:
           PointInTimeRecoveryEnabled: true
 
 Outputs:
+  EstimateUsageBucketName:
+    Description: Name of s3 bucket
+    Value: !Ref EstimateUsageBucket
 
-    EstimateDynamoTableName:
-      Description: Name of dynamodb table containing request
-      Value: !Ref EstimateDynamoTable
+  EstimateDynamoTableName:
+    Description: Name of dynamodb table containing request
+    Value: !Ref EstimateDynamoTable
 
-    EstimateDynamoTableArn:
-      Description: ARN of dynamodb table containing request
-      Value: !Sub '${EstimateDynamoTable.Arn}'
+  EstimateDynamoTableArn:
+    Description: ARN of dynamodb table containing request
+    Value: !Sub '${EstimateDynamoTable.Arn}'
 
-    PublicAdministrationDynamoTable:
-      Description: Name of dynamodb table containing request
-      Value: !Ref PublicAdministrationDynamoTable
+  PublicAdministrationDynamoTable:
+    Description: Name of dynamodb table containing request
+    Value: !Ref PublicAdministrationDynamoTable
 
-    PublicAdministrationDynamoTableArn:
-      Description: ARN of dynamodb table containing request
-      Value: !Sub '${PublicAdministrationDynamoTable.Arn}'
+  PublicAdministrationDynamoTableArn:
+    Description: ARN of dynamodb table containing request
+    Value: !Sub '${PublicAdministrationDynamoTable.Arn}'
 
-    BillingDynamoTable:
-      Description: Name of dynamodb table containing request
-      Value: !Ref BillingDynamoTable
+  BillingDynamoTable:
+    Description: Name of dynamodb table containing request
+    Value: !Ref BillingDynamoTable
 
-    BillingDynamoTableArn:
-      Description: ARN of dynamodb table containing request
-      Value: !Sub '${BillingDynamoTable.Arn}'
+  BillingDynamoTableArn:
+    Description: ARN of dynamodb table containing request
+    Value: !Sub '${BillingDynamoTable.Arn}'
 
 
 
