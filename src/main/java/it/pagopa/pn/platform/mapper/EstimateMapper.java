@@ -84,35 +84,12 @@ public class EstimateMapper {
         estimateDetail.setLastModifiedDate(Date.from(Instant.now()));
         estimateDetail.setDeadlineDate(Date.from(pnEstimate.getDeadlineDate()));
 
-//        if ((pnEstimate.getDeadlineDate().isAfter(Instant.now())))
-//            estimateDetail.showEdit(false);
-//        if ((pnEstimate.getDeadlineDate().isBefore(Instant.now())))
-//            estimateDetail.showEdit(true);
-
-
         return estimateDetail;
     }
 
-
-    public static PnEstimate dtoToPnEstimateDefault(String paId, String referenceMonth){
-        PnEstimate pnEstimate = new PnEstimate();
-        pnEstimate.setPaId(paId);
-        pnEstimate.setReferenceMonth(referenceMonth);
-        pnEstimate.setLastModifiedTimestamp(Instant.now());
-        //data di scadenza sulla base di data odierna
-        pnEstimate.setDeadlineDate(Instant.now().plus(Period.ofDays(30)));
-        pnEstimate.setStatus("IN_PROGRESS");
-
-        return pnEstimate;
-    }
-
-
-    public static PnEstimate dtoToPnEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
-        PnEstimate pnEstimate = new PnEstimate();
+    public static PnEstimate dtoToPnEstimate(PnEstimate pnEstimate, String status, EstimateCreateBody estimate) {
 
         pnEstimate.setStatus(status);
-        pnEstimate.setPaId(paId);
-        pnEstimate.setReferenceMonth(referenceMonth);
 
         //dati stima
         pnEstimate.setTotalDigitalNotif(estimate.getTotalDigitalNotif());

@@ -34,26 +34,31 @@ public class EstimateServiceImpl implements EstimateService {
 
 
     @Override
-    public Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
+    public Mono<EstimateDetail> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
         String[] splitMonth = referenceMonth.split("-");
         Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
         int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
-        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1]));
-        if ( refMonthInstant.isAfter(startDeadlineDate)) {
+        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, DateUtils.getYear(Instant.now()));
+        if (refMonthInstant.isAfter(startDeadlineDate)) {
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
-        this.estimateDAO.getEstimateDetail(paId,referenceMonth)
-                .map(pnEstimate -> {
-                            if (!pnEstimate.getStatus().equals(EstimateDetail.StatusEnum.DRAFT.getValue())){
-                                return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
-                            }
-                    return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate));
+        return this.externalRegistriesClient.getOnePa(paId)
+                .zipWhen(paInfo -> {
+                    Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
+                    if (refMonthInstant.isBefore(onBoardingDate)) {
+                        return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                    }
+                    return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
+                            .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)))
+                            .map(pnEstimate -> {
+                                if (!pnEstimate.getStatus().equals(EstimateDetail.StatusEnum.DRAFT.getValue())) {
+                                    return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                                }
+                                return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate));
+                            });
                 })
-                .switchIfEmpty(//controllare se data compatibile con instant now -> se si CREARE
-                        //estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate))
-                        //altrimenti errore );
-                )
-                .flatMap(item-> Mono.empty());
+                .map(paInfoAndEstimate ->
+                        EstimateMapper.estimateDetailToDto(paInfoAndEstimate.getT2(), paInfoAndEstimate.getT1()));
     }
 
     @Override
@@ -61,14 +66,13 @@ public class EstimateServiceImpl implements EstimateService {
         String[] splitMonth = referenceMonth.split("-");
         Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
         int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
-        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1]));
+        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, DateUtils.getYear(Instant.now()));
         if ( refMonthInstant.isAfter(startDeadlineDate)) {
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
         return this.externalRegistriesClient.getOnePa(paId)
                 .zipWhen(paInfo -> {
-                    //TODO: passare alla onBoardingDate la data di onboarding presa da paInfoDto
-                    Instant onBoardingDate = DateUtils.addOneMonth(Instant.parse("2022-07-02T10:15:30Z"));
+                    Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
                     if (refMonthInstant.isBefore(onBoardingDate)){
                     return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
                     }
@@ -89,8 +93,7 @@ public class EstimateServiceImpl implements EstimateService {
                         this.estimateDAO.getAllEstimates(paId)
                                 .map(pnEstimates -> {
                                             TimelineGenerator timelineGenerator = new TimelineGenerator(paId, pnEstimates);
-                                            //TODO: passare alla extractAllEstimates la data di onboarding presa da paInfoDto
-                                            return timelineGenerator.extractAllEstimates(Instant.parse("2022-07-02T10:15:30Z"), paId);
+                                            return timelineGenerator.extractAllEstimates(DateUtils.toInstant(paInfoDto.getAgreementDate()), paId);
                                         }
                                 )
                 )

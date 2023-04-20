@@ -1,8 +1,13 @@
 package it.pagopa.pn.platform.utils;
 
+import it.pagopa.pn.platform.exception.PnGenericException;
+import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 import java.time.*;
+
+import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.ESTIMATE_NOT_EXISTED;
 
 
 @Slf4j
@@ -60,6 +65,14 @@ public class DateUtils {
             return DateUtils.addOneMonth(DateUtils.fromDayMonthYear(15, month, year));
         }
         return DateUtils.fromDayMonthYear(15, month, year);
+    }
+
+    public static Instant toInstant (OffsetDateTime agreementDate){
+        if (agreementDate != null) {
+            return agreementDate.toInstant();
+        }else {
+            throw new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage());
+        }
     }
 
     public static Instant parseStringTOInstant(String date) {

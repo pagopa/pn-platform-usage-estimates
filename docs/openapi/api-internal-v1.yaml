@@ -67,10 +67,13 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EstimateCreateBody'
-
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstimateDetail'
         '400':
           $ref: '#/components/responses/Invalid'
         '401':

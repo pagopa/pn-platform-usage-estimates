@@ -9,6 +9,7 @@ import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaIn
 import it.pagopa.pn.platform.rest.v1.dto.EstimateCreateBody;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
 import reactor.util.retry.Retry;
 
 import javax.annotation.PostConstruct;
@@ -34,18 +35,11 @@ public class ExternalRegistriesClientImpl extends BaseClient implements External
 
     @Override
     public Mono<PaInfoDto> getOnePa(String id) {
-        PaInfoDto paInfoDto = new PaInfoDto();
-        paInfoDto.setId(id);
-        paInfoDto.setName("paName");
-        paInfoDto.setTaxId("128400532");
-
-        return Mono.just(paInfoDto);
-
-        /*return this.infoPaApi.getOnePa(this.pnPlatformConfig.getXPagopaExtchCxId())
+        return this.infoPaApi.getOnePa(this.pnPlatformConfig.getXPagopaExtchCxId())
                 .retryWhen(
                         Retry.backoff(2, Duration.ofMillis(500))
                                 .filter(throwable -> throwable instanceof TimeoutException || throwable instanceof ConnectException)
-                );*/
+                );
 
     }
 }
