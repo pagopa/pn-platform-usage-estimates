@@ -3,9 +3,12 @@ package it.pagopa.pn.platform.service.impl;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
+import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
+import it.pagopa.pn.platform.utils.DateUtils;
+import it.pagopa.pn.platform.utils.TimelineGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import java.time.Instant;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
@@ -30,33 +34,77 @@ public class EstimateServiceImpl implements EstimateService {
 
 
     @Override
-    public Mono<Void> createOrUpdateEstimate(String status, String paId, String referenceMonth, Estimate estimate) {
-        return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(status, paId, referenceMonth, estimate))
-                .flatMap(item-> Mono.empty());
+    public Mono<EstimateDetail> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
+        String[] splitMonth = referenceMonth.split("-");
+        Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
+        int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
+        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, DateUtils.getYear(Instant.now()));
+        if (refMonthInstant.isAfter(startDeadlineDate)) {
+            log.error("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", startDeadlineDate);
+            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+        }
+        return this.externalRegistriesClient.getOnePa(paId)
+                .flatMap(paInfo -> {
+                    Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
+                    if (refMonthInstant.isBefore(onBoardingDate)) {
+                        log.error("ReferenceMonth inconsistent with onBoardindate {}", onBoardingDate);
+                        return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                    }
+                    return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
+                            .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)))
+                            .flatMap(pnEstimate -> {
+                                if (!pnEstimate.getStatus().equals(EstimateDetail.StatusEnum.DRAFT.getValue())) {
+                                    log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
+                                    return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                                }
+                                return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate));
+                            })
+                            .map(pnEstimate -> EstimateMapper.estimateDetailToDto(pnEstimate, paInfo));
+                });
     }
 
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
-        return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
-                .switchIfEmpty(Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage())))
-                .zipWhen(pnEstimate -> externalRegistriesClient.getOnePa(paId)
-                        .map(publicAdmin -> publicAdmin)
-                        .switchIfEmpty(Mono.error(new PnGenericException(PA_ID_NOT_EXIST, PA_ID_NOT_EXIST.getMessage()))))
-                .map(detailEstimateAndPublicAdmin ->
-                        EstimateMapper.estimateDetailToDto(detailEstimateAndPublicAdmin.getT1(), detailEstimateAndPublicAdmin.getT2()));
+        String[] splitMonth = referenceMonth.split("-");
+        Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
+        int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
+        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, DateUtils.getYear(Instant.now()));
+        if ( refMonthInstant.isAfter(startDeadlineDate)) {
+            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+        }
+        return this.externalRegistriesClient.getOnePa(paId)
+                .zipWhen(paInfo -> {
+
+                    Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
+                    if (refMonthInstant.isBefore(onBoardingDate)){
+                        log.error("ReferenceMonth inconsistent with onBoardindate {}", onBoardingDate);
+                        return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                    }
+                    log.debug("Retrieve estimate from db and create it if it's not present.");
+                    return this.estimateDAO.getEstimateDetail(paId,referenceMonth)
+                            .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)));
+                })
+                .map(paInfoAndEstimate -> EstimateMapper.estimateDetailToDto(paInfoAndEstimate.getT2(), paInfoAndEstimate.getT1()));
+
     }
 
 
     //PER HELP DESK
     @Override
     public Mono<PageableEstimateResponseDto> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page-1, size);
-
-        return estimateDAO.getAllEstimates(paId)
-                .map(list -> EstimateMapper.toPagination(pageable, list))
-                .map(EstimateMapper::toPageableResponse);
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return this.externalRegistriesClient.getOnePa(paId)
+                .flatMap(paInfoDto ->
+                        this.estimateDAO.getAllEstimates(paId)
+                                .map(pnEstimates -> {
+                                            log.debug("Build timeline.");
+                                            TimelineGenerator timelineGenerator = new TimelineGenerator(paId, pnEstimates);
+                                            return timelineGenerator.extractAllEstimates(DateUtils.toInstant(paInfoDto.getAgreementDate()), paId);
+                                        }
+                                )
+                )
+                .map(list -> EstimateMapper.toPageableResponse(pageable, list));
     }
-
 
 
     //PER CONSUNTIVI

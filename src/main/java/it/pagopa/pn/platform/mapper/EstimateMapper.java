@@ -2,11 +2,14 @@ package it.pagopa.pn.platform.mapper;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.PageModel;
+import it.pagopa.pn.platform.model.TimelineEstimate;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.time.Period;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,17 +19,26 @@ public class EstimateMapper {
         throw new IllegalCallerException();
     }
 
-    public static PageableEstimateResponseDto toPageableResponse(PageModel<PnEstimate> pagePnEstimate) {
+    public static PageableEstimateResponseDto toPageableResponse(Pageable pageable, TimelineEstimate timelineEstimate) {
         PageableEstimateResponseDto pageableEstimateResponseDto = new PageableEstimateResponseDto();
-        pageableEstimateResponseDto.setPageable(pagePnEstimate.getPageable());
-        pageableEstimateResponseDto.setNumber(pagePnEstimate.getNumber());
-        pageableEstimateResponseDto.setNumberOfElements(pagePnEstimate.getNumberOfElements());
-        pageableEstimateResponseDto.setSize(pagePnEstimate.getSize());
-        pageableEstimateResponseDto.setTotalElements(pagePnEstimate.getTotalElements());
-        pageableEstimateResponseDto.setTotalPages((long) pagePnEstimate.getTotalPages());
-        pageableEstimateResponseDto.setFirst(pagePnEstimate.isFirst());
-        pageableEstimateResponseDto.setLast(pagePnEstimate.isLast());
-        pageableEstimateResponseDto.setEmpty(pagePnEstimate.isEmpty());
+        EstimateSearchTableDTO actual = new EstimateSearchTableDTO();
+        Page page = new Page();
+        pageableEstimateResponseDto.setActual(actual);
+        pageableEstimateResponseDto.setHistory(page);
+        pageableEstimateResponseDto.getActual().setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
+        pageableEstimateResponseDto.getActual().setReferenceMonth(timelineEstimate.getActual().getReferenceMonth());
+        pageableEstimateResponseDto.getActual().setDeadlineDate(timelineEstimate.getActual().getDeadlineDate().toString());
+        pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedTimestamp()));
+        PageModel<PnEstimate> pagePnEstimate = toPagination(pageable, timelineEstimate.getHistory());
+        pageableEstimateResponseDto.getHistory().setPageable(pagePnEstimate.getPageable());
+        pageableEstimateResponseDto.getHistory().setNumber(pagePnEstimate.getNumber());
+        pageableEstimateResponseDto.getHistory().setNumberOfElements(pagePnEstimate.getNumberOfElements());
+        pageableEstimateResponseDto.getHistory().setSize(pagePnEstimate.getSize());
+        pageableEstimateResponseDto.getHistory().setTotalElements(pagePnEstimate.getTotalElements());
+        pageableEstimateResponseDto.getHistory().setTotalPages((long) pagePnEstimate.getTotalPages());
+        pageableEstimateResponseDto.getHistory().setFirst(pagePnEstimate.isFirst());
+        pageableEstimateResponseDto.getHistory().setLast(pagePnEstimate.isLast());
+        pageableEstimateResponseDto.getHistory().setEmpty(pagePnEstimate.isEmpty());
         pageableEstimateResponseDto.setContent(pagePnEstimate.mapTo(EstimateMapper::estimatesToDto));
         return pageableEstimateResponseDto;
     }
@@ -34,9 +46,9 @@ public class EstimateMapper {
     public static EstimateSearchTableDTO estimatesToDto(PnEstimate estimates){
         EstimateSearchTableDTO estimatesList = new EstimateSearchTableDTO();
         estimatesList.setReferenceMonth(estimates.getReferenceMonth());
-        estimatesList.setLastModifiedTimestamp(Date.from(Instant.now()));
+        estimatesList.setDeadlineDate(estimates.getDeadlineDate().toString());
+        estimatesList.setLastModifiedDate(Date.from(Instant.now()));
         estimatesList.setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(estimates.getStatus()));
-        //estimatesList.setCheckPDND(true);
         return estimatesList;
     }
 
@@ -53,47 +65,41 @@ public class EstimateMapper {
 
         //STIME
         estimate.setTotalDigitalNotif(pnEstimate.getTotalDigitalNotif());
-        estimate.setTotalPaper890Notif(pnEstimate.getTotalPaper890Notif());
-        estimate.setTotalPaperInternationalNotif(pnEstimate.getTotalPaperInternationalNotif());
-        estimate.setTotalPaperNationalNotif(pnEstimate.getTotalPaperNationalNotif());
+        estimate.setTotal890Notif(pnEstimate.getTotal890Notif());
+        estimate.setTotalAnalogNotif(pnEstimate.getTotalAnalogNotif());
+
 
         //FATTURAZIONE
         billing.setMailAddress(pnEstimate.getMailAddress());
         billing.setDescription(pnEstimate.getDescription());
-        billing.setSdiCode(pnEstimate.getSdiCode());
         billing.setSplitPayment(pnEstimate.getSplitPayment());
 
         //PERIODO
         estimateDetail.setEstimate(estimate);
         estimateDetail.setPaInfo(paInfo);
         estimateDetail.setBilling(billing);
+
         estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());
-        estimateDetail.setLastModifiedTimestamp(Date.from(Instant.now()));
-        estimateDetail.setDeadlineDate(Date.from(Instant.now()));
-        estimateDetail.showEdit(true);
+        estimateDetail.setLastModifiedDate(Date.from(Instant.now()));
+        estimateDetail.setDeadlineDate(Date.from(pnEstimate.getDeadlineDate()));
 
         return estimateDetail;
     }
 
-    public static PnEstimate dtoToPnEstimate(String status, String paId, String referenceMonth, Estimate estimate) {
-        PnEstimate pnEstimate = new PnEstimate();
+    public static PnEstimate dtoToPnEstimate(PnEstimate pnEstimate, String status, EstimateCreateBody estimate) {
 
         pnEstimate.setStatus(status);
-        pnEstimate.setPaId(paId);
-        pnEstimate.setReferenceMonth(referenceMonth);
 
         //dati stima
         pnEstimate.setTotalDigitalNotif(estimate.getTotalDigitalNotif());
-        pnEstimate.setTotalPaper890Notif(estimate.getTotalPaper890Notif());
-        pnEstimate.setTotalPaperInternationalNotif(estimate.getTotalPaperInternationalNotif());
-        pnEstimate.setTotalPaperNationalNotif(estimate.getTotalPaperNationalNotif());
+        pnEstimate.setTotal890Notif(estimate.getTotal890Notif());
+        pnEstimate.setTotalAnalogNotif(estimate.getTotalAnalogNotif());
 
         //dati di fatturazione
-        pnEstimate.setDescription(estimate.getBilling().getDescription());
-        pnEstimate.setSdiCode(estimate.getBilling().getSdiCode());
-        pnEstimate.setMailAddress(estimate.getBilling().getMailAddress());
-        pnEstimate.setSplitPayment(estimate.getBilling().getSplitPayment());
+        pnEstimate.setDescription(estimate.getDescription());
+        pnEstimate.setMailAddress(estimate.getMailAddress());
+        pnEstimate.setSplitPayment(estimate.getSplitPayment());
 
         return pnEstimate;
     }
@@ -101,4 +107,5 @@ public class EstimateMapper {
     public static PageModel<PnEstimate> toPagination(Pageable pageable, List<PnEstimate> list){
         return PageModel.builder(list, pageable);
     }
+
 }
