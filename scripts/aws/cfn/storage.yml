@@ -86,7 +86,7 @@ Resources:
         - AttributeName: "paId"
           KeyType: "HASH"
         - AttributeName: "referenceMonth"
-          KeyType: "SORT"
+          KeyType: "RANGE"
       GlobalSecondaryIndexes:
         - IndexName: "pa-name-index"
           KeySchema:
@@ -115,7 +115,7 @@ Resources:
         - AttributeName: "paId"
           KeyType: "HASH"
         - AttributeName: "referenceYear"
-          KeyType: "SORT"
+          KeyType: "RANGE"
       KinesisStreamSpecification:
         StreamArn: !Ref CdcKinesisSourceStreamArn
       StreamSpecification:
