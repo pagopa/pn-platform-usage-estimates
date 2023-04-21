@@ -8,9 +8,9 @@
 		<version>2.0.0-SNAPSHOT</version>
 		<relativePath />
 	</parent>
-	<artifactId>pn-platform-usage-estimate</artifactId>
+	<artifactId>pn-platform-usage-estimates</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>pn-platform-usage-estimate</name>
+	<name>pn-platform-usage-estimates</name>
 	<description>Usage estimate microservice</description>
 	<properties>
 		<java.version>17</java.version>
