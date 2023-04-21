@@ -53,76 +53,76 @@ Resources:
             ExposedHeaders:
               - "x-amz-version-id"
 
-    EstimateDynamoTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: !Sub '${ProjectName}-PnEstimate'
-        AttributeDefinitions:
-          - AttributeName: "paId"
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: "paId"
-            KeyType: "HASH"
-        KinesisStreamSpecification:
-          StreamArn: !Ref CdcKinesisSourceStreamArn
-        StreamSpecification:
-          StreamViewType: NEW_IMAGE
-        BillingMode: "PAY_PER_REQUEST"
-        PointInTimeRecoverySpecification:
-          PointInTimeRecoveryEnabled: true
+  EstimateDynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-PnEstimate'
+      AttributeDefinitions:
+        - AttributeName: "paId"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "paId"
+          KeyType: "HASH"
+      KinesisStreamSpecification:
+        StreamArn: !Ref CdcKinesisSourceStreamArn
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      BillingMode: "PAY_PER_REQUEST"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
 
-    PublicAdministrationDynamoTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: !Sub '${ProjectName}-PnPublicAdministration'
-        AttributeDefinitions:
-          - AttributeName: "paId"
-            AttributeType: "S"
-          - AttributeName: "paName"
-            AttributeType: "S"
-          - AttributeName: "referenceMonth"
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: "paId"
-            KeyType: "HASH"
-          - AttributeName: "referenceMonth"
-            KeyType: "SORT"
-        GlobalSecondaryIndexes:
-          - IndexName: "pa-name-index"
-            KeySchema:
-              - AttributeName: "paName"
-                KeyType: "HASH"
-            Projection:
-              ProjectionType: "ALL"
-        KinesisStreamSpecification:
-          StreamArn: !Ref CdcKinesisSourceStreamArn
-        StreamSpecification:
-          StreamViewType: NEW_IMAGE
-        BillingMode: "PAY_PER_REQUEST"
-        PointInTimeRecoverySpecification:
-          PointInTimeRecoveryEnabled: true
+  PublicAdministrationDynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-PnPublicAdministration'
+      AttributeDefinitions:
+        - AttributeName: "paId"
+          AttributeType: "S"
+        - AttributeName: "paName"
+          AttributeType: "S"
+        - AttributeName: "referenceMonth"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "paId"
+          KeyType: "HASH"
+        - AttributeName: "referenceMonth"
+          KeyType: "SORT"
+      GlobalSecondaryIndexes:
+        - IndexName: "pa-name-index"
+          KeySchema:
+            - AttributeName: "paName"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+      KinesisStreamSpecification:
+        StreamArn: !Ref CdcKinesisSourceStreamArn
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      BillingMode: "PAY_PER_REQUEST"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
 
-    BillingDynamoTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: !Sub '${ProjectName}-PnBilling'
-        AttributeDefinitions:
-          - AttributeName: "paId"
-            AttributeType: "S"
-          - AttributeName: "referenceYear"
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: "paId"
-            KeyType: "HASH"
-          - AttributeName: "referenceYear"
-            KeyType: "SORT"
-        KinesisStreamSpecification:
-          StreamArn: !Ref CdcKinesisSourceStreamArn
-        StreamSpecification:
-          StreamViewType: NEW_IMAGE
-        BillingMode: "PAY_PER_REQUEST"
-        PointInTimeRecoverySpecification:
-          PointInTimeRecoveryEnabled: true
+  BillingDynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-PnBilling'
+      AttributeDefinitions:
+        - AttributeName: "paId"
+          AttributeType: "S"
+        - AttributeName: "referenceYear"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "paId"
+          KeyType: "HASH"
+        - AttributeName: "referenceYear"
+          KeyType: "SORT"
+      KinesisStreamSpecification:
+        StreamArn: !Ref CdcKinesisSourceStreamArn
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      BillingMode: "PAY_PER_REQUEST"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
 
 Outputs:
   EstimateUsageBucketName:
