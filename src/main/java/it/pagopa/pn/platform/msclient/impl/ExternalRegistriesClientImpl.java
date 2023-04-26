@@ -6,6 +6,7 @@ import it.pagopa.pn.platform.msclient.common.BaseClient;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.ApiClient;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.api.InfoPaApi;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
+import it.pagopa.pn.platform.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -14,6 +15,8 @@ import reactor.util.retry.Retry;
 import javax.annotation.PostConstruct;
 import java.net.ConnectException;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.concurrent.TimeoutException;
 
 @Slf4j
@@ -45,6 +48,9 @@ public class ExternalRegistriesClientImpl extends BaseClient implements External
 
                 )
                 .map(paInfo -> {
+                    if (paInfo.getAgreementDate() == null) {
+                        paInfo.setAgreementDate(OffsetDateTime.parse("2022-10-01T10:15:30Z"));
+                    }
                     log.debug("PaInfo : {}", paInfo);
                     return paInfo;
                 })
