@@ -28,6 +28,17 @@ Parameters:
     Type: Number
     Description: activate when N datapoint on M
 
+  # Autoscaling parameters
+  AutoscalingCheckPeriod:
+    Default: 60
+    Type: Number
+    Description: minimum autoscaling number of tasks\
+
+  AutoscalingDataPointN:
+    Default: 1
+    Type: Number
+    Description: activate when N datapoint on M
+
   AutoscalingThreshold:
     Default: 70
     Type: String
@@ -41,6 +52,18 @@ Parameters:
     Default: 6
     Type: Number
     Description: maximum autoscaling number of tasks
+
+  HealthCheckTimeout:
+    Description: health check timeout seconds
+    Type: Number
+    Default: 5
+
+  HealthyThresholdCount:
+    Description: |
+      The number of consecutive health checks successes required before considering
+      an unhealthy target healthy.
+    Type: Number
+    Default: 5
 
   UnhealthyThresholdCount:
     Description: |
