@@ -1,26 +1,15 @@
 package it.pagopa.pn.platform.service.impl;
 
-import it.pagopa.pn.platform.exception.PnGenericException;
-import it.pagopa.pn.platform.mapper.BillingMapper;
-import it.pagopa.pn.platform.middleware.db.dao.BillingDAO;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
-import it.pagopa.pn.platform.rest.v1.dto.Billing;
-import it.pagopa.pn.platform.rest.v1.dto.Profiling;
-import it.pagopa.pn.platform.rest.v1.dto.ProfilingDetail;
 import it.pagopa.pn.platform.service.ProfilationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-
-import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
 @Slf4j
 @Service
 public class ProfilationServiceImpl implements ProfilationService {
 
-    @Autowired
-    private BillingDAO billingDAO;
     @Autowired
     private ExternalRegistriesClient externalRegistriesClient;
 

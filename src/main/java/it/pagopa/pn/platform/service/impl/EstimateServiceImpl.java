@@ -45,10 +45,10 @@ public class EstimateServiceImpl implements EstimateService {
             log.info("ReferenceMonth has not correct format");
             return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
         }
-        Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
         int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
-        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, DateUtils.getYear(Instant.now()));
-        if (refMonthInstant.isAfter(startDeadlineDate)) {
+        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1]));
+        Instant startDeadlineDate = Instant.now();
+        if (startDeadlineDate.isAfter(refMonthInstant)) {
             log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", startDeadlineDate);
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
@@ -75,10 +75,10 @@ public class EstimateServiceImpl implements EstimateService {
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
         String[] splitMonth = referenceMonth.split("-");
-        Instant startDeadlineDate = DateUtils.getStartDeadLineDate();
+        Instant startDeadlineDate = Instant.now();
         int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
-        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, DateUtils.getYear(Instant.now()));
-        if ( refMonthInstant.isAfter(startDeadlineDate)) {
+        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1]));
+        if (startDeadlineDate.isAfter(refMonthInstant)) {
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
         return this.externalRegistriesClient.getOnePa(paId)
