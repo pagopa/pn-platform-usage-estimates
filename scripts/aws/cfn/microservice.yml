@@ -222,6 +222,16 @@ Resources:
               - !Sub "${EstimateDynamoTableArn}"
               - !Sub "${EstimateDynamoTableArn}/*"
 
+  PlatformUsageEstimatesMicroserviceCloudWatchDashboard:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
+      Parameters:
+        DashboardName: !Sub "${ProjectName}-platform-usage-estimates"
+        AlarmArns: !Join
+          - ','
+          - - !GetAtt PlatformUsageEstimatesMicroservice.Outputs.FatalLogsMetricAlarmArn
+
   # Expose PN-Usage-platform-estimates microservice public API with API-GW for WEB usage
   PlatformUsageEstimatesMicroservicePublicWebAPI:
     Type: AWS::CloudFormation::Stack
@@ -240,12 +250,12 @@ Resources:
         OpenApiBucketName: !Ref MicroserviceBucketName
         OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/api-internal-v1.yaml
 
-  PlatformUsageEstimatesMicroserviceCloudWatchDashboard:
+  PlatformUsageEstimatesMicroservicePublicWebApiWaf:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
+      TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-waf-acl.yaml"
       Parameters:
-        DashboardName: !Sub "${ProjectName}-platform-usage-estimates"
-        AlarmArns: !Join
-          - ','
-          - - !GetAtt PlatformUsageEstimatesMicroservice.Outputs.FatalLogsMetricAlarmArn
+        WAFName: !Sub '${ProjectName}-platform-usage-estimates-web'
+        IntendedUsage: WEB
+        APIGatewayARNs: !GetAtt PlatformUsageEstimatesMicroservicePublicWebAPI.Outputs.APIGatewayARN
+        Limit: 6000
