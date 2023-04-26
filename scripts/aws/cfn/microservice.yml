@@ -106,7 +106,6 @@ Resources:
         ContainerEnvEntry6: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry7: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
         TaskRoleManagedPolicyArn: !Ref PlatformUsageEstimatesMicroserviceTaskPolicy
-        EcsLogGroup: !Ref EcsLogGroup
 
   PlatformUsageEstimatesMicroserviceTaskPolicy:
     Type: AWS::IAM::ManagedPolicy
