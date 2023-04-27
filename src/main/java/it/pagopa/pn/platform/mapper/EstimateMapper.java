@@ -106,15 +106,15 @@ public class EstimateMapper {
         return pnEstimate;
     }
 
-    public static MonthlyNotificationPreorderDto dtoToFile (PnEstimate pnEstimate){
+    public static MonthlyNotificationPreorderDto dtoToFile (PnEstimate pnEstimate, EstimateCreateBody request){
         MonthlyNotificationPreorderDto monthlyNotificationPreorderDto = new MonthlyNotificationPreorderDto();
-        monthlyNotificationPreorderDto.setAnalogNotifications890(pnEstimate.getTotal890Notif());
-        monthlyNotificationPreorderDto.setAnalogNotificationsAR(pnEstimate.getTotalAnalogNotif());
-        monthlyNotificationPreorderDto.setDigitalNotifications(pnEstimate.getTotalDigitalNotif());
+        monthlyNotificationPreorderDto.setAnalogNotifications890(request.getTotal890Notif());
+        monthlyNotificationPreorderDto.setAnalogNotificationsAR(request.getTotalAnalogNotif());
+        monthlyNotificationPreorderDto.setDigitalNotifications(request.getTotalDigitalNotif());
         monthlyNotificationPreorderDto.setReferenceMonth(pnEstimate.getReferenceMonth());
         monthlyNotificationPreorderDto.selfCarePaId(pnEstimate.getPaId());
-        if (pnEstimate.getSplitPayment() != null) monthlyNotificationPreorderDto.setSplitPayment(pnEstimate.getSplitPayment().toString());
-        monthlyNotificationPreorderDto.setAdministrativeEmail(pnEstimate.getMailAddress());
+        monthlyNotificationPreorderDto.setSplitPayment(request.getSplitPayment().toString());
+        monthlyNotificationPreorderDto.setAdministrativeEmail(request.getMailAddress());
         return monthlyNotificationPreorderDto;
     }
 

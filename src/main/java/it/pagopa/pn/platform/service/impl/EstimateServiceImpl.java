@@ -70,11 +70,13 @@ public class EstimateServiceImpl implements EstimateService {
                                     return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
                                 }
                                 if (status.equals(EstimateDetail.StatusEnum.VALIDATED.getValue())) {
-                                    MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate);
+                                    MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate, estimate);
                                     String json = Utility.objectToJson(dtoDatalake);
                                     if (json != null) {
-                                        File snapshot = new File(json.concat("paid_" + paId + "/" + "month_" + referenceMonth + "/" + "snapshot/" + "monthlypreorder_" + pnEstimate.getLastModifiedTimestamp().truncatedTo(ChronoUnit.SECONDS) + "_" + UUID.randomUUID() +  ".json"));
-                                        File last = new File(json.concat("paid_" + paId + "/" + "month_" + referenceMonth + "/" + "last/" + "monthlypreorder_" + referenceMonth + ".json"));
+                                        String nameSnapshot = "paid_" + paId + "/" + "month_" + referenceMonth + "/" + "snapshot/" + "monthlypreorder_" + pnEstimate.getLastModifiedTimestamp().truncatedTo(ChronoUnit.SECONDS) + "_" + UUID.randomUUID() +  ".json";
+                                        String nameLast = "paid_" + paId + "/" + "month_" + referenceMonth + "/" + "last/" + "monthlypreorder_" + referenceMonth + ".json";
+                                        File snapshot = new File(nameSnapshot);
+                                        File last = new File(nameLast.concat(json));
                                         s3Bucket.putObject(snapshot);
                                         s3Bucket.putObject(last);
                                     }
