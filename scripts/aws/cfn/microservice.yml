@@ -248,7 +248,7 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         OpenApiBucketName: !Ref MicroserviceBucketName
-        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/api-internal-v1.yaml
+        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/aws/api-platform-usage-estimates-WEB-aws.yaml
 
   PlatformUsageEstimatesMicroservicePublicWebApiWaf:
     Type: AWS::CloudFormation::Stack
