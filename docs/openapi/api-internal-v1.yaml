@@ -443,12 +443,6 @@ components:
           $ref: '#/components/schemas/EstimateSearchTableDTO'
         history:
           $ref: '#/components/schemas/Page'
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/EstimateSearchTableDTO'
-          maxItems: 999999999
-          minItems: 1
       additionalProperties: false
       required:
         - content
@@ -493,6 +487,12 @@ components:
     Page:
       type: object
       properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/EstimateSearchTableDTO'
+          maxItems: 999999999
+          minItems: 1
         empty:
           type: boolean
         first:
