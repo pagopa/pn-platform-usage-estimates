@@ -1,0 +1,11 @@
+{
+  "openapi": [
+    {
+      "intendedUsage": "WEB",
+      "openapiFiles": [
+        "api-internal-v1.yaml"
+      ],
+      "servicePath": "platform-usage-estimates"
+    }
+  ]
+}
