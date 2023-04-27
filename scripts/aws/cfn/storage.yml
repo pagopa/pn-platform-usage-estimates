@@ -60,9 +60,13 @@ Resources:
       AttributeDefinitions:
         - AttributeName: "paId"
           AttributeType: "S"
+        - AttributeName: "referenceMonth"
+          AttributeType: "S"
       KeySchema:
         - AttributeName: "paId"
           KeyType: "HASH"
+        - AttributeName: "referenceMonth"
+          KeyType: "RANGE"
       KinesisStreamSpecification:
         StreamArn: !Ref CdcKinesisSourceStreamArn
       StreamSpecification:
@@ -83,7 +87,3 @@ Outputs:
   EstimateDynamoTableArn:
     Description: ARN of dynamodb table containing request
     Value: !Sub '${EstimateDynamoTable.Arn}'
-
-
-
-
