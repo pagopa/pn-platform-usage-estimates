@@ -113,7 +113,7 @@ public class EstimateMapper {
         monthlyNotificationPreorderDto.setDigitalNotifications(pnEstimate.getTotalDigitalNotif());
         monthlyNotificationPreorderDto.setReferenceMonth(pnEstimate.getReferenceMonth());
         monthlyNotificationPreorderDto.selfCarePaId(pnEstimate.getPaId());
-        monthlyNotificationPreorderDto.setSplitPayment(pnEstimate.getSplitPayment().toString());
+        if (pnEstimate.getSplitPayment() != null) monthlyNotificationPreorderDto.setSplitPayment(pnEstimate.getSplitPayment().toString());
         monthlyNotificationPreorderDto.setAdministrativeEmail(pnEstimate.getMailAddress());
         return monthlyNotificationPreorderDto;
     }

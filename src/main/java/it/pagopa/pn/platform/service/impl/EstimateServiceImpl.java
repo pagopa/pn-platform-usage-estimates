@@ -1,6 +1,5 @@
 package it.pagopa.pn.platform.service.impl;
 
-import io.swagger.v3.core.util.Json;
 import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.exception.PnGenericException;
@@ -23,15 +22,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.util.UUID;
 
 import java.io.File;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.ESTIMATE_NOT_EXISTED;
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT;
-
 
 @Slf4j
 @Service
@@ -40,21 +38,18 @@ public class EstimateServiceImpl implements EstimateService {
     @Autowired
     private EstimateDAO estimateDAO;
 
+    @Autowired
     private S3Bucket s3Bucket;
 
     @Autowired
     private ExternalRegistriesClient externalRegistriesClient;
 
-
     @Override
     public Mono<EstimateDetail> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
-        String[] splitMonth = referenceMonth.split("-");
-        if (!(splitMonth.length > 1)) {
-            log.info("ReferenceMonth has not correct format");
+        Instant refMonthInstant = getInstantFromMonth(referenceMonth);
+        if (refMonthInstant == null) {
             return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
         }
-        int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
-        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1]));
         Instant startDeadlineDate = Instant.now();
         if (startDeadlineDate.isAfter(refMonthInstant)) {
             log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", startDeadlineDate);
@@ -93,10 +88,11 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
-        String[] splitMonth = referenceMonth.split("-");
         Instant startDeadlineDate = Instant.now();
-        int numberOfMonth = Month.getNumberMonth(splitMonth[0]);
-        Instant refMonthInstant = DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1]));
+        Instant refMonthInstant = getInstantFromMonth(referenceMonth);
+        if (refMonthInstant == null) {
+            return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
+        }
         if (startDeadlineDate.isAfter(refMonthInstant)) {
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
@@ -144,5 +140,16 @@ public class EstimateServiceImpl implements EstimateService {
     @Override
     public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileId) {
         return null;
+    }
+
+    private Instant getInstantFromMonth(String referenceMonth) throws PnGenericException {
+        Instant result = null;
+        String[] splitMonth = referenceMonth.split("-");
+        if (!(splitMonth.length > 1)) {
+            log.info("ReferenceMonth has not correct format");
+        }
+        Integer numberOfMonth = Month.getNumberMonth(splitMonth[0]);
+        result = (numberOfMonth != null) ? DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1])) : null;
+        return result;
     }
 }
