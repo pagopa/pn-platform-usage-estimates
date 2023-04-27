@@ -38,6 +38,7 @@ public class EstimateServiceImpl implements EstimateService {
     @Autowired
     private EstimateDAO estimateDAO;
 
+    @Autowired
     private S3Bucket s3Bucket;
 
     @Autowired
