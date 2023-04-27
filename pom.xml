@@ -208,6 +208,28 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>generate-datalake</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>process-resources</phase>
+						<configuration>
+							<inputSpec>${project.basedir}/docs/openapi/datalake-v1.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<library>webclient</library>
+							<generateApiDocumentation>false</generateApiDocumentation>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<configOptions>
+								<swaggerAnnotations>false</swaggerAnnotations>
+								<openApiNullable>false</openApiNullable>
+							</configOptions>
+							<modelPackage>${project.groupId}.platform.datalake.v1.dto</modelPackage>
+							<modelNameSuffix>Dto</modelNameSuffix>
+						</configuration>
+					</execution>
+					<execution>
 						<id>generate-client-pn-external-registries</id>
 						<goals>
 							<goal>generate</goal>

@@ -1,3 +1,18 @@
+openapi: 3.0.1
+info:
+  title: PN Template BE Microservice
+  description: Documentation APIs v1.0
+  termsOfService: https://termofservice.it
+  x-api-id: api-internal-template
+  x-summary: 'Piattaforma Notifiche: API template'
+  version: '1.0.0'
+  contact:
+    email: pn@pagopa.it
+  license:
+    name: Licenza di PN
+    url: 'https://da-definire/'
+
+paths: {}
 components:
   schemas:
 
