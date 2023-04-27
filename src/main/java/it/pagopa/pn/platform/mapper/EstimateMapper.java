@@ -1,5 +1,6 @@
 package it.pagopa.pn.platform.mapper;
 
+import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.PageModel;
 import it.pagopa.pn.platform.model.TimelineEstimate;
@@ -7,6 +8,7 @@ import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaIn
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import org.springframework.data.domain.Pageable;
 
+import java.io.File;
 import java.time.Instant;
 import java.time.Period;
 import java.util.ArrayList;
@@ -102,6 +104,18 @@ public class EstimateMapper {
         pnEstimate.setSplitPayment(estimate.getSplitPayment());
 
         return pnEstimate;
+    }
+
+    public static MonthlyNotificationPreorderDto dtoToFile (PnEstimate pnEstimate){
+        MonthlyNotificationPreorderDto monthlyNotificationPreorderDto = new MonthlyNotificationPreorderDto();
+        monthlyNotificationPreorderDto.setAnalogNotifications890(pnEstimate.getTotal890Notif());
+        monthlyNotificationPreorderDto.setAnalogNotificationsAR(pnEstimate.getTotalAnalogNotif());
+        monthlyNotificationPreorderDto.setDigitalNotifications(pnEstimate.getTotalDigitalNotif());
+        monthlyNotificationPreorderDto.setReferenceMonth(pnEstimate.getReferenceMonth());
+        monthlyNotificationPreorderDto.selfCarePaId(pnEstimate.getPaId());
+        monthlyNotificationPreorderDto.setSplitPayment(pnEstimate.getSplitPayment().toString());
+        monthlyNotificationPreorderDto.setAdministrativeEmail(pnEstimate.getMailAddress());
+        return monthlyNotificationPreorderDto;
     }
 
     public static PageModel<PnEstimate> toPagination(Pageable pageable, List<PnEstimate> list){
