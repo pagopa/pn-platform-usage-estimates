@@ -1,5 +1,8 @@
 package it.pagopa.pn.platform.service.impl;
 
+import io.swagger.v3.core.util.Json;
+import it.pagopa.pn.platform.S3.S3Bucket;
+import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
@@ -12,6 +15,7 @@ import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
 import it.pagopa.pn.platform.service.EstimateService;
 import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
+import it.pagopa.pn.platform.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,8 +23,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
+import java.io.File;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.ESTIMATE_NOT_EXISTED;
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT;
@@ -33,6 +40,7 @@ public class EstimateServiceImpl implements EstimateService {
     @Autowired
     private EstimateDAO estimateDAO;
 
+    private S3Bucket s3Bucket;
 
     @Autowired
     private ExternalRegistriesClient externalRegistriesClient;
@@ -62,9 +70,20 @@ public class EstimateServiceImpl implements EstimateService {
                     return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
                             .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)))
                             .flatMap(pnEstimate -> {
-                                if (!pnEstimate.getStatus().equals(EstimateDetail.StatusEnum.DRAFT.getValue())) {
+                                if (pnEstimate.getStatus().equals(EstimateDetail.StatusEnum.ABSENT.getValue())) {
                                     log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
                                     return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                                }
+                                if (status.equals(EstimateDetail.StatusEnum.VALIDATED.getValue())) {
+                                    MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate);
+                                    String json = Utility.objectToJson(dtoDatalake);
+                                    if (json != null) {
+                                        File snapshot = new File(json.concat("paid_" + paId + "/" + "month_" + referenceMonth + "/" + "snapshot/" + "monthlypreorder_" + pnEstimate.getLastModifiedTimestamp().truncatedTo(ChronoUnit.SECONDS) + "_" + UUID.randomUUID() +  ".json"));
+                                        File last = new File(json.concat("paid_" + paId + "/" + "month_" + referenceMonth + "/" + "last/" + "monthlypreorder_" + referenceMonth + ".json"));
+                                        s3Bucket.putObject(snapshot);
+                                        s3Bucket.putObject(last);
+                                    }
+
                                 }
                                 return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate));
                             })
