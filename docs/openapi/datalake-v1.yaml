@@ -1,3 +1,15 @@
+openapi: 3.0.1
+info:
+  title: PN Usage Estimates BE Microservice
+  description: Documentation APIs v1.0
+  termsOfService: https://termofservice.it
+  x-api-id: datalake
+  x-summary: 'Piattaforma Stime: API'
+  version: '1.0.0'
+  contact:
+    email: pn@pagopa.it
+
+paths: {}
 components:
   schemas:
 

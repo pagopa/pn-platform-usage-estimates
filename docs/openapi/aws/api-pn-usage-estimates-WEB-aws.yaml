@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: AtHUrI27KEQcJfwA5wrk6BHxWkslNtQ5tSx5LyTikEE=
+  version: Xwv6BeMQxmrMSs/veOJE9zoxJrneTgCO15uxR+5QX68=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -17,7 +17,7 @@ paths:
         - Estimate
       operationId: createOrUpdateEstimate
       x-api-permissions:
-        - 'estimate-write'
+        - estimate-write
       summary: Inserimento o modifica di una stima.
       description: API che consente di aggiungere o di modificare i dettagli di una stima.
       parameters:
@@ -56,7 +56,7 @@ paths:
         - pn-auth-fleet_jwtAuthorizer_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/attachments/preload
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/estimate/{referenceMonth}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
@@ -67,6 +67,8 @@ paths:
           integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
           integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
           integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceMonth: method.request.path.referenceMonth
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
@@ -75,23 +77,26 @@ paths:
       operationId: Options for /{paId}/estimate/{referenceMonth} API CORS
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/attachments/preload
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/estimate/{referenceMonth}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
-        requestParameters: {}
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceMonth: method.request.path.referenceMonth
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-
   /estimates:
     get:
       tags:
         - Estimate
       operationId: getAllEstimate
       x-api-permissions:
-        - 'estimate-read'
-      summary: ritorna elenco di stime in base alla partita iva, al nome della pa o al codice Ipa.
+        - estimate-read
+      summary: >-
+        ritorna elenco di stime in base alla partita iva, al nome della pa o al
+        codice Ipa.
       description: API che estrae la lista di stime
       parameters:
         - $ref: '#/components/parameters/queryPaId'
@@ -126,7 +131,7 @@ paths:
         - pn-auth-fleet_jwtAuthorizer_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/attachments/preload
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimates
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
@@ -145,7 +150,7 @@ paths:
       operationId: Options for /estimates API CORS
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/attachments/preload
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimates
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters: {}
@@ -153,15 +158,16 @@ paths:
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-
   /estimate/{paId}/detail/{referenceMonth}:
     get:
       tags:
         - Estimate
       operationId: getEstimateDetail
       x-api-permissions:
-        - 'estimate-read'
-      summary: ritorna il dettaglio delle stime in base al mese di riferimento e al paId.
+        - estimate-read
+      summary: >-
+        ritorna il dettaglio delle stime in base al mese di riferimento e al
+        paId.
       description: API che ritorna il dettaglio di una stima.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
@@ -204,6 +210,8 @@ paths:
           integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
           integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
           integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceMonth: method.request.path.referenceMonth
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
@@ -215,20 +223,23 @@ paths:
           http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/detail/{referenceMonth}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
-        requestParameters: {}
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceMonth: method.request.path.referenceMonth
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-
   /estimate/{paId}/files/{referenceMonth}:
     get:
       tags:
         - Estimate
       operationId: getAllEstimateFile
       x-api-permissions:
-        - 'estimate-read'
-      summary: estrae tutte le fatture delle stime associate al pa e al mese di riferimento.
+        - estimate-read
+      summary: >-
+        estrae tutte le fatture delle stime associate al pa e al mese di
+        riferimento.
       description: API che consente di estrarre l'elenco fatture delle stime.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
@@ -271,6 +282,8 @@ paths:
           integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
           integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
           integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceMonth: method.request.path.referenceMonth
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
@@ -282,19 +295,20 @@ paths:
           http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/files/{referenceMonth}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
-        requestParameters: {}
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceMonth: method.request.path.referenceMonth
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-
   /estimate/{paId}/file/{fileId}:
     get:
       tags:
         - Estimate
       operationId: downloadEstimateFile
       x-api-permissions:
-        - 'estimate-read'
+        - estimate-read
       summary: Download fatture delle stime
       description: API che consente il download della fattura del mese di riferimento.
       parameters:
@@ -338,6 +352,8 @@ paths:
           integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
           integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
           integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.fileId: method.request.path.fileId
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
@@ -349,19 +365,20 @@ paths:
           http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/file/{fileId}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
-        requestParameters: {}
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.fileId: method.request.path.fileId
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-
   /billing/{paId}/profilation:
     get:
       tags:
         - Billing
       operationId: getProfilationDetail
       x-api-permissions:
-        - 'profilation-read'
+        - profilation-read
       summary: ritorna il dettaglio della profilazione in base al paId.
       description: API che ritorna il dettaglio della profilazione.
       parameters:
@@ -404,6 +421,7 @@ paths:
           integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
           integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
           integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
@@ -415,13 +433,86 @@ paths:
           http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/billing/{paId}/profilation
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
-        requestParameters: {}
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-
 components:
+  parameters:
+    pathPaId:
+      name: paId
+      in: path
+      required: true
+      schema:
+        type: string
+    pathFileId:
+      name: fileId
+      in: path
+      required: true
+      schema:
+        type: string
+    queryPaId:
+      name: paId
+      in: query
+      required: false
+      schema:
+        type: string
+    queryTaxId:
+      name: taxId
+      in: query
+      required: false
+      schema:
+        type: string
+    queryIpaId:
+      name: ipaId
+      in: query
+      required: false
+      schema:
+        type: string
+    queryStatus:
+      name: status
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - VALIDATED
+          - DRAFT
+    pathReferenceMonth:
+      name: referenceMonth
+      in: path
+      required: true
+      example: MAR-2023
+      schema:
+        type: string
+    pathReferenceYear:
+      name: referenceYear
+      in: path
+      required: true
+      schema:
+        type: string
+    querySizePage:
+      name: size
+      in: query
+      description: Numero di elementi per pagina.
+      required: false
+      schema:
+        type: number
+        default: 5
+        maximum: 999999999
+        minimum: 1
+    queryNumberPage:
+      name: page
+      in: query
+      description: Risultati di pagina che si vuole ottenere (0..N)
+      required: false
+      schema:
+        type: number
+        default: 0
+        maximum: 999999999
+        minimum: 0
   schemas:
     Problem:
       properties:
@@ -429,15 +520,18 @@ components:
           description: URI reference of type definition
           type: string
         status:
-          description: The HTTP status code generated by the origin server for this occurrence of the problem.
-          type: integer
-          format: int32
+          description: >-
+            The HTTP status code generated by the origin server for this
+            occurrence of the problem.
+          type: number
           example: 503
           maximum: 600
           minimum: 100
           exclusiveMaximum: true
         title:
-          description: A short, summary of the problem type. Written in english and readable
+          description: >-
+            A short, summary of the problem type. Written in english and
+            readable
           example: Service Unavailable
           maxLength: 64
           pattern: ^[ -~]{0,64}$
@@ -454,7 +548,7 @@ components:
           type: string
         timestamp:
           description: date and time referred to UTC
-          example: 2022-07-27T12:22:33.444Z
+          example: '2022-07-27T12:22:33.444Z'
           type: string
           format: date-time
         errors:
@@ -469,14 +563,18 @@ components:
       properties:
         code:
           description: Internal code of the error, in human-readable format
-          example: PN_PARAMETER_TOO_LONG | PN_PARAMETER_TOO_SHORT | PN_DUPLICATE_ENTRY | etc...
+          example: >-
+            PN_PARAMETER_TOO_LONG | PN_PARAMETER_TOO_SHORT | PN_DUPLICATE_ENTRY
+            | etc...
           type: string
         element:
           description: Parameter or request body field name for validation error
-          example: 'body.order.item[2].quantity'
+          example: body.order.item[2].quantity
           type: string
         detail:
-          description: A human readable explanation specific to this occurrence of the problem.
+          description: >-
+            A human readable explanation specific to this occurrence of the
+            problem.
           example: Parameter not valid
           maxLength: 1024
           type: string
@@ -491,7 +589,10 @@ components:
           $ref: '#/components/schemas/Billing'
         status:
           type: string
-          enum: [ VALIDATED, DRAFT, ABSENT ]
+          enum:
+            - VALIDATED
+            - DRAFT
+            - ABSENT
         deadlineDate:
           type: string
           format: date
@@ -511,75 +612,68 @@ components:
         - referenceMonth
         - estimate
         - showEdit
-
     PAInfo:
       type: object
       properties:
         paId:
           type: string
           example: '12345678900'
-          format: '/^[0-9]{11}$/'
+          format: /^[0-9]{11}$/
           maxLength: 32
         paName:
           type: string
-          example: 'Comune di Roma'
-          format: '/[^A-Za-z0-9]+/'
+          example: Comune di Roma
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
         taxId:
           type: string
           example: '3242214145'
-          format: '/^[0-9]{11}$/'
+          format: /^[0-9]{11}$/
           maxLength: 32
         registeredOffice:
           type: string
-          example: 'piazza gaeaulenti 56, Milano'
-          format: '/[^A-Za-z0-9]+/'
+          example: piazza gaeaulenti 56, Milano
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
         pec:
           type: string
-          example: 'test@pec.it'
-          format: '/[^A-Za-z0-9]+/'
+          example: test@pec.it
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
         ipaCode:
           type: string
-          example: 'abc12324'
-          format: '/[^A-Za-z0-9]+/'
+          example: abc12324
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
         sdiCode:
           type: string
-          example: 'abc1334324'
-          format: '/[^A-Za-z0-9]+/'
+          example: abc1334324
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
-
     Estimate:
       type: object
       properties:
         totalDigitalNotif:
-          type: integer
-          format: int32
+          type: number
           maximum: 999999999
           minimum: 1
         total890Notif:
-          type: integer
-          format: int32
+          type: number
           maximum: 999999999
           minimum: 1
         totalAnalogNotif:
-          type: integer
-          format: int32
+          type: number
           maximum: 999999999
           minimum: 1
       required:
         - totalDigitalNotif
         - total890Notif
         - totalAnalogNotif
-
     EstimateCreateBody:
       type: object
       allOf:
         - $ref: '#/components/schemas/Estimate'
         - $ref: '#/components/schemas/Billing'
-
     EstimateSearchTableDTO:
       type: object
       properties:
@@ -592,17 +686,16 @@ components:
           format: date
         status:
           type: string
-          enum: [ VALIDATED, DRAFT, ABSENT ]
-
-
+          enum:
+            - VALIDATED
+            - DRAFT
+            - ABSENT
     listEstimateFile:
       type: array
       items:
         $ref: '#/components/schemas/InfoDownloadDTO'
       maxItems: 999999999
       minItems: 1
-
-
     PageableEstimateResponseDto:
       type: object
       properties:
@@ -619,23 +712,19 @@ components:
       additionalProperties: false
       required:
         - content
-
     Pageable:
       type: object
       properties:
         offset:
-          type: integer
-          format: int64
+          type: number
           maximum: 999999999
           minimum: 1
         pageNumber:
-          type: integer
-          format: int32
+          type: number
           maximum: 999999999
           minimum: 1
         pageSize:
-          type: integer
-          format: int32
+          type: number
           maximum: 999999999
           minimum: 1
         paged:
@@ -645,7 +734,6 @@ components:
         unpaged:
           type: boolean
       additionalProperties: false
-
     Sort:
       type: object
       properties:
@@ -656,7 +744,6 @@ components:
         unsorted:
           type: boolean
       additionalProperties: false
-
     Page:
       type: object
       properties:
@@ -667,32 +754,27 @@ components:
         last:
           type: boolean
         number:
-          type: integer
-          format: int32
+          type: number
           maximum: 999999999
           minimum: 1
         numberOfElements:
-          type: integer
-          format: int32
+          type: number
           maximum: 999999999
           minimum: 1
         pageable:
           $ref: '#/components/schemas/Pageable'
         size:
-          type: integer
-          format: int32
+          type: number
           maximum: 1024
           minimum: 1
         sort:
           $ref: '#/components/schemas/Sort'
         totalElements:
-          type: integer
-          format: int64
+          type: number
           maximum: 1
           minimum: 1
         totalPages:
-          type: integer
-          format: int64
+          type: number
           maximum: 999999999
           minimum: 1
       additionalProperties: false
@@ -702,29 +784,27 @@ components:
         - size
         - totalElements
         - totalPages
-
     InfoDownloadDTO:
       type: object
       properties:
         idFile:
           type: string
-          example: 'A12C34D56789E0'
-          format: '/[^A-Za-z0-9]+/'
+          example: A12C34D56789E0
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
         paId:
           type: string
-          example: 'A12C34D56789E0'
-          format: '/[^A-Za-z0-9]+/'
+          example: A12C34D56789E0
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
         url:
           type: string
-          example: 'http://file.com'
+          example: http://file.com
         status:
           type: string
           enum:
             - UPLOADING
             - UPLOADED
-
     Profiling:
       type: object
       properties:
@@ -736,7 +816,6 @@ components:
             $ref: '#/components/schemas/ProfilingDetail'
           maxItems: 999999999
           minItems: 1
-
     ProfilingDetail:
       type: object
       properties:
@@ -744,7 +823,11 @@ components:
           $ref: '#/components/schemas/Billing'
         status:
           type: string
-          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+          enum:
+            - CREATED
+            - VALIDATED
+            - IN_PROGRESS
+            - ENDED
         deadlineDate:
           type: string
           format: date
@@ -757,7 +840,6 @@ components:
         - status
         - referenceYear
         - showEdit
-
     Billing:
       type: object
       properties:
@@ -766,103 +848,17 @@ components:
           example: 'true'
         description:
           type: string
-          example: 'altre info'
-          format: '/[^A-Za-z0-9]+/'
+          example: altre info
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
         mailAddress:
           type: string
-          example: 'test@comune.milano.it'
-          format: '/[^A-Za-z0-9]+/'
+          example: test@comune.milano.it
+          format: /[^A-Za-z0-9]+/
           maxLength: 32
       required:
         - splitPayment
         - mailAddress
-
-  parameters:
-    pathPaId:
-      name: paId
-      in: path
-      required: true
-      schema:
-        type: string
-
-    pathFileId:
-      name: fileId
-      in: path
-      required: true
-      schema:
-        type: string
-
-    queryPaId:
-      name: paId
-      in: query
-      required: false
-      schema:
-        type: string
-
-    queryTaxId:
-      name: taxId
-      in: query
-      required: false
-      schema:
-        type: string
-
-    queryIpaId:
-      name: ipaId
-      in: query
-      required: false
-      schema:
-        type: string
-
-    queryStatus:
-      name: status
-      in: query
-      required: true
-      schema:
-        type: string
-        enum:
-          - VALIDATED
-          - DRAFT
-
-    pathReferenceMonth:
-      name: referenceMonth
-      in: path
-      required: true
-      example: "MAR-2023"
-      schema:
-        type: string
-
-    pathReferenceYear:
-      name: referenceYear
-      in: path
-      required: true
-      schema:
-        type: string
-
-    querySizePage:
-      name: size
-      in: query
-      description: Numero di elementi per pagina.
-      required: false
-      schema:
-        type: integer
-        default: 5
-        format: int32
-        maximum: 999999999
-        minimum: 1
-
-    queryNumberPage:
-      name: page
-      in: query
-      description: Risultati di pagina che si vuole ottenere (0..N)
-      required: false
-      schema:
-        type: integer
-        default: 0
-        format: int32
-        maximum: 999999999
-        minimum: 0
-
   responses:
     Forbidden:
       description: Forbidden
@@ -886,5 +882,37 @@ components:
         authorizerUri: >-
           arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-jwtAuthorizerLambda/invocations
         authorizerResultTtlInSeconds: 300
-        identityValidationExpression: ^Bearer\s([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\.([a-zA-Z0-9_\-]+)$
         type: token
+tags:
+  - null
+x-amazon-apigateway-gateway-responses:
+  DEFAULT_5XX:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+  DEFAULT_4XX:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+  BAD_REQUEST_PARAMETERS:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+    responseTemplates:
+      application/json: >-
+        {"status": 400, "title": "VALIDATION ERROR", "traceId":
+        "$context.xrayTraceId", "errors": [ { "code": "PN_INVALID_PARAMETERS",
+        "detail": "Validation errors: $context.error.validationErrorString" } ]}
+  BAD_REQUEST_BODY:
+    responseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: '''*'''
+    responseTemplates:
+      application/json: >-
+        {"status": 400, "title": "VALIDATION ERROR", "traceId":
+        "$context.xrayTraceId", "errors": [ { "code": "PN_INVALID_BODY",
+        "detail": "Validation errors: $context.error.validationErrorString" } ]}
+x-amazon-apigateway-request-validators:
+  basic:
+    validateRequestBody: true
+    validateRequestParameters: true
+  params-only:
+    validateRequestBody: false
+    validateRequestParameters: true
+x-amazon-apigateway-request-validator: basic
