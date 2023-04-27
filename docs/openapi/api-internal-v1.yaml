@@ -28,7 +28,7 @@ paths:
         '500':
           description: Internal Server Error
 
-  /pn-usage-estimates/v1/{paId}/estimate/{referenceMonth}:
+  /pn-usage-estimates/{paId}/estimate/{referenceMonth}:
     post:
       tags:
         - Estimate
@@ -70,7 +70,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/estimates:
+  /pn-usage-estimates/estimates:
     get:
       tags:
         - Estimate
@@ -109,7 +109,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/estimate/{paId}/detail/{referenceMonth}:
+  /pn-usage-estimates/estimate/{paId}/detail/{referenceMonth}:
     get:
       tags:
         - Estimate
@@ -145,7 +145,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/estimate/{paId}/files/{referenceMonth}:
+  /pn-usage-estimates/estimate/{paId}/files/{referenceMonth}:
     get:
       tags:
         - Estimate
@@ -181,7 +181,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/estimate/{paId}/file/{fileId}:
+  /pn-usage-estimates/estimate/{paId}/file/{fileId}:
     get:
       tags:
         - Estimate
@@ -217,7 +217,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/v1/billing/{paId}/profilation:
+  /pn-usage-estimates/billing/{paId}/profilation:
     get:
       tags:
         - Billing

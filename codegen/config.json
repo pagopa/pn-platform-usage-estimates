@@ -5,7 +5,7 @@
       "openapiFiles": [
         "api-internal-v1.yaml"
       ],
-      "servicePath": "platform-usage-estimates"
+      "servicePath": "pn-usage-estimates"
     }
   ]
 }
