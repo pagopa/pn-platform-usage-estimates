@@ -55,7 +55,6 @@ public class EstimateServiceTest extends BaseTest{
     @Test
     @DisplayName("estimateInDB")
     void getEstimateDetailOk(){
-
         String paId = "12345";
         String referenceMonth = "GIU-2100";
 
