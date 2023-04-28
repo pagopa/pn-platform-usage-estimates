@@ -5,7 +5,6 @@ import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
-import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateCreateBody;
@@ -17,8 +16,6 @@ import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import it.pagopa.pn.platform.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
-import netscape.javascript.JSObject;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,11 +26,7 @@ import reactor.core.publisher.Mono;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.ESTIMATE_NOT_EXISTED;
@@ -103,23 +96,24 @@ public class EstimateServiceImpl implements EstimateService {
                                             snapshot = new FileWriter(fileSnapshot);
                                             last = new FileWriter(fileLast);
                                             snapshot.write(json);
+                                            snapshot.flush();
                                             last.write(json);
+                                            last.flush();
                                             s3Bucket.putObject(snapshotPath, fileSnapshot);
                                             s3Bucket.putObject(lastPath, fileLast);
+
                                         } catch (IOException e) {
                                             return Mono.error(new RuntimeException(e));
                                         }
                                         finally{
                                             try{
                                                 if (snapshot != null) {
-                                                    snapshot.flush();
                                                     snapshot.close();
                                                     fileSnapshot.delete();
                                                 }
                                                 if (last != null){
-                                                    last.flush();
                                                     last.close();
-                                                    fileLast.delete();
+                                                    fileSnapshot.delete();
                                                 }
                                             } catch (IOException e) {
                                                 Mono.error(new RuntimeException(e));

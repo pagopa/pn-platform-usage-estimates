@@ -64,7 +64,7 @@ public class TimelineGenerator {
         log.info("Creo la stima.");
         PnEstimate estimate = new PnEstimate();
         estimate.setPaId(paId);
-        estimate.setLastModifiedTimestamp(Instant.now());
+        estimate.setLastModifiedDate(Instant.now());
         if (deadline == null) {
             log.info("caso in cui non mi è stato passata deadlineDate");
             String[] splitMonth = referenceMonth.split("-");

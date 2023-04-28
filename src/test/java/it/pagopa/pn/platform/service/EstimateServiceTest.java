@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -270,7 +269,7 @@ public class EstimateServiceTest extends BaseTest{
         estimate.setTotal890Notif(50);
         estimate.setTotalAnalogNotif(60);
         estimate.setTotalDigitalNotif(40);
-        estimate.setLastModifiedTimestamp(Instant.parse("2023-04-02T10:15:30Z"));
+        estimate.setLastModifiedDate(Instant.parse("2023-04-02T10:15:30Z"));
         return estimate;
     }
 
@@ -285,7 +284,7 @@ public class EstimateServiceTest extends BaseTest{
         estimate.setTotal890Notif(50);
         estimate.setTotalAnalogNotif(60);
         estimate.setTotalDigitalNotif(40);
-        estimate.setLastModifiedTimestamp(Instant.parse("2023-04-02T10:15:30Z"));
+        estimate.setLastModifiedDate(Instant.parse("2023-04-02T10:15:30Z"));
         return estimate;
     }
 
