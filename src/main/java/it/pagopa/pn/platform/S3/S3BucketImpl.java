@@ -22,9 +22,9 @@ public class S3BucketImpl implements S3Bucket {
     }
 
     @Override
-    public Mono<File> putObject(File file) {
+    public Mono<File> putObject(String filePath, File file) {
         try {
-            PutObjectRequest request = new PutObjectRequest(this.awsBucketProperties.getName(), file.getName(), file);
+            PutObjectRequest request = new PutObjectRequest(this.awsBucketProperties.getName(), filePath.concat(file.getName()), file);
             // set metadata
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.addUserMetadata("title", file.getName());

@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
@@ -34,6 +35,14 @@ import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.REFERENCE_MONTH_
 @Slf4j
 @Service
 public class EstimateServiceImpl implements EstimateService {
+
+    private static final String PAID = "paid_";
+    private static final String MONTH = "month_";
+    private static final String SNAPSHOT = "snapshot";
+    private static final String LAST = "last";
+    private static final String MONTHLY = "monthlypreorder_";
+    private static final String EXTENSION = ".json";
+    private static final String SLASH = "/";
 
     @Autowired
     private EstimateDAO estimateDAO;
@@ -73,12 +82,29 @@ public class EstimateServiceImpl implements EstimateService {
                                     MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate, estimate);
                                     String json = Utility.objectToJson(dtoDatalake);
                                     if (json != null) {
-                                        String nameSnapshot = "paid_" + paId + "/" + "month_" + referenceMonth + "/" + "snapshot/" + "monthlypreorder_" + pnEstimate.getLastModifiedTimestamp().truncatedTo(ChronoUnit.SECONDS) + "_" + UUID.randomUUID() +  ".json";
-                                        String nameLast = "paid_" + paId + "/" + "month_" + referenceMonth + "/" + "last/" + "monthlypreorder_" + referenceMonth + ".json";
-                                        File snapshot = new File(nameSnapshot);
-                                        File last = new File(nameLast.concat(json));
-                                        s3Bucket.putObject(snapshot);
-                                        s3Bucket.putObject(last);
+                                        String snapshotPath = PAID.concat(paId).concat(SLASH).concat(MONTH)
+                                                .concat(referenceMonth).concat(SLASH).concat(SNAPSHOT).concat(SLASH);
+                                        String snapshotFilename = MONTHLY.concat(pnEstimate.getLastModifiedTimestamp().truncatedTo(ChronoUnit.SECONDS).toString()).concat("_")
+                                                .concat(UUID.randomUUID().toString()).concat(EXTENSION);
+                                        String lastPath = PAID.concat(paId).concat(SLASH).concat(MONTH)
+                                                .concat(referenceMonth).concat(SLASH).concat(LAST).concat(SLASH);
+                                        String lastFilename = MONTHLY.concat(referenceMonth).concat(EXTENSION);
+                                        File snapshot = new File(snapshotFilename);
+                                        File last = new File(lastFilename);
+                                        try {
+                                            snapshot.createNewFile();
+                                            last.createNewFile();
+                                            // TODO gestire file
+                                            s3Bucket.putObject(snapshotPath, snapshot);
+                                            s3Bucket.putObject(lastPath, last);
+                                        } catch (IOException ioException) {
+                                            log.error("Error occurred in creation file");
+                                            // TODO gestire meglio l'errore in modo da tornare mono error
+                                        } finally {
+                                            snapshot.delete();
+                                            last.delete();
+                                        }
+
                                     }
 
                                 }
