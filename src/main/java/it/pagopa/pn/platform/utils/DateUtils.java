@@ -2,10 +2,8 @@ package it.pagopa.pn.platform.utils;
 
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
-import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import reactor.core.publisher.Mono;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
@@ -95,7 +93,7 @@ public class DateUtils {
 
     @NotNull
     public static String buildTimestamp(PnEstimate pnEstimate) {
-        Instant timeStamp = pnEstimate.getLastModifiedTimestamp().truncatedTo(ChronoUnit.SECONDS);
+        Instant timeStamp = pnEstimate.getLastModifiedDate().truncatedTo(ChronoUnit.SECONDS);
         return getYear(timeStamp).toString().concat("-")
                 .concat(getMonth(timeStamp).toString()).concat("-")
                 .concat(getDay(timeStamp).toString()).concat("T")

@@ -47,7 +47,7 @@ class TimelineGeneratorTest {
         estimate.setTotalAnalogNotif(242);
         estimate.setDescription("description");
         estimate.setMailAddress("mailAddress");
-        estimate.setLastModifiedTimestamp(Instant.now());
+        estimate.setLastModifiedDate(Instant.now());
         estimate.setSplitPayment(true);
 
         //2 caso
@@ -60,7 +60,7 @@ class TimelineGeneratorTest {
         estimate1.setTotalAnalogNotif(210);
         estimate1.setDescription("description");
         estimate1.setMailAddress("mailAddress");
-        estimate1.setLastModifiedTimestamp(Instant.now());
+        estimate1.setLastModifiedDate(Instant.now());
         estimate1.setSplitPayment(true);
 
         //3 caso
@@ -73,7 +73,7 @@ class TimelineGeneratorTest {
         estimate2.setTotalAnalogNotif(222);
         estimate2.setDescription("description");
         estimate2.setMailAddress("mailAddress");
-        estimate2.setLastModifiedTimestamp(Instant.now());
+        estimate2.setLastModifiedDate(Instant.now());
         estimate2.setSplitPayment(true);
 
         dbList.add(estimate);

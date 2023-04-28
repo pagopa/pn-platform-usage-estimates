@@ -8,10 +8,8 @@ import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaIn
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import org.springframework.data.domain.Pageable;
 
-import java.io.File;
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.Period;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -30,7 +28,7 @@ public class EstimateMapper {
         pageableEstimateResponseDto.getActual().setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
         pageableEstimateResponseDto.getActual().setReferenceMonth(timelineEstimate.getActual().getReferenceMonth());
         pageableEstimateResponseDto.getActual().setDeadlineDate(timelineEstimate.getActual().getDeadlineDate().toString());
-        pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedTimestamp()));
+        pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedDate()));
         PageModel<PnEstimate> pagePnEstimate = toPagination(pageable, timelineEstimate.getHistory());
         pageableEstimateResponseDto.getHistory().setPageable(pagePnEstimate.getPageable());
         pageableEstimateResponseDto.getHistory().setNumber(pagePnEstimate.getNumber());
@@ -115,6 +113,16 @@ public class EstimateMapper {
         monthlyNotificationPreorderDto.selfCarePaId(pnEstimate.getPaId());
         monthlyNotificationPreorderDto.setSplitPayment(request.getSplitPayment().toString());
         monthlyNotificationPreorderDto.setAdministrativeEmail(request.getMailAddress());
+        monthlyNotificationPreorderDto.setRecordCreationDate(pnEstimate.getLastModifiedDate().toString());
+        monthlyNotificationPreorderDto.setRecordFormatVersion(BigDecimal.ONE);
+        int count = 1;
+        if (pnEstimate.getRecordVersion() == null){
+            pnEstimate.setRecordVersion(count);
+        }else {
+            count = pnEstimate.getRecordVersion()+1;
+            pnEstimate.setRecordVersion(count);
+        }
+        monthlyNotificationPreorderDto.setRecordVersion(new BigDecimal(pnEstimate.getRecordVersion()));
         return monthlyNotificationPreorderDto;
     }
 
