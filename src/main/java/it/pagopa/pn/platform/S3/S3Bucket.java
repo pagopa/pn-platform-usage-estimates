@@ -6,5 +6,5 @@ import java.io.File;
 
 public interface S3Bucket {
 
-    Mono<File> putObject(File file);
+    Mono<File> putObject(String filePath, File file);
 }
