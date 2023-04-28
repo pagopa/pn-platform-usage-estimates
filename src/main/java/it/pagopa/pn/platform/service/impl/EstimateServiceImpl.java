@@ -16,6 +16,7 @@ import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import it.pagopa.pn.platform.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
+import netscape.javascript.JSObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
@@ -89,24 +92,35 @@ public class EstimateServiceImpl implements EstimateService {
                                         String lastPath = PAID.concat(paId).concat(SLASH).concat(MONTH)
                                                 .concat(referenceMonth).concat(SLASH).concat(LAST).concat(SLASH);
                                         String lastFilename = MONTHLY.concat(referenceMonth).concat(EXTENSION);
-                                        File snapshot = new File(snapshotFilename);
-                                        File last = new File(lastFilename);
+                                        File fileSnapshot = new File(snapshotFilename);
+                                        File fileLast = new File(lastFilename);
+                                        FileWriter snapshot = null;
+                                        FileWriter last = null;
                                         try {
-                                            snapshot.createNewFile();
-                                            last.createNewFile();
-                                            // TODO gestire file
-                                            s3Bucket.putObject(snapshotPath, snapshot);
-                                            s3Bucket.putObject(lastPath, last);
-                                        } catch (IOException ioException) {
-                                            log.error("Error occurred in creation file");
-                                            // TODO gestire meglio l'errore in modo da tornare mono error
-                                        } finally {
-                                            snapshot.delete();
-                                            last.delete();
+                                            snapshot = new FileWriter(fileSnapshot);
+                                            last = new FileWriter(fileLast);
+                                            snapshot.write(json);
+                                            last.write(json);
+                                            s3Bucket.putObject(snapshotPath, fileSnapshot);
+                                            s3Bucket.putObject(lastPath, fileLast);
+                                        } catch (IOException e) {
+                                            return Mono.error(new RuntimeException(e));
                                         }
-
+                                        finally{
+                                            try{
+                                                if (snapshot != null) {
+                                                    snapshot.flush();
+                                                    snapshot.close();
+                                                }
+                                                if (last != null){
+                                                    last.flush();
+                                                    last.close();
+                                                }
+                                            } catch (IOException e) {
+                                                Mono.error(new RuntimeException(e));
+                                            }
+                                        }
                                     }
-
                                 }
                                 return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate));
                             })
