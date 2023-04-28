@@ -1,11 +1,14 @@
 package it.pagopa.pn.platform.utils;
 
 import it.pagopa.pn.platform.exception.PnGenericException;
+import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.ESTIMATE_NOT_EXISTED;
 
@@ -49,6 +52,21 @@ public class DateUtils {
         return localDateTime.getDayOfMonth();
     }
 
+    public static Integer getHour (Instant instant){
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+        return localDateTime.getHour();
+    }
+
+    public static Integer getMinute (Instant instant){
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        return localDateTime.getMinute();
+    }
+
+    public static Integer getSecond (Instant instant){
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        return localDateTime.getSecond();
+    }
+
     public static boolean isEqualMonth (Instant uno, Instant due){
         LocalDateTime localDateTimeUno = LocalDateTime.ofInstant(uno, italianZoneId);
         LocalDateTime localDateTimeDue = LocalDateTime.ofInstant(due, italianZoneId);
@@ -73,6 +91,17 @@ public class DateUtils {
         }else {
             throw new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage());
         }
+    }
+
+    @NotNull
+    public static String buildTimestamp(PnEstimate pnEstimate) {
+        Instant timeStamp = pnEstimate.getLastModifiedTimestamp().truncatedTo(ChronoUnit.SECONDS);
+        return getYear(timeStamp).toString().concat("-")
+                .concat(getMonth(timeStamp).toString()).concat("-")
+                .concat(getDay(timeStamp).toString()).concat("T")
+                .concat(getHour(timeStamp).toString())
+                .concat(getMinute(timeStamp).toString())
+                .concat(getSecond(timeStamp).toString());
     }
 
     public static Instant parseStringTOInstant(String date) {

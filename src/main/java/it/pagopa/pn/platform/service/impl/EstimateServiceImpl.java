@@ -5,6 +5,7 @@ import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
+import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateCreateBody;
@@ -17,6 +18,7 @@ import it.pagopa.pn.platform.utils.TimelineGenerator;
 import it.pagopa.pn.platform.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
 import netscape.javascript.JSObject;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
@@ -85,12 +89,11 @@ public class EstimateServiceImpl implements EstimateService {
                                     MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate, estimate);
                                     String json = Utility.objectToJson(dtoDatalake);
                                     if (json != null) {
-                                        String snapshotPath = PAID.concat(paId).concat(SLASH).concat(MONTH)
-                                                .concat(referenceMonth).concat(SLASH).concat(SNAPSHOT).concat(SLASH);
-                                        String snapshotFilename = MONTHLY.concat(pnEstimate.getLastModifiedTimestamp().truncatedTo(ChronoUnit.SECONDS).toString()).concat("_")
+                                        String prefix = PAID.concat(paId).concat(SLASH).concat(MONTH).concat(referenceMonth).concat(SLASH);
+                                        String snapshotPath = prefix.concat(SNAPSHOT).concat(SLASH);
+                                        String snapshotFilename = MONTHLY.concat(DateUtils.buildTimestamp(pnEstimate)).concat("_")
                                                 .concat(UUID.randomUUID().toString()).concat(EXTENSION);
-                                        String lastPath = PAID.concat(paId).concat(SLASH).concat(MONTH)
-                                                .concat(referenceMonth).concat(SLASH).concat(LAST).concat(SLASH);
+                                        String lastPath = prefix.concat(LAST).concat(SLASH);
                                         String lastFilename = MONTHLY.concat(referenceMonth).concat(EXTENSION);
                                         File fileSnapshot = new File(snapshotFilename);
                                         File fileLast = new File(lastFilename);
@@ -111,10 +114,12 @@ public class EstimateServiceImpl implements EstimateService {
                                                 if (snapshot != null) {
                                                     snapshot.flush();
                                                     snapshot.close();
+                                                    fileSnapshot.delete();
                                                 }
                                                 if (last != null){
                                                     last.flush();
                                                     last.close();
+                                                    fileLast.delete();
                                                 }
                                             } catch (IOException e) {
                                                 Mono.error(new RuntimeException(e));
@@ -127,6 +132,8 @@ public class EstimateServiceImpl implements EstimateService {
                             .map(pnEstimate -> EstimateMapper.estimateDetailToDto(pnEstimate, paInfo));
                 });
     }
+
+
 
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
