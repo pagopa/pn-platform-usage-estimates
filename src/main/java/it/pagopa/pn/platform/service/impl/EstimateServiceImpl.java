@@ -109,11 +109,15 @@ public class EstimateServiceImpl implements EstimateService {
                                             try{
                                                 if (snapshot != null) {
                                                     snapshot.close();
-                                                    fileSnapshot.delete();
+                                                    if (!fileSnapshot.delete()){
+                                                        log.info("fileSnapshot non eliminato: " + fileSnapshot);
+                                                    }
                                                 }
                                                 if (last != null){
                                                     last.close();
-                                                    fileSnapshot.delete();
+                                                    if (!fileLast.delete()){
+                                                        log.info("fileLast non eliminato: " + fileLast);
+                                                    }
                                                 }
                                             } catch (IOException e) {
                                                 Mono.error(new RuntimeException(e));
