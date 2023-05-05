@@ -2,6 +2,8 @@ package it.pagopa.pn.platform.utils;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.TimelineEstimate;
+import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,7 @@ import java.util.List;
 
 class TimelineGeneratorTest {
     private List<PnEstimate> dbList ;
+    private List<PnEstimate> emptyDbList ;
     private List<PnEstimate> timelineList = new ArrayList<>();
     Instant onboardingDate = Instant.parse("2022-07-02T10:15:30Z"); //settare in base al test che si vuole fare
 
@@ -20,8 +23,9 @@ class TimelineGeneratorTest {
         this.initialize();
     }
 
+    //caso con dbList popolata
     @Test
-    void estimatesGeneratorTest(){
+    void estimatesGeneratorTest() {
         String paId = "12345";
         TimelineGenerator timelineGenerator = new TimelineGenerator(paId, dbList);
         TimelineEstimate timelineList = timelineGenerator.extractAllEstimates(onboardingDate, paId);
@@ -31,8 +35,68 @@ class TimelineGeneratorTest {
     }
 
 
-    private void initialize() {
+    //ALL MISSING CASE
+    @Test
+    void emptyDbListCaseTest(){
+        String paId = "12345";
+        TimelineGenerator timelineGenerator = new TimelineGenerator(paId, emptyDbList);
+        TimelineEstimate timelineList = timelineGenerator.extractAllEstimates(onboardingDate, paId);
+        System.out.println(timelineList);
+        Assertions.assertTrue(emptyDbList.isEmpty());
+        Assertions.assertNotNull(timelineList.getActual());
+        Assertions.assertEquals(10,timelineList.getHistory().size());
+    }
+
+
+
+    @Test
+    void generatePnEstimateErrorTest(){
+        String paId = "12345";
+        AssertionError exception = Assertions.assertThrows(AssertionError.class, () -> {
+            PnEstimate pnEstimate = TimelineGenerator.getEstimate(paId, null, null);
+            Assertions.assertNull(pnEstimate);
+        });
+        String actualMessage = exception.getMessage();
+        Assertions.assertNull(actualMessage);
+    }
+
+    //deadline date before instant now -> stima assente
+    @Test
+    void generatePnEstimateWithoutRefMonthFirstTest(){
+        String paId = "12345";
+        Instant deadlineDate = Instant.parse("2022-10-15T10:15:30Z");
+        PnEstimate pnEstimate = TimelineGenerator.getEstimate(paId, null, deadlineDate);
+        Assertions.assertNotNull(pnEstimate);
+        Assertions.assertEquals(pnEstimate.getStatus(), EstimateDetail.StatusEnum.ABSENT.getValue());
+
+    }
+
+    //deadline date after instant now -> stima assente
+    @Test
+    void generatePnEstimateWithoutRefMonthSecondTest(){
+        String paId = "12345";
+        Instant deadlineDate = Instant.parse("2023-04-25T10:15:30Z");
+        PnEstimate pnEstimate = TimelineGenerator.getEstimate(paId, null, deadlineDate);
+        Assertions.assertNotNull(pnEstimate);
+        Assertions.assertEquals(pnEstimate.getStatus(), EstimateDetail.StatusEnum.ABSENT.getValue());
+
+    }
+
+    @Test
+    void generatePnEstimateWithoutDeadlineDateFirstTest(){
+        String paId = "12345";
+        String referenceMonth = "MAR-2023";
+        PnEstimate pnEstimate = TimelineGenerator.getEstimate(paId, referenceMonth, null);
+        Assertions.assertNotNull(pnEstimate);
+        Assertions.assertEquals(pnEstimate.getStatus(), EstimateDetail.StatusEnum.ABSENT.getValue());
+
+    }
+
+
+
+    private void initialize(){
         dbList = new ArrayList<>();
+        emptyDbList = new ArrayList<>();
         PnEstimate estimate = new PnEstimate();
         PnEstimate estimate1 = new PnEstimate();
         PnEstimate estimate2 = new PnEstimate();
@@ -51,7 +115,7 @@ class TimelineGeneratorTest {
         estimate.setSplitPayment(true);
 
         //2 caso
-        estimate1.setPaId("23453");
+        estimate1.setPaId("12345");
         estimate1.setStatus("VALIDATED");
         estimate1.setDeadlineDate(Instant.parse("2023-01-15T10:15:30Z"));
         estimate1.setReferenceMonth("FEBB-2023");
@@ -64,7 +128,7 @@ class TimelineGeneratorTest {
         estimate1.setSplitPayment(true);
 
         //3 caso
-        estimate2.setPaId("89025");
+        estimate2.setPaId("12345");
         estimate2.setStatus("VALIDATED");
         estimate2.setDeadlineDate(Instant.parse("2022-10-15T10:15:30Z"));
         estimate2.setReferenceMonth("NOV-2022");

@@ -67,7 +67,6 @@ public class PnEstimate implements Comparable<PnEstimate> {
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_RECORD_VERSION)}))
     private Integer recordVersion;
 
-
     @Override
     public int compareTo(@NotNull PnEstimate o) {
         return o.deadlineDate.compareTo(this.deadlineDate);
