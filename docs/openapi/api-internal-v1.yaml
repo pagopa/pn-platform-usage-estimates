@@ -402,10 +402,6 @@ components:
           format: int32
           maximum: 999999999
           minimum: 1
-      required:
-        - totalDigitalNotif
-        - total890Notif
-        - totalAnalogNotif
 
     EstimateCreateBody:
       type: object
@@ -413,7 +409,7 @@ components:
         - $ref: '#/components/schemas/Estimate'
         - $ref: '#/components/schemas/Billing'
 
-    EstimateSearchTableDTO:
+    EstimateSearchTableHistoryDTO:
       type: object
       properties:
         referenceMonth:
@@ -426,6 +422,35 @@ components:
         status:
           type: string
           enum: [ VALIDATED, DRAFT, ABSENT ]
+
+    EstimateSearchTableActualDTO:
+      type: object
+      properties:
+        referenceMonth:
+          type: string
+        deadlineDate:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [ VALIDATED, DRAFT, ABSENT ]
+        totalDigitalNotif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        total890Notif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        totalAnalogNotif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
 
 
     listEstimateFile:
@@ -440,7 +465,7 @@ components:
       type: object
       properties:
         actual:
-          $ref: '#/components/schemas/EstimateSearchTableDTO'
+          $ref: '#/components/schemas/EstimateSearchTableActualDTO'
         history:
           $ref: '#/components/schemas/Page'
       additionalProperties: false
@@ -490,7 +515,7 @@ components:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/EstimateSearchTableDTO'
+            $ref: '#/components/schemas/EstimateSearchTableHistoryDTO'
           maxItems: 999999999
           minItems: 1
         empty:
