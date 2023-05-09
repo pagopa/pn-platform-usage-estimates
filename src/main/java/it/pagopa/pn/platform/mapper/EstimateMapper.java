@@ -15,20 +15,23 @@ import java.util.List;
 
 public class EstimateMapper {
 
+    static Integer DEFAULT_VALUE = 0;
+
     private EstimateMapper() {
         throw new IllegalCallerException();
     }
 
     public static PageableEstimateResponseDto toPageableResponse(Pageable pageable, TimelineEstimate timelineEstimate) {
         PageableEstimateResponseDto pageableEstimateResponseDto = new PageableEstimateResponseDto();
-        EstimateSearchTableDTO actual = new EstimateSearchTableDTO();
+        EstimateSearchTableActualDTO actual = new EstimateSearchTableActualDTO();
         Page page = new Page();
         pageableEstimateResponseDto.setActual(actual);
         pageableEstimateResponseDto.setHistory(page);
-        pageableEstimateResponseDto.getActual().setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
+        pageableEstimateResponseDto.getActual().setStatus(EstimateSearchTableActualDTO.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
         pageableEstimateResponseDto.getActual().setReferenceMonth(timelineEstimate.getActual().getReferenceMonth());
         pageableEstimateResponseDto.getActual().setDeadlineDate(timelineEstimate.getActual().getDeadlineDate().toString());
         pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedDate()));
+        setActualInteger(timelineEstimate, pageableEstimateResponseDto);
         PageModel<PnEstimate> pagePnEstimate = toPagination(pageable, timelineEstimate.getHistory());
         pageableEstimateResponseDto.getHistory().setPageable(pagePnEstimate.getPageable());
         pageableEstimateResponseDto.getHistory().setNumber(pagePnEstimate.getNumber());
@@ -43,12 +46,35 @@ public class EstimateMapper {
         return pageableEstimateResponseDto;
     }
 
-    public static EstimateSearchTableDTO estimatesToDto(PnEstimate estimates){
-        EstimateSearchTableDTO estimatesList = new EstimateSearchTableDTO();
+    private static void setActualInteger(TimelineEstimate timelineEstimate, PageableEstimateResponseDto pageableEstimateResponseDto) {
+        if (timelineEstimate.getActual().getTotal890Notif() == null){
+            pageableEstimateResponseDto.getActual().setTotal890Notif(DEFAULT_VALUE);
+        }
+        else {
+            pageableEstimateResponseDto.getActual().setTotal890Notif(timelineEstimate.getActual().getTotal890Notif());
+        }
+        if (timelineEstimate.getActual().getTotalAnalogNotif() == null){
+            pageableEstimateResponseDto.getActual().setTotalAnalogNotif(DEFAULT_VALUE);
+        }
+        else  {
+            pageableEstimateResponseDto.getActual().setTotalAnalogNotif(timelineEstimate.getActual().getTotalAnalogNotif());
+        }
+
+        if (timelineEstimate.getActual().getTotalDigitalNotif() == null){
+            pageableEstimateResponseDto.getActual().setTotalDigitalNotif(DEFAULT_VALUE);
+        }
+        else {
+            pageableEstimateResponseDto.getActual().setTotalDigitalNotif(timelineEstimate.getActual().getTotalDigitalNotif());
+
+        }
+    }
+
+    public static EstimateSearchTableHistoryDTO estimatesToDto(PnEstimate estimates){
+        EstimateSearchTableHistoryDTO estimatesList = new EstimateSearchTableHistoryDTO();
         estimatesList.setReferenceMonth(estimates.getReferenceMonth());
         estimatesList.setDeadlineDate(estimates.getDeadlineDate().toString());
         estimatesList.setLastModifiedDate(Date.from(Instant.now()));
-        estimatesList.setStatus(EstimateSearchTableDTO.StatusEnum.fromValue(estimates.getStatus()));
+        estimatesList.setStatus(EstimateSearchTableHistoryDTO.StatusEnum.fromValue(estimates.getStatus()));
         return estimatesList;
     }
 
@@ -91,15 +117,17 @@ public class EstimateMapper {
 
         pnEstimate.setStatus(status);
 
-        //dati stima
-        pnEstimate.setTotalDigitalNotif(estimate.getTotalDigitalNotif());
-        pnEstimate.setTotal890Notif(estimate.getTotal890Notif());
-        pnEstimate.setTotalAnalogNotif(estimate.getTotalAnalogNotif());
+        if (status.equals(EstimateDetail.StatusEnum.DRAFT.getValue())) {
+            //dati stima
+            pnEstimate.setTotalDigitalNotif(estimate.getTotalDigitalNotif());
+            pnEstimate.setTotal890Notif(estimate.getTotal890Notif());
+            pnEstimate.setTotalAnalogNotif(estimate.getTotalAnalogNotif());
 
-        //dati di fatturazione
-        pnEstimate.setDescription(estimate.getDescription());
-        pnEstimate.setMailAddress(estimate.getMailAddress());
-        pnEstimate.setSplitPayment(estimate.getSplitPayment());
+            //dati di fatturazione
+            pnEstimate.setDescription(estimate.getDescription());
+            pnEstimate.setMailAddress(estimate.getMailAddress());
+            pnEstimate.setSplitPayment(estimate.getSplitPayment());
+        }
 
         return pnEstimate;
     }
