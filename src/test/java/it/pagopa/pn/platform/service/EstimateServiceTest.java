@@ -10,6 +10,7 @@ import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaIn
 import it.pagopa.pn.platform.msclient.impl.ExternalRegistriesClientImpl;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateCreateBody;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
+import it.pagopa.pn.platform.rest.v1.dto.EstimatePeriod;
 import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
 import it.pagopa.pn.platform.service.impl.EstimateServiceImpl;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
@@ -208,9 +209,9 @@ public class EstimateServiceTest extends BaseTest{
         Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
         Mockito.when(this.estimateDAO.createOrUpdate(Mockito.any())).thenReturn(Mono.just(pnEstimate));
 
-        EstimateDetail estimateDetail = this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, estimateCreateBody).block();
+        EstimatePeriod estimatePeriod = this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, estimateCreateBody).block();
 
-        assertNotNull(estimateDetail);
+        assertNotNull(estimatePeriod);
 
     }
 
@@ -230,9 +231,9 @@ public class EstimateServiceTest extends BaseTest{
         Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
         Mockito.when(this.estimateDAO.createOrUpdate(Mockito.any())).thenReturn(Mono.just(pnEstimate));
 
-        EstimateDetail estimateDetail = this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, estimateCreateBody).block();
+        EstimatePeriod estimatePeriod = this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, estimateCreateBody).block();
 
-        assertNotNull(estimateDetail);
+        assertNotNull(estimatePeriod);
 
     }
 

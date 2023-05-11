@@ -7,10 +7,7 @@ import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateCreateBody;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
-import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
 import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
@@ -54,7 +51,7 @@ public class EstimateServiceImpl implements EstimateService {
     private ExternalRegistriesClient externalRegistriesClient;
 
     @Override
-    public Mono<EstimateDetail> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
+    public Mono<EstimatePeriod> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
         Instant refMonthInstant = getInstantFromMonth(referenceMonth);
         if (refMonthInstant == null) {
             return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
@@ -127,7 +124,7 @@ public class EstimateServiceImpl implements EstimateService {
                                 }
                                 return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate));
                             })
-                            .map(pnEstimate -> EstimateMapper.estimateDetailToDto(pnEstimate, paInfo));
+                            .map(EstimateMapper::estimatePeriodToDto);
                 });
     }
 
@@ -145,7 +142,6 @@ public class EstimateServiceImpl implements EstimateService {
         }
         return this.externalRegistriesClient.getOnePa(paId)
                 .zipWhen(paInfo -> {
-
                     Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
                     if (refMonthInstant.isBefore(onBoardingDate)){
                         log.error("ReferenceMonth inconsistent with onBoardindate {}", onBoardingDate);

@@ -473,19 +473,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/Period'
 
-    EstimateSearchTable:
+    EstimateHistory:
       type: object
-      properties:
-        referenceMonth:
-          type: string
-        deadlineDate:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        status:
-          type: string
-          enum: [ VALIDATED, DRAFT, ABSENT ]
+      allOf:
+        - $ref: '#/components/schemas/Period'
 
 
     listEstimateFile:
@@ -550,7 +541,7 @@ components:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/EstimateSearchTable'
+            $ref: '#/components/schemas/EstimateHistory'
           maxItems: 999999999
           minItems: 1
         empty:
