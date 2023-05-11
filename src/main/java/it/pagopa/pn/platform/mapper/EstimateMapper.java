@@ -30,7 +30,10 @@ public class EstimateMapper {
         pageableEstimateResponseDto.getActual().setStatus(EstimatePeriod.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
         pageableEstimateResponseDto.getActual().setReferenceMonth(timelineEstimate.getActual().getReferenceMonth());
         pageableEstimateResponseDto.getActual().setDeadlineDate(Date.from(timelineEstimate.getActual().getDeadlineDate()));
-        pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedDate()));
+        if (timelineEstimate.getActual().getLastModifiedDate() != null){
+            pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedDate()));
+        }
+        pageableEstimateResponseDto.getActual().setShowEdit(timelineEstimate.getActual().getDeadlineDate().isAfter(Instant.now()));
         setActualInteger(timelineEstimate, pageableEstimateResponseDto);
         PageModel<PnEstimate> pagePnEstimate = toPagination(pageable, timelineEstimate.getHistory());
         pageableEstimateResponseDto.getHistory().setPageable(pagePnEstimate.getPageable());
@@ -102,8 +105,9 @@ public class EstimateMapper {
 
         estimatePeriod.setStatus(EstimatePeriod.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimatePeriod.setReferenceMonth(pnEstimate.getReferenceMonth());
-        estimatePeriod.setLastModifiedDate(Date.from(Instant.now()));
+        estimatePeriod.setLastModifiedDate(Date.from(pnEstimate.getLastModifiedDate()));
         estimatePeriod.setDeadlineDate(Date.from(pnEstimate.getDeadlineDate()));
+        estimatePeriod.setShowEdit(pnEstimate.getDeadlineDate().isAfter(Instant.now()));
 
         return estimatePeriod;
     }
@@ -138,8 +142,11 @@ public class EstimateMapper {
 
         estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());
-        estimateDetail.setLastModifiedDate(Date.from(Instant.now()));
+        if (pnEstimate.getLastModifiedDate() != null){
+            estimateDetail.setLastModifiedDate(Date.from(pnEstimate.getLastModifiedDate()));
+        }
         estimateDetail.setDeadlineDate(Date.from(pnEstimate.getDeadlineDate()));
+        estimateDetail.setShowEdit(pnEstimate.getDeadlineDate().isAfter(Instant.now()));
 
         return estimateDetail;
     }
@@ -148,30 +155,29 @@ public class EstimateMapper {
 
         pnEstimate.setStatus(status);
 
-        if (status.equals(EstimateDetail.StatusEnum.DRAFT.getValue())) {
-            //dati stima
-            pnEstimate.setTotalDigitalNotif(estimate.getTotalDigitalNotif());
-            pnEstimate.setTotal890Notif(estimate.getTotal890Notif());
-            pnEstimate.setTotalAnalogNotif(estimate.getTotalAnalogNotif());
+        //dati stima
+        pnEstimate.setTotalDigitalNotif(estimate.getTotalDigitalNotif());
+        pnEstimate.setTotal890Notif(estimate.getTotal890Notif());
+        pnEstimate.setTotalAnalogNotif(estimate.getTotalAnalogNotif());
 
-            //dati di fatturazione
-            pnEstimate.setDescription(estimate.getDescription());
-            pnEstimate.setMailAddress(estimate.getMailAddress());
-            pnEstimate.setSplitPayment(estimate.getSplitPayment());
-        }
+        //dati di fatturazione
+        pnEstimate.setDescription(estimate.getDescription());
+        pnEstimate.setMailAddress(estimate.getMailAddress());
+        pnEstimate.setSplitPayment(estimate.getSplitPayment());
+        pnEstimate.setLastModifiedDate(Instant.now());
 
         return pnEstimate;
     }
 
-    public static MonthlyNotificationPreorderDto dtoToFile (PnEstimate pnEstimate, EstimateCreateBody request){
+    public static MonthlyNotificationPreorderDto dtoToFile (PnEstimate pnEstimate){
         MonthlyNotificationPreorderDto monthlyNotificationPreorderDto = new MonthlyNotificationPreorderDto();
-        monthlyNotificationPreorderDto.setAnalogNotifications890(request.getTotal890Notif());
-        monthlyNotificationPreorderDto.setAnalogNotificationsAR(request.getTotalAnalogNotif());
-        monthlyNotificationPreorderDto.setDigitalNotifications(request.getTotalDigitalNotif());
+        monthlyNotificationPreorderDto.setAnalogNotifications890(pnEstimate.getTotal890Notif());
+        monthlyNotificationPreorderDto.setAnalogNotificationsAR(pnEstimate.getTotalAnalogNotif());
+        monthlyNotificationPreorderDto.setDigitalNotifications(pnEstimate.getTotalDigitalNotif());
+        monthlyNotificationPreorderDto.setSplitPayment(pnEstimate.getSplitPayment().toString());
+        monthlyNotificationPreorderDto.setAdministrativeEmail(pnEstimate.getMailAddress());
         monthlyNotificationPreorderDto.setReferenceMonth(pnEstimate.getReferenceMonth());
         monthlyNotificationPreorderDto.selfCarePaId(pnEstimate.getPaId());
-        monthlyNotificationPreorderDto.setSplitPayment(request.getSplitPayment().toString());
-        monthlyNotificationPreorderDto.setAdministrativeEmail(request.getMailAddress());
         monthlyNotificationPreorderDto.setRecordCreationDate(pnEstimate.getLastModifiedDate().toString());
         monthlyNotificationPreorderDto.setRecordFormatVersion(BigDecimal.ONE);
         int count = 1;

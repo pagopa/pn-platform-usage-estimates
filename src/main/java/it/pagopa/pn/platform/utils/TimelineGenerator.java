@@ -28,7 +28,7 @@ public class TimelineGenerator {
         this.dbList = new ArrayList<>(dbList);
     }
 
-    public TimelineEstimate extractAllEstimates(Instant onboardingDate, String paId) {
+    public TimelineEstimate extractAllEstimates(Instant onboardingDate) {
         Collections.sort(dbList);
         log.info("Prendo i dati da db: {}", dbList.size());
         Instant currentDate = DateUtils.getStartDeadLineDate();
@@ -64,7 +64,6 @@ public class TimelineGenerator {
         log.info("Creo la stima.");
         PnEstimate estimate = new PnEstimate();
         estimate.setPaId(paId);
-        estimate.setLastModifiedDate(Instant.now());
         if (deadline == null) {
             log.info("caso in cui non mi è stato passata deadlineDate");
             String[] splitMonth = referenceMonth.split("-");

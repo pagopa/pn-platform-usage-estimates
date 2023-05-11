@@ -5,6 +5,7 @@ import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
+import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
@@ -26,8 +27,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.UUID;
 
-import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.ESTIMATE_NOT_EXISTED;
-import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT;
+import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
 @Slf4j
 @Service
@@ -71,64 +71,49 @@ public class EstimateServiceImpl implements EstimateService {
                     return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
                             .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)))
                             .flatMap(pnEstimate -> {
-                                if (pnEstimate.getStatus().equals(EstimateDetail.StatusEnum.ABSENT.getValue())) {
+                                if (pnEstimate.getStatus().equals(EstimatePeriod.StatusEnum.ABSENT.getValue())) {
                                     log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
                                     return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                                } else if (pnEstimate.getStatus().equalsIgnoreCase(EstimatePeriod.StatusEnum.VALIDATED.getValue())
+                                                && status.equalsIgnoreCase(EstimatePeriod.StatusEnum.DRAFT.getValue())) {
+                                    log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
+                                    return Mono.error(new PnGenericException(OPERATION_NOT_ALLOWED, OPERATION_NOT_ALLOWED.getMessage()));
                                 }
-                                if (status.equals(EstimateDetail.StatusEnum.VALIDATED.getValue())) {
-                                    MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate, estimate);
-                                    String json = Utility.objectToJson(dtoDatalake);
-                                    if (json != null) {
-                                        String prefix = PAID.concat(paId).concat(SLASH).concat(MONTH).concat(referenceMonth).concat(SLASH);
-                                        String snapshotPath = prefix.concat(SNAPSHOT).concat(SLASH);
-                                        String snapshotFilename = MONTHLY.concat(DateUtils.buildTimestamp(pnEstimate)).concat("_")
-                                                .concat(UUID.randomUUID().toString()).concat(EXTENSION);
-                                        String lastPath = prefix.concat(LAST).concat(SLASH);
-                                        String lastFilename = MONTHLY.concat(referenceMonth).concat(EXTENSION);
-                                        File fileSnapshot = new File(snapshotFilename);
-                                        File fileLast = new File(lastFilename);
-                                        FileWriter snapshot = null;
-                                        FileWriter last = null;
-                                        try {
-                                            snapshot = new FileWriter(fileSnapshot);
-                                            last = new FileWriter(fileLast);
-                                            snapshot.write(json);
-                                            snapshot.flush();
-                                            last.write(json);
-                                            last.flush();
-                                            s3Bucket.putObject(snapshotPath, fileSnapshot);
-                                            s3Bucket.putObject(lastPath, fileLast);
-
-                                        } catch (IOException e) {
-                                            return Mono.error(new RuntimeException(e));
-                                        }
-                                        finally{
-                                            try{
-                                                if (snapshot != null) {
-                                                    snapshot.close();
-                                                    if (!fileSnapshot.delete()){
-                                                        log.info("fileSnapshot non eliminato: " + fileSnapshot);
-                                                    }
-                                                }
-                                                if (last != null){
-                                                    last.close();
-                                                    if (!fileLast.delete()){
-                                                        log.info("fileLast non eliminato: " + fileLast);
-                                                    }
-                                                }
-                                            } catch (IOException e) {
-                                                Mono.error(new RuntimeException(e));
-                                            }
-                                        }
-                                    }
-                                }
-                                return estimateDAO.createOrUpdate(EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate));
+                                PnEstimate forSave = EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate);
+                                saveFile(status, paId, referenceMonth, forSave);
+                                return estimateDAO.createOrUpdate(forSave);
                             })
                             .map(EstimateMapper::estimatePeriodToDto);
                 });
     }
 
-
+    @Override
+    public Mono<EstimatePeriod> validated(String paId, String referenceMonth) {
+        Instant refMonthInstant = getInstantFromMonth(referenceMonth);
+        if (refMonthInstant == null) {
+            return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
+        }
+        Instant today = Instant.now();
+        if (today.isAfter(refMonthInstant)) {
+            log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", today);
+            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+        }
+        return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
+                .switchIfEmpty(Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage())))
+                .flatMap(pnEstimate -> {
+                    if (pnEstimate.getStatus().equalsIgnoreCase(EstimatePeriod.StatusEnum.DRAFT.getValue())
+                            && pnEstimate.getDeadlineDate().isAfter(today)){
+                        pnEstimate.setStatus(EstimatePeriod.StatusEnum.VALIDATED.getValue());
+                        pnEstimate.setLastModifiedDate(today);
+                        estimateDAO.createOrUpdate(pnEstimate);
+                        saveFile( EstimatePeriod.StatusEnum.VALIDATED.getValue(), paId, referenceMonth, pnEstimate);
+                    } else if (pnEstimate.getStatus().equalsIgnoreCase(EstimatePeriod.StatusEnum.DRAFT.getValue())
+                            && pnEstimate.getDeadlineDate().isBefore(today)) {
+                        return Mono.error(new PnGenericException(ESTIMATE_EXPIRED, ESTIMATE_EXPIRED.getMessage()));
+                    }
+                    return Mono.just(pnEstimate);
+                }).map(EstimateMapper::estimatePeriodToDto);
+    }
 
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
@@ -166,7 +151,7 @@ public class EstimateServiceImpl implements EstimateService {
                                 .map(pnEstimates -> {
                                             log.debug("Build timeline.");
                                             TimelineGenerator timelineGenerator = new TimelineGenerator(paId, pnEstimates);
-                                            return timelineGenerator.extractAllEstimates(DateUtils.toInstant(paInfoDto.getAgreementDate()), paId);
+                                            return timelineGenerator.extractAllEstimates(DateUtils.toInstant(paInfoDto.getAgreementDate()));
                                         }
                                 )
                 )
@@ -194,5 +179,55 @@ public class EstimateServiceImpl implements EstimateService {
         Integer numberOfMonth = Month.getNumberMonth(splitMonth[0]);
         result = (numberOfMonth != null) ? DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1])) : null;
         return result;
+    }
+
+    private void saveFile(String status, String paId, String referenceMonth, PnEstimate pnEstimate) {
+        if (status.equals(EstimateDetail.StatusEnum.VALIDATED.getValue())) {
+            MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate);
+            String json = Utility.objectToJson(dtoDatalake);
+            if (json != null) {
+                String prefix = PAID.concat(paId).concat(SLASH).concat(MONTH).concat(referenceMonth).concat(SLASH);
+                String snapshotPath = prefix.concat(SNAPSHOT).concat(SLASH);
+                String snapshotFilename = MONTHLY.concat(DateUtils.buildTimestamp(pnEstimate)).concat("_")
+                        .concat(UUID.randomUUID().toString()).concat(EXTENSION);
+                String lastPath = prefix.concat(LAST).concat(SLASH);
+                String lastFilename = MONTHLY.concat(referenceMonth).concat(EXTENSION);
+                File fileSnapshot = new File(snapshotFilename);
+                File fileLast = new File(lastFilename);
+                FileWriter snapshot = null;
+                FileWriter last = null;
+                try {
+                    snapshot = new FileWriter(fileSnapshot);
+                    last = new FileWriter(fileLast);
+                    snapshot.write(json);
+                    snapshot.flush();
+                    last.write(json);
+                    last.flush();
+                    s3Bucket.putObject(snapshotPath, fileSnapshot);
+                    s3Bucket.putObject(lastPath, fileLast);
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                finally{
+                    try{
+                        if (snapshot != null) {
+                            snapshot.close();
+                            if (!fileSnapshot.delete()){
+                                log.info("fileSnapshot non eliminato: " + fileSnapshot);
+                            }
+                        }
+                        if (last != null){
+                            last.close();
+                            if (!fileLast.delete()){
+                                log.info("fileLast non eliminato: " + fileLast);
+                            }
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
     }
 }
