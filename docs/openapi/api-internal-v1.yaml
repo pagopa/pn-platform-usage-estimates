@@ -52,7 +52,44 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EstimateDetail'
+                $ref: '#/components/schemas/EstimatePeriod'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+
+  /pn-usage-estimates/{paId}/estimate/{referenceMonth}/validated:
+    get:
+      tags:
+        - Estimate
+      operationId: validated
+      x-api-permissions:
+        - 'estimate-read'
+      summary: Validazione stima.
+      description: API che consente di modificare lo stato di una stima.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceMonth'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstimatePeriod'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -315,6 +352,8 @@ components:
           type: string
       required:
         - code
+
+
     EstimateDetail:
       type: object
       properties:
@@ -322,21 +361,10 @@ components:
           $ref: '#/components/schemas/PAInfo'
         billing:
           $ref: '#/components/schemas/Billing'
-        status:
-          type: string
-          enum: [ VALIDATED, DRAFT, ABSENT ]
-        deadlineDate:
-          type: string
-          format: date
-        referenceMonth:
-          type: string
         estimate:
           $ref: '#/components/schemas/Estimate'
-        lastModifiedDate:
-          type: string
-          format: date
-        showEdit:
-          type: boolean
+      allOf:
+        - $ref: '#/components/schemas/Period'
       required:
         - paInfo
         - billing
@@ -384,6 +412,28 @@ components:
           format: '/[^A-Za-z0-9]+/'
           maxLength: 32
 
+    Period:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ VALIDATED, DRAFT, ABSENT ]
+        deadlineDate:
+          type: string
+          format: date
+        referenceMonth:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        showEdit:
+          type: boolean
+      required:
+        - status
+        - referenceMonth
+        - deadlineDate
+        - showEdit
+
     Estimate:
       type: object
       properties:
@@ -402,6 +452,10 @@ components:
           format: int32
           maximum: 999999999
           minimum: 1
+      required:
+        - totalDigitalNotif
+        - total890Notif
+        - totalAnalogNotif
 
     EstimateCreateBody:
       type: object
@@ -409,21 +463,17 @@ components:
         - $ref: '#/components/schemas/Estimate'
         - $ref: '#/components/schemas/Billing'
 
-    EstimateSearchTableHistoryDTO:
+    EstimatePeriod:
       type: object
       properties:
-        referenceMonth:
-          type: string
-        deadlineDate:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        status:
-          type: string
-          enum: [ VALIDATED, DRAFT, ABSENT ]
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+        billing:
+          $ref: '#/components/schemas/Billing'
+      allOf:
+        - $ref: '#/components/schemas/Period'
 
-    EstimateSearchTableActualDTO:
+    EstimateSearchTable:
       type: object
       properties:
         referenceMonth:
@@ -436,21 +486,6 @@ components:
         status:
           type: string
           enum: [ VALIDATED, DRAFT, ABSENT ]
-        totalDigitalNotif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        total890Notif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        totalAnalogNotif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
 
 
     listEstimateFile:
@@ -465,7 +500,7 @@ components:
       type: object
       properties:
         actual:
-          $ref: '#/components/schemas/EstimateSearchTableActualDTO'
+          $ref: '#/components/schemas/EstimatePeriod'
         history:
           $ref: '#/components/schemas/Page'
       additionalProperties: false
@@ -515,7 +550,7 @@ components:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/EstimateSearchTableHistoryDTO'
+            $ref: '#/components/schemas/EstimateSearchTable'
           maxItems: 999999999
           minItems: 1
         empty:
@@ -734,12 +769,4 @@ components:
       description: Internal Server Error
     Unauthorized:
       description: Unauthorized
-
-#  securitySchemes:                                      # ONLY EXTERNAL
-#    bearerAuth:                                         # ONLY EXTERNAL
-#      type: http                                        # ONLY EXTERNAL
-#      scheme: bearer                                    # ONLY EXTERNAL
-#      bearerFormat: JWT                                 # ONLY EXTERNAL
-#security:                                               # ONLY EXTERNAL
-# - bearerAuth: []                                       # ONLY EXTERNAL
               
