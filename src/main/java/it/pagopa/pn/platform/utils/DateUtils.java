@@ -4,6 +4,7 @@ import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.data.util.Pair;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
@@ -18,6 +19,23 @@ public class DateUtils {
 
     private DateUtils(){}
 
+    public static Pair<Instant,Instant> getStartEndFromRefMonth(Instant refMonthInstant){
+            Instant start = fromDayMonthYear(16, getMonth(minusMonth(refMonthInstant, 2)) , getYear(minusMonth(refMonthInstant, 2)));
+            Instant end = fromDayMonthYear(15, getMonth(minusMonth(refMonthInstant, 1)) , getYear(minusMonth(refMonthInstant, 1)));
+
+            return Pair.of(start, end);
+    }
+
+    public  static Instant getMaxDeadlineDate (){
+        Instant today = Instant.now();
+        int addMonth = (getDay(today) > 15) ? 1 : 0;
+        Instant max = plusMonth(today, addMonth);
+        return fromDayMonthYear(15, getMonth(max), getYear(max));
+    }
+    public static Instant plusMonth(Instant from, int months) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, italianZoneId);
+        return localDateTime.plusMonths(months).toInstant(ZoneOffset.UTC);
+    }
 
     public static Instant addOneMonth(Instant from) {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(from, italianZoneId);

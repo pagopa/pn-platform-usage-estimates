@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
@@ -56,9 +58,8 @@ public class EstimateServiceImpl implements EstimateService {
         if (refMonthInstant == null) {
             return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
         }
-        Instant startDeadlineDate = Instant.now();
-        if (startDeadlineDate.isAfter(refMonthInstant)) {
-            log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", startDeadlineDate);
+        if (todayIsNotInRange(refMonthInstant)) {
+            log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", refMonthInstant);
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
         }
         return this.externalRegistriesClient.getOnePa(paId)
@@ -94,10 +95,11 @@ public class EstimateServiceImpl implements EstimateService {
             return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
         }
         Instant today = Instant.now();
-        if (today.isAfter(refMonthInstant)) {
-            log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", today);
-            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+        if (todayIsNotInRange(refMonthInstant)) {
+            log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", refMonthInstant);
+            return Mono.error(new PnGenericException(ESTIMATE_EXPIRED, ESTIMATE_EXPIRED.getMessage()));
         }
+
         return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
                 .switchIfEmpty(Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage())))
                 .flatMap(pnEstimate -> {
@@ -107,9 +109,6 @@ public class EstimateServiceImpl implements EstimateService {
                         pnEstimate.setLastModifiedDate(today);
                         estimateDAO.createOrUpdate(pnEstimate);
                         saveFile( EstimatePeriod.StatusEnum.VALIDATED.getValue(), paId, referenceMonth, pnEstimate);
-                    } else if (pnEstimate.getStatus().equalsIgnoreCase(EstimatePeriod.StatusEnum.DRAFT.getValue())
-                            && pnEstimate.getDeadlineDate().isBefore(today)) {
-                        return Mono.error(new PnGenericException(ESTIMATE_EXPIRED, ESTIMATE_EXPIRED.getMessage()));
                     }
                     return Mono.just(pnEstimate);
                 }).map(EstimateMapper::estimatePeriodToDto);
@@ -117,14 +116,18 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Override
     public Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth) {
-        Instant startDeadlineDate = Instant.now();
         Instant refMonthInstant = getInstantFromMonth(referenceMonth);
+
         if (refMonthInstant == null) {
             return Mono.error(new PnGenericException(REFERENCE_MONTH_NOT_CORRECT, REFERENCE_MONTH_NOT_CORRECT.getMessage()));
         }
-        if (startDeadlineDate.isAfter(refMonthInstant)) {
+
+        Instant deadlineRefMonth = DateUtils.minusMonth(refMonthInstant,1);
+        Instant maxDeadlineDate = DateUtils.getMaxDeadlineDate();
+
+        if (maxDeadlineDate.isBefore(deadlineRefMonth))
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
-        }
+
         return this.externalRegistriesClient.getOnePa(paId)
                 .zipWhen(paInfo -> {
                     Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
@@ -181,6 +184,11 @@ public class EstimateServiceImpl implements EstimateService {
         return result;
     }
 
+    private boolean todayIsNotInRange(Instant refMonthInstant){
+        Pair<Instant,Instant> range = DateUtils.getStartEndFromRefMonth(refMonthInstant);
+        Instant today = Instant.now();
+        return !(range.getFirst().isBefore(today) && range.getSecond().isAfter(today));
+    }
     private void saveFile(String status, String paId, String referenceMonth, PnEstimate pnEstimate) {
         if (status.equals(EstimateDetail.StatusEnum.VALIDATED.getValue())) {
             MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate);
