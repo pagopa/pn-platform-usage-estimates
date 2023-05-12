@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: Xwv6BeMQxmrMSs/veOJE9zoxJrneTgCO15uxR+5QX68=
+  version: 9sSyCbOSzSqraUjNOBLSXgrjeTzi84ZbOlhJItaitCw=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -35,7 +35,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EstimateDetail'
+                $ref: '#/components/schemas/EstimatePeriod'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -78,6 +78,76 @@ paths:
       x-amazon-apigateway-integration:
         uri: >-
           http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/estimate/{referenceMonth}
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceMonth: method.request.path.referenceMonth
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+  /{paId}/estimate/{referenceMonth}/validated:
+    get:
+      tags:
+        - Estimate
+      operationId: validated
+      x-api-permissions:
+        - estimate-read
+      summary: Validazione stima.
+      description: API che consente di modificare lo stato di una stima.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceMonth'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstimatePeriod'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - pn-auth-fleet_jwtAuthorizer_openapi: []
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/estimate/{referenceMonth}/validated
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
+          integration.request.header.x-pagopa-pn-cx-role: context.authorizer.cx_role
+          integration.request.header.x-pagopa-pn-uid: context.authorizer.uid
+          integration.request.header.x-pagopa-pn-jti: context.authorizer.cx_jti
+          integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
+          integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
+          integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceMonth: method.request.path.referenceMonth
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+    options:
+      operationId: Options for /{paId}/estimate/{referenceMonth}/validated API CORS
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/estimate/{referenceMonth}/validated
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
@@ -587,24 +657,10 @@ components:
           $ref: '#/components/schemas/PAInfo'
         billing:
           $ref: '#/components/schemas/Billing'
-        status:
-          type: string
-          enum:
-            - VALIDATED
-            - DRAFT
-            - ABSENT
-        deadlineDate:
-          type: string
-          format: date
-        referenceMonth:
-          type: string
         estimate:
           $ref: '#/components/schemas/Estimate'
-        lastModifiedDate:
-          type: string
-          format: date
-        showEdit:
-          type: boolean
+      allOf:
+        - $ref: '#/components/schemas/Period'
       required:
         - paInfo
         - billing
@@ -650,6 +706,30 @@ components:
           example: abc1334324
           format: /[^A-Za-z0-9]+/
           maxLength: 32
+    Period:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - VALIDATED
+            - DRAFT
+            - ABSENT
+        deadlineDate:
+          type: string
+          format: date
+        referenceMonth:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        showEdit:
+          type: boolean
+      required:
+        - status
+        - referenceMonth
+        - deadlineDate
+        - showEdit
     Estimate:
       type: object
       properties:
@@ -674,22 +754,19 @@ components:
       allOf:
         - $ref: '#/components/schemas/Estimate'
         - $ref: '#/components/schemas/Billing'
-    EstimateSearchTableDTO:
+    EstimatePeriod:
       type: object
       properties:
-        referenceMonth:
-          type: string
-        deadlineDate:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        status:
-          type: string
-          enum:
-            - VALIDATED
-            - DRAFT
-            - ABSENT
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+        billing:
+          $ref: '#/components/schemas/Billing'
+      allOf:
+        - $ref: '#/components/schemas/Period'
+    EstimateHistory:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Period'
     listEstimateFile:
       type: array
       items:
@@ -700,15 +777,9 @@ components:
       type: object
       properties:
         actual:
-          $ref: '#/components/schemas/EstimateSearchTableDTO'
+          $ref: '#/components/schemas/EstimatePeriod'
         history:
           $ref: '#/components/schemas/Page'
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/EstimateSearchTableDTO'
-          maxItems: 999999999
-          minItems: 1
       additionalProperties: false
       required:
         - content
@@ -747,6 +818,12 @@ components:
     Page:
       type: object
       properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/EstimateHistory'
+          maxItems: 999999999
+          minItems: 1
         empty:
           type: boolean
         first:
@@ -882,6 +959,7 @@ components:
         authorizerUri: >-
           arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:pn-jwtAuthorizerLambda/invocations
         authorizerResultTtlInSeconds: 300
+        identityValidationExpression: ^Bearer\s([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\.([a-zA-Z0-9_\-]+)$
         type: token
 tags:
   - null
