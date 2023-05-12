@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -126,14 +127,14 @@ public class EstimateServiceImpl implements EstimateService {
 
 
         if (maxDeadlineDate.isBefore(deadlineRefMonth))
-            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage(), HttpStatus.NOT_FOUND));
 
         return this.externalRegistriesClient.getOnePa(paId)
                 .zipWhen(paInfo -> {
                     Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
                     if (refMonthInstant.isBefore(onBoardingDate)){
                         log.error("ReferenceMonth inconsistent with onBoardindate {}", onBoardingDate);
-                        return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                        return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage(), HttpStatus.NOT_FOUND));
                     }
                     log.debug("Retrieve estimate from db and create it if it's not present.");
                     return this.estimateDAO.getEstimateDetail(paId,referenceMonth)
