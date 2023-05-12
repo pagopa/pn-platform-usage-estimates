@@ -15,7 +15,7 @@ import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.ESTIMATE_NOT_EXI
 @Slf4j
 public class DateUtils {
 
-    private static final ZoneId italianZoneId = ZoneId.of("Europe/Rome");
+    private static final ZoneId ZONE_ID = ZoneId.of("UTC");
 
     private DateUtils(){}
 
@@ -33,36 +33,36 @@ public class DateUtils {
         return fromDayMonthYear(15, getMonth(max), getYear(max));
     }
     public static Instant plusMonth(Instant from, int months) {
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, italianZoneId);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
         return localDateTime.plusMonths(months).toInstant(ZoneOffset.UTC);
     }
 
     public static Instant addOneMonth(Instant from) {
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, italianZoneId);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
         return localDateTime.plusMonths(1).toInstant(ZoneOffset.UTC);
     }
 
     public static Instant minusMonth(Instant from, int months) {
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, italianZoneId);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
         return localDateTime.minusMonths(months).toInstant(ZoneOffset.UTC);
     }
 
     public static Instant fromDayMonthYear(int day, int month, int year){
-        return LocalDateTime.of(year, month, day, 22, 0).toInstant(ZoneOffset.UTC);
+        return LocalDateTime.of(year, month, day, 23, 59).toInstant(ZoneOffset.UTC);
     }
 
     public static Integer getYear (Instant instant){
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZONE_ID);
         return localDateTime.getYear();
     }
 
     public static Integer getMonth (Instant instant){
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZONE_ID);
         return localDateTime.getMonth().getValue();
     }
 
     public static Integer getDay (Instant instant){
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZONE_ID);
         return localDateTime.getDayOfMonth();
     }
 
@@ -72,18 +72,18 @@ public class DateUtils {
     }
 
     public static Integer getMinute (Instant instant){
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZONE_ID);
         return localDateTime.getMinute();
     }
 
     public static Integer getSecond (Instant instant){
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, italianZoneId);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZONE_ID);
         return localDateTime.getSecond();
     }
 
     public static boolean isEqualMonth (Instant uno, Instant due){
-        LocalDateTime localDateTimeUno = LocalDateTime.ofInstant(uno, italianZoneId);
-        LocalDateTime localDateTimeDue = LocalDateTime.ofInstant(due, italianZoneId);
+        LocalDateTime localDateTimeUno = LocalDateTime.ofInstant(uno, ZONE_ID);
+        LocalDateTime localDateTimeDue = LocalDateTime.ofInstant(due, ZONE_ID);
         return localDateTimeUno.getMonth().getValue() == localDateTimeDue.getMonth().getValue()
                 && localDateTimeUno.getYear() == localDateTimeDue.getYear();
     }
