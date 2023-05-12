@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.UUID;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
@@ -125,6 +124,7 @@ public class EstimateServiceImpl implements EstimateService {
         Instant deadlineRefMonth = DateUtils.minusMonth(refMonthInstant,1);
         Instant maxDeadlineDate = DateUtils.getMaxDeadlineDate();
 
+
         if (maxDeadlineDate.isBefore(deadlineRefMonth))
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
 
@@ -180,7 +180,7 @@ public class EstimateServiceImpl implements EstimateService {
             log.info("ReferenceMonth has not correct format");
         }
         Integer numberOfMonth = Month.getNumberMonth(splitMonth[0]);
-        result = (numberOfMonth != null) ? DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1])).minusSeconds(3600) : null;
+        result = (numberOfMonth != null) ? DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1])) : null;
         return result;
     }
 
@@ -189,6 +189,7 @@ public class EstimateServiceImpl implements EstimateService {
         Instant today = Instant.now();
         return !(range.getFirst().isBefore(today) && range.getSecond().isAfter(today));
     }
+
     private void saveFile(String status, String paId, String referenceMonth, PnEstimate pnEstimate) {
         if (status.equals(EstimateDetail.StatusEnum.VALIDATED.getValue())) {
             MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate);
