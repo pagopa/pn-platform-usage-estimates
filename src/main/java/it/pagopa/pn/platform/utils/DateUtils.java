@@ -48,9 +48,7 @@ public class DateUtils {
     }
 
     public static Instant fromDayMonthYear(int day, int month, int year){
-
-        return LocalDateTime.of(year, month, day, 1, 0).toInstant(ZoneOffset.UTC);
-
+        return LocalDateTime.of(year, month, day, 23, 0).toInstant(ZoneOffset.UTC);
     }
 
     public static Integer getYear (Instant instant){
