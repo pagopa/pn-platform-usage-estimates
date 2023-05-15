@@ -234,7 +234,7 @@ public class EstimateServiceImpl implements EstimateService {
                             }
                         }
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        log.error("Something happened while closing connection. Cause: " + e.getMessage());
                     }
                 }
             }
