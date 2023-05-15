@@ -179,9 +179,11 @@ public class EstimateServiceImpl implements EstimateService {
         String[] splitMonth = referenceMonth.split("-");
         if (!(splitMonth.length > 1)) {
             log.info("ReferenceMonth has not correct format");
+            return null;
         }
         Integer numberOfMonth = Month.getNumberMonth(splitMonth[0]);
-        result = (numberOfMonth != null) ? DateUtils.fromDayMonthYear(15, numberOfMonth, Integer.parseInt(splitMonth[1])) : null;
+        int year = Integer.parseInt(splitMonth[1]);
+        result = (numberOfMonth != null) && (splitMonth[1].length() == 4) ? DateUtils.fromDayMonthYear(15, numberOfMonth, year) : null;
         return result;
     }
 
