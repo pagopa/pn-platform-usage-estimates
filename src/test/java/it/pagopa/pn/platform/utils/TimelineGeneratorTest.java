@@ -30,7 +30,7 @@ class TimelineGeneratorTest {
         TimelineEstimate timelineList = timelineGenerator.extractAllEstimates(onboardingDate);
         System.out.println(timelineList);
         Assertions.assertNotNull(timelineList.getActual());
-        Assertions.assertEquals(10, timelineList.getHistory().size());
+        Assertions.assertEquals(11, timelineList.getHistory().size());
     }
 
 
@@ -43,7 +43,7 @@ class TimelineGeneratorTest {
         System.out.println(timelineList);
         Assertions.assertTrue(emptyDbList.isEmpty());
         Assertions.assertNotNull(timelineList.getActual());
-        Assertions.assertEquals(10,timelineList.getHistory().size());
+        Assertions.assertEquals(11,timelineList.getHistory().size());
     }
 
 
