@@ -79,8 +79,12 @@ public class EstimateMapper {
         EstimateHistory estimatesList = new EstimateHistory();
         estimatesList.setReferenceMonth(estimates.getReferenceMonth());
         estimatesList.setDeadlineDate(Date.from(estimates.getDeadlineDate()));
-        estimatesList.setLastModifiedDate(Date.from(Instant.now()));
-        estimatesList.setStatus(EstimateHistory.StatusEnum.fromValue(estimates.getStatus()));
+        estimatesList.setLastModifiedDate(estimates.getLastModifiedDate() != null ? Date.from(estimates.getLastModifiedDate()) : null);
+        if (estimates.getStatus().equalsIgnoreCase(EstimateHistory.StatusEnum.DRAFT.toString())){
+            estimatesList.setStatus(EstimateHistory.StatusEnum.ABSENT);
+        }else {
+            estimatesList.setStatus(EstimateHistory.StatusEnum.fromValue(estimates.getStatus()));
+        }
         return estimatesList;
     }
 
