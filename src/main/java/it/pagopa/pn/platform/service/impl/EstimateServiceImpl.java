@@ -60,7 +60,7 @@ public class EstimateServiceImpl implements EstimateService {
         }
         if (todayIsNotInRange(refMonthInstant)) {
             log.info("ReferenceMonth that is just occurred is greater then startDeadlineDate {}", refMonthInstant);
-            return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+            return Mono.error(new PnGenericException(ESTIMATE_EXPIRED, ESTIMATE_EXPIRED.getMessage()));
         }
         return this.externalRegistriesClient.getOnePa(paId)
                 .flatMap(paInfo -> {
