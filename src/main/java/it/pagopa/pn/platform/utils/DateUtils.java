@@ -20,7 +20,7 @@ public class DateUtils {
     private DateUtils(){}
 
     public static Pair<Instant,Instant> getStartEndFromRefMonth(Instant refMonthInstant){
-            Instant start = fromDayMonthYear(16, getMonth(minusMonth(refMonthInstant, 2)) , getYear(minusMonth(refMonthInstant, 2)));
+            Instant start = fromDayMonthYear(15, getMonth(minusMonth(refMonthInstant, 2)) , getYear(minusMonth(refMonthInstant, 2))).plusSeconds(60);
             Instant end = fromDayMonthYear(15, getMonth(minusMonth(refMonthInstant, 1)) , getYear(minusMonth(refMonthInstant, 1)));
 
             return Pair.of(start, end);

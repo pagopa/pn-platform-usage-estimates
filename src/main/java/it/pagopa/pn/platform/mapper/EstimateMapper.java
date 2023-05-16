@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -168,7 +169,7 @@ public class EstimateMapper {
         pnEstimate.setDescription(estimate.getDescription());
         pnEstimate.setMailAddress(estimate.getMailAddress());
         pnEstimate.setSplitPayment(estimate.getSplitPayment());
-        pnEstimate.setLastModifiedDate(Instant.now());
+        pnEstimate.setLastModifiedDate(Instant.now().truncatedTo(ChronoUnit.SECONDS));
 
         return pnEstimate;
     }
