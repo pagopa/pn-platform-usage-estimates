@@ -190,7 +190,7 @@ public class EstimateServiceImpl implements EstimateService {
     private boolean todayIsNotInRange(Instant refMonthInstant){
         Pair<Instant,Instant> range = DateUtils.getStartEndFromRefMonth(refMonthInstant);
         Instant today = Instant.now();
-        return !(range.getFirst().isBefore(today) && range.getSecond().isAfter(today));
+        return !(range.getFirst().isBefore(today) && range.getSecond().isAfter(today) );
     }
 
     private void saveFile(String status, String paId, String referenceMonth, PnEstimate pnEstimate) {
