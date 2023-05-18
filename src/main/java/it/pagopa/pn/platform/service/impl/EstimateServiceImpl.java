@@ -206,37 +206,26 @@ public class EstimateServiceImpl implements EstimateService {
                 String lastFilename = MONTHLY.concat(referenceMonth).concat(EXTENSION);
                 File fileSnapshot = new File(snapshotFilename);
                 File fileLast = new File(lastFilename);
-                FileWriter snapshot = null;
-                FileWriter last = null;
                 try {
-                    snapshot = new FileWriter(fileSnapshot);
-                    last = new FileWriter(fileLast);
-                    snapshot.write(json);
-                    snapshot.flush();
-                    last.write(json);
-                    last.flush();
+                    try (FileWriter snapshot = new FileWriter(fileSnapshot)) {
+                        snapshot.write(json);
+                        snapshot.flush();
+                    }
+                    try(FileWriter last = new FileWriter(fileLast)){
+                        last.write(json);
+                        last.flush();
+                    }
                     s3Bucket.putObject(snapshotPath, fileSnapshot);
                     s3Bucket.putObject(lastPath, fileLast);
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }
-                finally{
-                    try{
-                        if (snapshot != null) {
-                            snapshot.close();
-                            if (!fileSnapshot.delete()){
-                                log.info("fileSnapshot non eliminato: " + fileSnapshot);
-                            }
-                        }
-                        if (last != null){
-                            last.close();
-                            if (!fileLast.delete()){
-                                log.info("fileLast non eliminato: " + fileLast);
-                            }
-                        }
-                    } catch (IOException e) {
-                        log.error("Something happened while closing connection. Cause: " + e.getMessage());
+                } finally{
+                    if (!fileSnapshot.delete()){
+                        log.info("fileSnapshot non eliminato: " + fileSnapshot);
+                    }
+                    if (!fileLast.delete()){
+                        log.info("fileLast non eliminato: " + fileLast);
                     }
                 }
             }
