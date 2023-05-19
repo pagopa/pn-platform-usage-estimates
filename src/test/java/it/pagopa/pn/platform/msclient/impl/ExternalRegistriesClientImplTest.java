@@ -25,40 +25,29 @@ class ExternalRegistriesClientImplTest extends BaseTest.WithMockServer {
     @Autowired
     private ExternalRegistriesClient externalRegistriesClient;
 
-    private final PaInfoDto pa = new PaInfoDto();
-
-    @BeforeEach
-    void setUp(){
-        initialize();
-    }
-
-    //@Test
-    void testOK() {
-        //externalRegistriesClient.getOnePa("b6c5b42a-8a07-436f-96ce-8c2ab7f4dbd2").block();
+    @Test
+    void externalRegistriesClient200RequestTest() {
         PaInfoDto paInfo = externalRegistriesClient.getOnePa("12345").block();
         Assertions.assertNotNull(paInfo);
         Assertions.assertEquals(paInfo.getId(), "12345");
     }
 
-    //@Test
-    void testWithNullPaId() {
-
-        //Assertions.assertEquals(exception.getStatusCode().value(), HttpStatus.BAD_REQUEST.value());
+    @Test
+    void externalRegistriesClient400Test() {
+        externalRegistriesClient.getOnePa("12345")
+                .onErrorResume(WebClientResponseException.class, ex -> {
+                    Assertions.assertEquals(ex.getStatusCode(), HttpStatus.BAD_REQUEST);
+                    return Mono.empty();
+                }).block();
     }
 
-    //@Test
-    void testErrorPaIdNotFound(){
+    @Test
+    void externalRegistriesClient500Test(){
         externalRegistriesClient.getOnePa("12345")
                 .onErrorResume(WebClientResponseException.class, ex -> {
                     Assertions.assertEquals(ex.getStatusCode(), HttpStatus.NOT_FOUND);
                     return Mono.empty();
                 }).block();
-    }
-
-    void initialize(){
-        pa.setId("12345");
-        pa.setTaxId("taxId");
-        pa.setIpaCode("ipaCode");
     }
 
 }

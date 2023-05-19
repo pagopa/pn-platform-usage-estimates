@@ -12,20 +12,20 @@
         ]
       },
       "body": {
-        "paName": "string",
-        "taxId": "string",
-        "ipaCode": "string",
-        "sdiCode": "string",
-        "agreementDate": "string",
-        "generalContacts": [
+        "id": "12345",
+        "paName": "paName",
+        "taxId": "taxId",
+        "ipaCode": "ipaCode",
+        "sdiCode": "sdiCode",
+        "agreementDate": "2022-07-27T12:22:33.444Z",
+        "generalContacts":
           {
-            "pec": "string",
-            "email": "string",
-            "tel": "string",
-            "web": "string",
-            "registeredOffice": "string"
+            "pec": "pec@test.com",
+            "email": "email@test.com",
+            "tel": "tel",
+            "web": "web",
+            "registeredOffice": "registeredOffice"
           }
-        ]
       }
     }
   },
