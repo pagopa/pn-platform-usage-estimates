@@ -254,24 +254,25 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/billing/{paId}/profilation:
-    get:
+  /pn-usage-estimates/{paId}/profilation/{referenceYear}:
+    post:
       tags:
-        - Billing
-      operationId: getProfilationDetail
+        - Profilation
+      operationId: createOrUpdateProfilation
       x-api-permissions:
-        - 'profilation-read'
-      summary: ritorna il dettaglio della profilazione in base al paId.
-      description: API che ritorna il dettaglio della profilazione.
+        - 'profilation-write'
+      summary: salva o aggiorna i dati della profilazione.
+      description: API che salva o aggiorna i dettagli della profilazione.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Profiling'
+                $ref: '#/components/schemas/Billing'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -289,6 +290,42 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+
+  /pn-usage-estimates/profilation/{paId}/detail/{referenceYear}:
+    get:
+      tags:
+        - Profilation
+      operationId: getProfilationDetail
+      x-api-permissions:
+        - 'profilation-read'
+      summary: ritorna il dettaglio della profilazione in base al paId e al referenceYear.
+      description: API che ritorna il dettaglio della profilazione.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilingDetail'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
 
 
 components:
@@ -352,7 +389,6 @@ components:
           type: string
       required:
         - code
-
 
     EstimateDetail:
       type: object
@@ -609,37 +645,36 @@ components:
             - UPLOADING
             - UPLOADED
 
-    Profiling:
+    ProfilingDetail:
       type: object
       properties:
         paInfo:
           $ref: '#/components/schemas/PAInfo'
-        profiles:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProfilingDetail'
-          maxItems: 999999999
-          minItems: 1
-
-    ProfilingDetail:
-      type: object
-      properties:
         billing:
           $ref: '#/components/schemas/Billing'
+      allOf:
+        - $ref: '#/components/schemas/ProfilationPeriod'
+
+    ProfilationPeriod:
+      type: object
+      properties:
         status:
           type: string
-          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+          enum: [ VALIDATED, DRAFT, ABSENT ]
         deadlineDate:
           type: string
           format: date
         referenceYear:
           type: string
+        lastModifiedDate:
+          type: string
+          format: date
         showEdit:
           type: boolean
       required:
-        - billing
         - status
         - referenceYear
+        - deadlineDate
         - showEdit
 
     Billing:
