@@ -33,8 +33,8 @@ public class EstimateApiController implements EstimateApi {
     }
 
     @Override
-    public Mono<ResponseEntity<PageableEstimateResponseDto>> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size, ServerWebExchange exchange) {
-        return this.estimateService.getAllEstimate(paId, taxId, ipaId, page, size).map(ResponseEntity::ok);
+    public Mono<ResponseEntity<PageableEstimateResponseDto>> getAllEstimate(String originFe, String paId, String taxId, String ipaId, Integer page, Integer size, ServerWebExchange exchange) {
+        return this.estimateService.getAllEstimate(originFe, paId, taxId, ipaId, page, size).map(ResponseEntity::ok);
     }
 
     @Override

@@ -59,7 +59,7 @@ class EstimateApiControllerTest {
     void getAllEstimate() {
         PageableEstimateResponseDto response = new PageableEstimateResponseDto();
         String path = "/pn-usage-estimates/estimates";
-        Mockito.when(estimateService.getAllEstimate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        Mockito.when(estimateService.getAllEstimate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Mono.just(response));
 
         webTestClient.get()

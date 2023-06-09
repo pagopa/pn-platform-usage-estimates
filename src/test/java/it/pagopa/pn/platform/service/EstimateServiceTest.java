@@ -153,7 +153,7 @@ public class EstimateServiceTest extends BaseTest{
         Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
         Mockito.when(this.estimateDAO.getAllEstimates(paId)).thenReturn(Mono.just(pnEstimates));
 
-        PageableEstimateResponseDto pageableEstimateResponseDto = this.estimateService.getAllEstimate(paId,null, null, 1, 5).block();
+        PageableEstimateResponseDto pageableEstimateResponseDto = this.estimateService.getAllEstimate("PN-PLATFORM-NOTIFICATION-FE", paId,null, null, 1, 5).block();
 
         assertNotNull(pageableEstimateResponseDto);
         assertNotNull(pageableEstimateResponseDto.getActual());
