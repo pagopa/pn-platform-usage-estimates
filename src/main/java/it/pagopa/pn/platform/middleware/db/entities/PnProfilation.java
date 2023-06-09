@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
@@ -16,7 +17,7 @@ import java.time.Instant;
 @Setter
 @ToString
 @NoArgsConstructor
-public class PnProfilation {
+public class PnProfilation implements Comparable<PnProfilation> {
 
     public static final String COL_PA_ID = "paId" ;
     public static final String COL_STATUS = "status";
@@ -51,4 +52,8 @@ public class PnProfilation {
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_MAIL_ADDRESS)}))
     private String mailAddress;
 
+    @Override
+    public int compareTo(@NotNull PnProfilation o) {
+        return o.deadlineDate.compareTo(this.deadlineDate);
+    }
 }
