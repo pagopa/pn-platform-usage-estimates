@@ -9,7 +9,8 @@ public enum ExceptionTypeEnum {
     PA_ID_NOT_EXIST("PA_ID_NOT_EXIST", "La pa non è presente a sistema"),
     BILLING_NOT_EXIST("BILLING_NOT_EXIST", "Fatturazione non presente a sistema"),
     OPERATION_NOT_ALLOWED("OPERATION_NOT_ALLOWED", "Operazione non consentita"),
-    ESTIMATE_EXPIRED("ESTIMATE_EXPIRED", "Stima scaduta");
+    ESTIMATE_EXPIRED("ESTIMATE_EXPIRED", "Stima scaduta"),
+    BAD_REQUEST("BAD_REQUEST", "Campi obbligatori mancanti.");
 
     private final String title;
     private final String message;

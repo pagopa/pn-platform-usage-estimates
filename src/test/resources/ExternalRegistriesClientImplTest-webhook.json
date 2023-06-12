@@ -1,0 +1,88 @@
+[
+  {
+    "httpRequest": {
+      "path": "/ext-registry-private/pa/v1/activated-on-pn/12345",
+      "method": "GET"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "content-type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "id": "12345",
+        "paName": "paName",
+        "taxId": "taxId",
+        "ipaCode": "ipaCode",
+        "sdiCode": "sdiCode",
+        "agreementDate": "2022-07-27T12:22:33.444Z",
+        "generalContacts":
+          {
+            "pec": "pec@test.com",
+            "email": "email@test.com",
+            "tel": "tel",
+            "web": "web",
+            "registeredOffice": "registeredOffice"
+          }
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/ext-registry-private/pa/v1/activated-on-pn/12345",
+      "method": "GET"
+    },
+    "httpResponse": {
+      "statusCode": 400,
+      "headers": {
+        "content-type": [
+          "application/json"
+        ]
+      },
+      "body": {
+        "status": 0,
+        "title": "string",
+        "detail": "string",
+        "traceId": "string",
+        "timestamp": 0,
+        "errors": [
+          {
+            "code": "string",
+            "element": "string",
+            "detail": "string"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "path": "/ext-registry-private/pa/v1/activated-on-pn/12345",
+      "method": "GET"
+    },
+    "httpResponse": {
+      "statusCode": 500,
+      "headers": {
+        "content-type": [
+          "application/json"
+        ]
+      },
+      "body":{
+        "status": 0,
+        "title": "string",
+        "detail": "string",
+        "traceId": "string",
+        "timestamp": 0,
+        "errors": [
+          {
+            "code": "string",
+            "element": "string",
+            "detail": "string"
+          }
+        ]
+      }
+    }
+  }
+]
