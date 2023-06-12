@@ -1,28 +1,24 @@
 package it.pagopa.pn.platform.service.impl;
 
 import it.pagopa.pn.platform.exception.PnGenericException;
-import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.mapper.ProfilationMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ProfilationDAO;
-import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.middleware.db.entities.PnProfilation;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 
 import it.pagopa.pn.platform.service.ProfilationService;
 import it.pagopa.pn.platform.utils.DateUtils;
-import it.pagopa.pn.platform.utils.TimelineGenerator;
 import it.pagopa.pn.platform.utils.TimelineGeneratorProfilation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.Year;
-import java.time.temporal.ChronoField;
-import java.util.Calendar;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
@@ -87,12 +83,48 @@ public class ProfilationServiceImpl implements ProfilationService {
 
     @Override
     public Mono<PageableProfilationResponseDto> getAllProfilations(String paId, String taxId, String ipaId, Integer page, Integer size) {
-        return null;
+        Pageable pageable = PageRequest.of(page - 1, size);
+        return this.externalRegistriesClient.getOnePa(paId)
+                .flatMap(paInfoDto ->
+                        this.profilationDAO.getAllProfilations(paId)
+                                .map(pnProfilations -> {
+                                            log.debug("Build timeline.");
+                                            TimelineGeneratorProfilation timelineGeneratorProfilation = new TimelineGeneratorProfilation(paId, pnProfilations);
+                                            return timelineGeneratorProfilation.extractAllProfilations(DateUtils.toInstant(paInfoDto.getAgreementDate()));
+                                        }
+                                )
+                )
+                .map(list -> ProfilationMapper.toPageableResponse(pageable, list));
     }
+
+
 
     @Override
     public Mono<ProfilationPeriod> validatedProfilation(String paId, String referenceYear) {
-        return null;
+        Instant refYearInstant = Instant.now();
+        if (referenceYear == null) {
+            return Mono.error(new PnGenericException(REFERENCE_YEAR_NOT_CORRECT, REFERENCE_YEAR_NOT_CORRECT.getMessage()));
+        }
+
+        if (Integer.parseInt(referenceYear) < DateUtils.getYear(refYearInstant)){
+            return Mono.error(new PnGenericException(PROFILATION_EXPIRED, PROFILATION_EXPIRED.getMessage()));
+        }
+
+        if (Integer.parseInt(referenceYear) > DateUtils.getYear(refYearInstant)){
+            return Mono.error(new PnGenericException(FUTURE_PROFILATION_NOT_EXIST, FUTURE_PROFILATION_NOT_EXIST.getMessage()));
+        }
+
+        return this.profilationDAO.getProfilationDetail(paId, referenceYear)
+                .switchIfEmpty(Mono.error(new PnGenericException(PROFILATION_NOT_EXISTED, PROFILATION_NOT_EXISTED.getMessage())))
+                .flatMap(pnProfilation -> {
+                    if (pnProfilation.getStatus().equalsIgnoreCase(ProfilationPeriod.StatusEnum.DRAFT.getValue())
+                            && pnProfilation.getDeadlineDate().isAfter(refYearInstant)){
+                        pnProfilation.setStatus(ProfilationPeriod.StatusEnum.VALIDATED.getValue());
+                        pnProfilation.setLastModifiedDate(refYearInstant);
+                        profilationDAO.createOrUpdate(pnProfilation);
+                    }
+                    return Mono.just(pnProfilation);
+                }).map(ProfilationMapper::profilationPeriodToDto);
     }
 
 }

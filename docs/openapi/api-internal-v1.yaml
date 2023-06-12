@@ -643,7 +643,7 @@ components:
         actual:
           $ref: '#/components/schemas/ProfilationPeriod'
         history:
-          $ref: '#/components/schemas/Page'
+          $ref: '#/components/schemas/PageForProfilation'
       additionalProperties: false
       required:
         - content
@@ -736,6 +736,59 @@ components:
         - size
         - totalElements
         - totalPages
+
+    PageForProfilation:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfilationHistory'
+          maxItems: 999999999
+          minItems: 1
+        empty:
+          type: boolean
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        numberOfElements:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        size:
+          type: integer
+          format: int32
+          maximum: 1024
+          minimum: 1
+        sort:
+          $ref: '#/components/schemas/Sort'
+        totalElements:
+          type: integer
+          format: int64
+          maximum: 1
+          minimum: 1
+        totalPages:
+          type: integer
+          format: int64
+          maximum: 999999999
+          minimum: 1
+      additionalProperties: false
+      required:
+        - number
+        - numberOfElements
+        - size
+        - totalElements
+        - totalPages
+
 
     InfoDownloadDTO:
       type: object
