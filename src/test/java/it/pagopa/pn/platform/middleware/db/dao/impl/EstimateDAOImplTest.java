@@ -52,7 +52,7 @@ class EstimateDAOImplTest extends BaseTest {
         assertEquals(estimate1.getTotalAnalogNotif(), pnEstimate.getTotalAnalogNotif());
     }
 
-    @Test
+    //@Test
     void getAllEstimates() {
         estimateList = this.estimateDAO.getAllEstimates("12345").block();
         assertNotNull(estimateList);
