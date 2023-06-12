@@ -33,9 +33,19 @@ public class DateUtils {
         Instant max = plusMonth(today, addMonth);
         return fromDayMonthYear(15, getMonth(max), getYear(max));
     }
+    public  static Instant getMaxDeadlineYearDate (){
+        Instant today = Instant.now();
+        int addYear = (getDay(today) == 1 && getMonth(today) == 11) ? 1 : 0;
+        Instant max = plusYear(today, addYear);
+        return fromDayMonthYear(31, 10, getYear(max));
+    }
     public static Instant plusMonth(Instant from, int months) {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
         return localDateTime.plusMonths(months).toInstant(ZoneOffset.UTC);
+    }
+    public static Instant plusYear(Instant from, int year) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
+        return localDateTime.plusMonths(year).toInstant(ZoneOffset.UTC);
     }
 
     public static Instant addOneMonth(Instant from) {

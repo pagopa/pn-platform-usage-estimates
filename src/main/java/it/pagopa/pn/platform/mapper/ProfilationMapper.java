@@ -4,6 +4,7 @@ package it.pagopa.pn.platform.mapper;
 import it.pagopa.pn.platform.middleware.db.entities.PnProfilation;
 import it.pagopa.pn.platform.model.PageModel;
 import it.pagopa.pn.platform.model.TimelineProfilation;
+import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 
 import java.time.Instant;
@@ -28,6 +29,36 @@ public class ProfilationMapper {
         pnProfilation.setLastModifiedDate(Instant.now().truncatedTo(ChronoUnit.SECONDS));
 
         return pnProfilation;
+    }
+
+    public static ProfilationDetail profilationDetailToDto(PnProfilation pnProfilation, PaInfoDto paInfoDto){
+        ProfilationDetail profilationDetail = new ProfilationDetail();
+        PAInfo paInfo = new PAInfo();
+        Billing billing = new Billing();
+
+        //INFO PA
+        paInfo.setPaId(paInfoDto.getId());
+        paInfo.setPaName(paInfoDto.getName());
+        paInfo.setTaxId(paInfoDto.getTaxId());
+
+        //FATTURAZIONE
+        billing.setMailAddress(pnProfilation.getMailAddress());
+        billing.setDescription(pnProfilation.getDescription());
+        billing.setSplitPayment(pnProfilation.getSplitPayment());
+
+        //PERIODO
+        profilationDetail.setPaInfo(paInfo);
+        profilationDetail.setBilling(billing);
+
+        profilationDetail.setStatus(ProfilationDetail.StatusEnum.fromValue(pnProfilation.getStatus()));
+        profilationDetail.setReferenceYear(pnProfilation.getReferenceYear());
+        if (pnProfilation.getLastModifiedDate() != null){
+            profilationDetail.setLastModifiedDate(Date.from(pnProfilation.getLastModifiedDate()));
+        }
+        profilationDetail.setDeadlineDate(Date.from(pnProfilation.getDeadlineDate()));
+        profilationDetail.setShowEdit(pnProfilation.getDeadlineDate().isAfter(Instant.now()));
+
+        return profilationDetail;
     }
 
     public static ProfilationPeriod profilationPeriodToDto(PnProfilation pnProfilation) {

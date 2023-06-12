@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -50,7 +51,7 @@ public class ProfilationServiceImpl implements ProfilationService {
 
         return this.externalRegistriesClient.getOnePa(paId)
                 .flatMap(paInfo -> {
-                    Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(OffsetDateTime.from(Instant.parse("2022-10-15T10:15:30Z"))));
+                    Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
 
                     //controllo per vedere se anno che mi viene passato è prima di data di onboarding -> ERRORE
                     if (Integer.parseInt(referenceYear) < DateUtils.getYear(onBoardingDate)) {
@@ -78,7 +79,32 @@ public class ProfilationServiceImpl implements ProfilationService {
 
     @Override
     public Mono<ProfilationDetail> getProfilationDetail(String paId, String referenceYear) {
-        return null;
+        Instant refYearInstant = Instant.now();
+
+        if (referenceYear == null) {
+            return Mono.error(new PnGenericException(REFERENCE_YEAR_NOT_CORRECT, REFERENCE_YEAR_NOT_CORRECT.getMessage()));
+        }
+
+        Instant deadlineRefYear = DateUtils.minusYear(refYearInstant,1);
+        Instant maxDeadlineDate = DateUtils.getMaxDeadlineYearDate();
+
+
+        if (maxDeadlineDate.isBefore(deadlineRefYear))
+            return Mono.error(new PnGenericException(PROFILATION_NOT_EXISTED, PROFILATION_NOT_EXISTED.getMessage(), HttpStatus.NOT_FOUND));
+
+        return this.externalRegistriesClient.getOnePa(paId)
+                .zipWhen(paInfo -> {
+                    Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
+                    if (refYearInstant.isBefore(onBoardingDate)){
+                        log.error("ReferenceYear inconsistent with onBoardindate {}", onBoardingDate);
+                        return Mono.error(new PnGenericException(PROFILATION_NOT_EXISTED, PROFILATION_NOT_EXISTED.getMessage(), HttpStatus.NOT_FOUND));
+                    }
+                    log.debug("Retrieve profilation from db and create it if it's not present.");
+                    return this.profilationDAO.getProfilationDetail(paId,referenceYear)
+                            .switchIfEmpty(Mono.just(TimelineGeneratorProfilation.getProfilation(paId, referenceYear, null)));
+                })
+                .map(paInfoAndProfilation -> ProfilationMapper.profilationDetailToDto(paInfoAndProfilation.getT2(), paInfoAndProfilation.getT1()));
+
     }
 
     @Override
