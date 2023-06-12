@@ -17,5 +17,6 @@ import org.springframework.context.annotation.Import;
 public class PnPlatformConfig {
     private String clientExternalRegistriesBasepath;
     private String xPagopaExtchCxId;
+    private String safeStorageCxId;
 
 }
