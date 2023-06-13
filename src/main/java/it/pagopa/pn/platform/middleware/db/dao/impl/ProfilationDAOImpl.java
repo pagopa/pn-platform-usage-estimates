@@ -19,7 +19,7 @@ public class ProfilationDAOImpl  extends BaseDAO<PnProfilation> implements Profi
                            DynamoDbAsyncClient dynamoDbAsyncClient,
                            AwsPropertiesConfig awsPropertiesConfig) {
         super(dynamoDbEnhancedAsyncClient, dynamoDbAsyncClient,
-                awsPropertiesConfig.getDynamodbEstimateTable(), PnProfilation.class);
+                awsPropertiesConfig.getDynamodbProfilationTable(), PnProfilation.class);
     }
 
     @Override

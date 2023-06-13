@@ -45,7 +45,7 @@ public class ProfilationServiceImpl implements ProfilationService {
             return Mono.error(new PnGenericException(PROFILATION_EXPIRED, PROFILATION_EXPIRED.getMessage()));
         }
 
-        if (Integer.parseInt(referenceYear) > DateUtils.getYear(refTodayInstant)){
+        if (Integer.parseInt(referenceYear) >= DateUtils.getYear(refTodayInstant) + 2){
             return Mono.error(new PnGenericException(FUTURE_PROFILATION_NOT_EXIST, FUTURE_PROFILATION_NOT_EXIST.getMessage()));
         }
 
@@ -63,11 +63,11 @@ public class ProfilationServiceImpl implements ProfilationService {
                             .switchIfEmpty(Mono.just(TimelineGeneratorProfilation.getProfilation(paId,referenceYear, null )))
                             .flatMap(pnProfilation -> {
                                 if (pnProfilation.getStatus().equals(ProfilationPeriod.StatusEnum.ABSENT.getValue())) {
-                                    log.error("PnEstimate inconsistent status. {}", pnProfilation.getStatus());
-                                    return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                                    log.error("PnProfilation inconsistent status. {}", pnProfilation.getStatus());
+                                    return Mono.error(new PnGenericException(PROFILATION_NOT_EXISTED, PROFILATION_NOT_EXISTED.getMessage()));
                                 } else if (pnProfilation.getStatus().equalsIgnoreCase(ProfilationPeriod.StatusEnum.VALIDATED.getValue())
-                                        && status.equalsIgnoreCase(EstimatePeriod.StatusEnum.DRAFT.getValue())) {
-                                    log.error("PnEstimate inconsistent status. {}", pnProfilation.getStatus());
+                                        && status.equalsIgnoreCase(ProfilationPeriod.StatusEnum.DRAFT.getValue())) {
+                                    log.error("PnProfilation inconsistent status. {}", pnProfilation.getStatus());
                                     return Mono.error(new PnGenericException(OPERATION_NOT_ALLOWED, OPERATION_NOT_ALLOWED.getMessage()));
                                 }
                                 PnProfilation forSave = ProfilationMapper.dtoToPnProfilation(pnProfilation, status, profilationCreateBody);

@@ -1,11 +1,9 @@
 package it.pagopa.pn.platform.utils;
 
-import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
+
 import it.pagopa.pn.platform.middleware.db.entities.PnProfilation;
-import it.pagopa.pn.platform.model.Month;
-import it.pagopa.pn.platform.model.TimelineEstimate;
 import it.pagopa.pn.platform.model.TimelineProfilation;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
+import it.pagopa.pn.platform.rest.v1.dto.ProfilationDetail;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
@@ -53,9 +51,9 @@ public class TimelineGeneratorProfilation {
     /**
      *
      * @param paId
-     * @param referenceYear sarà null se chiamato internamente dalla classe TimelineGenerator
+     * @param referenceYear sarà null se chiamato internamente dalla classe TimelineGeneratorProfilation
      * @param deadline può essere null solo se chiamato da Create-GetDetail
-     * @return PnEstimate
+     * @return PnProfilation
      */
     public static PnProfilation getProfilation(String paId, String referenceYear, Instant deadline){
         if (referenceYear == null && deadline == null) throw new AssertionError();
@@ -78,10 +76,10 @@ public class TimelineGeneratorProfilation {
         }
 
 
-        profilation.setStatus(EstimateDetail.StatusEnum.DRAFT.getValue());
+        profilation.setStatus(ProfilationDetail.StatusEnum.DRAFT.getValue());
         if (profilation.getDeadlineDate().isBefore(Instant.now())){
             log.info("stima assente");
-            profilation.setStatus(EstimateDetail.StatusEnum.ABSENT.getValue());
+            profilation.setStatus(ProfilationDetail.StatusEnum.ABSENT.getValue());
         }
 
         return profilation;
