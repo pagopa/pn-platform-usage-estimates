@@ -33,16 +33,16 @@ public class TimelineGeneratorProfilation {
         while (currentDeadlineDate.isAfter(onboardingDate)){
             if (this.dbList != null && !this.dbList.isEmpty() && lastYear < this.dbList.size()
                     && DateUtils.isEqualYear(currentDeadlineDate, this.dbList.get(lastYear).getDeadlineDate())) {
-                log.info("Sto per aggiungere stima presente a db nello storico: {}", currentDeadlineDate);
+                log.info("Sto per aggiungere profilazione presente a db nello storico: {}", currentDeadlineDate);
                 this.timelineList.add(this.dbList.get(lastYear));
                 lastYear++;
             } else {
-                log.info("Aggiungo stima generata per {} deadlineDate", currentDeadlineDate);
+                log.info("Aggiungo profilazione generata per {} deadlineDate", currentDeadlineDate);
                 this.timelineList.add(getProfilation(this.paId, null, currentDeadlineDate));
             }
 
-            currentDeadlineDate = DateUtils.minusMonth(currentDeadlineDate, 1);
-            log.info("Decrementata currentDate di un mese: {}", currentDeadlineDate);
+            currentDeadlineDate = DateUtils.minusYear(currentDeadlineDate, 1);
+            log.info("Decrementata currentDate di un anno: {}", currentDeadlineDate);
         }
         log.info("Ritorno storico completo {}", timelineList.size());
         return new TimelineProfilation(this.timelineList.get(0), timelineList.subList(1, timelineList.size()));
@@ -57,7 +57,7 @@ public class TimelineGeneratorProfilation {
      */
     public static PnProfilation getProfilation(String paId, String referenceYear, Instant deadline){
         if (referenceYear == null && deadline == null) throw new AssertionError();
-        log.info("Creo la stima.");
+        log.info("Creo la prifilazione.");
         PnProfilation profilation = new PnProfilation();
         profilation.setPaId(paId);
         if (deadline == null) {
@@ -66,7 +66,7 @@ public class TimelineGeneratorProfilation {
             profilation.setDeadlineDate(DateUtils.minusYear(refYearInstant, 1));
             profilation.setReferenceYear(referenceYear);
         } else if (referenceYear == null) {
-            log.info("caso in cui non mi è stato passato referenceMonth");
+            log.info("caso in cui non mi è stato passato referenceYear");
             Instant refYearInstant = DateUtils.addOneYear(deadline);
 
             String refYear = String.valueOf(DateUtils.getYear(refYearInstant));
@@ -78,7 +78,7 @@ public class TimelineGeneratorProfilation {
 
         profilation.setStatus(ProfilationDetail.StatusEnum.DRAFT.getValue());
         if (profilation.getDeadlineDate().isBefore(Instant.now())){
-            log.info("stima assente");
+            log.info("profilazione assente");
             profilation.setStatus(ProfilationDetail.StatusEnum.ABSENT.getValue());
         }
 
