@@ -55,7 +55,7 @@ class EstimateApiControllerTest {
     }
 
 
-    //@Test
+    @Test
     void getAllEstimate() {
         PageableEstimateResponseDto response = new PageableEstimateResponseDto();
         String path = "/pn-usage-estimates/estimates";
@@ -64,6 +64,7 @@ class EstimateApiControllerTest {
 
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path(path).build())
+                .header("originFe", "PN-PLATFORM-NOTIFICATION-FE")
                 .exchange()
                 .expectStatus().isOk();
     }
