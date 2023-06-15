@@ -57,12 +57,12 @@ class EstimateDAOImplTest extends BaseTest {
         estimateList = this.estimateDAO.getAllEstimates("12345").block();
         assertNotNull(estimateList);
         System.out.println(estimateList);
-        assertEquals(2, estimateList.size());
+        assertEquals(3, estimateList.size());
     }
 
 
     private void initialValue() {
-        estimate1.setPaId("12345");
+        estimate1.setPaId("1234");
         estimate1.setDeadlineDate(DateUtils.getStartDeadLineDate());
         estimate1.setReferenceMonth("MAR-2023");
         estimate1.setStatus("VALIDATED");
@@ -78,7 +78,7 @@ class EstimateDAOImplTest extends BaseTest {
         this.estimateDAO.createOrUpdate(estimate1).block();
         log.info("ESTIMATE CREATED");
 
-        estimate2.setPaId("12345");
+        estimate2.setPaId("1234");
         estimate2.setDeadlineDate(DateUtils.getStartDeadLineDate());
         estimate2.setReferenceMonth("APR-2023");
         estimate2.setStatus("DRAFT");
