@@ -5,5 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface ActivityReportMetaDAO {
 
-    Mono<PnActivityReport> createMetaData ();
+    Mono<PnActivityReport> createMetaData (PnActivityReport pnActivityReport);
+
 }

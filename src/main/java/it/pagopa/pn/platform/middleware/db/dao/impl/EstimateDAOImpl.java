@@ -43,5 +43,9 @@ public class EstimateDAOImpl extends BaseDAO<PnEstimate> implements EstimateDAO 
         return Mono.fromFuture(this.get(paId, referenceMonth).thenApply(item -> item));
     }
 
+    public Mono<List<PnEstimate>> getAllEstimates() {
+        return this.getByFilter(null, null, null, null, null).collectList();
+    }
+
 
 }

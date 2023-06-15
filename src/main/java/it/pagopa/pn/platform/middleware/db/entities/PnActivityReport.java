@@ -35,10 +35,10 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     private String status;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_BUCKET_NAME)}))
-    private Instant bucketName;
+    private String bucketName;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_FILE_ZIP_KEY)}))
-    private Instant fileZipKey;
+    private String fileZipKey;
 
     @Override
     public int compareTo(@NotNull PnActivityReport o) {
