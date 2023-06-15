@@ -679,7 +679,7 @@ components:
         type: string
 
     OriginFe:
-      name: origin-fe
+      name: originFe
       schema:
         type: string
         enum:
