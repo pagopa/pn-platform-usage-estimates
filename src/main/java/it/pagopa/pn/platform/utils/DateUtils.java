@@ -106,7 +106,7 @@ public class DateUtils {
     public static Instant toInstant (OffsetDateTime agreementDate){
         if (agreementDate != null) {
             return agreementDate.toInstant();
-        }else {
+        } else {
             throw new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage());
         }
     }

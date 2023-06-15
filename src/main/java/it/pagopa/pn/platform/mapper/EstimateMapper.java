@@ -46,6 +46,7 @@ public class EstimateMapper {
         pageableEstimateResponseDto.getHistory().setFirst(pagePnEstimate.isFirst());
         pageableEstimateResponseDto.getHistory().setLast(pagePnEstimate.isLast());
         pageableEstimateResponseDto.getHistory().setEmpty(pagePnEstimate.isEmpty());
+
         pageableEstimateResponseDto.getHistory().setContent(pagePnEstimate.mapTo(EstimateMapper::estimatesToDto));
         return pageableEstimateResponseDto;
     }
