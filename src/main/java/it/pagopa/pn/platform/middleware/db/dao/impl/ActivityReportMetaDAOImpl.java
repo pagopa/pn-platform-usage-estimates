@@ -1,22 +1,27 @@
 package it.pagopa.pn.platform.middleware.db.dao.impl;
 
+import it.pagopa.pn.platform.config.AwsPropertiesConfig;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.middleware.db.dao.common.BaseDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 
-public class ActivityReportMetaDAOImpl extends BaseDAO implements ActivityReportMetaDAO {
+@Repository
+@Slf4j
+public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> implements ActivityReportMetaDAO {
     protected ActivityReportMetaDAOImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient,
                                         DynamoDbAsyncClient dynamoDbAsyncClient,
-                                        String tableName,
-                                        Class aClass) {
-        super(dynamoDbEnhancedAsyncClient, dynamoDbAsyncClient, tableName, aClass);
+                                        AwsPropertiesConfig awsPropertiesConfig) {
+        super(dynamoDbEnhancedAsyncClient, dynamoDbAsyncClient,
+                awsPropertiesConfig.getDynamodbEstimateTable(), PnActivityReport.class);
     }
 
     @Override
-    public Mono<PnActivityReport> createMetaData(PnActivityReport pnActivityReport) {
-        return Mono.fromFuture(this.put(pnActivityReport).thenApply(item -> item));
+    public void createMetaData(PnActivityReport pnActivityReport) {
+        Mono.fromFuture(this.put(pnActivityReport).thenApply(item -> item));
     }
 }

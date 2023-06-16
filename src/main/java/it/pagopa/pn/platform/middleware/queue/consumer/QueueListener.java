@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.messaging.listener.SqsMessageDeletionPolicy;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import it.pagopa.pn.platform.exception.PnGenericException;
-import it.pagopa.pn.platform.mapper.ActivityReportMapper;
-import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
-import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.ActivityReport;
 import it.pagopa.pn.platform.service.QueueListenerService;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +27,7 @@ public class QueueListener {
     @SqsListener(value = "${pn.platform-usage-estimates.queue-data-lake}", deletionPolicy = SqsMessageDeletionPolicy.ALWAYS)
     public void pullFromDataLakeQueue(@Payload String node, @Headers Map<String, Object> headers){
 
+        log.info(node);
         ActivityReport activityReport = convertToObject(node, ActivityReport.class);
         this.queueListenerService.activityReportListener(activityReport);
 
