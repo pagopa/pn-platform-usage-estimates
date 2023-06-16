@@ -174,7 +174,7 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
     @Override
-    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileId) {
+    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileKey) {
         return null;
     }
 

@@ -190,7 +190,7 @@ paths:
       operationId: getAllEstimateFile
       x-api-permissions:
         - 'estimate-read'
-      summary: estrae tutte le fatture delle stime associate al pa e al mese di riferimento.
+      summary: estrae tutti i consuntivi delle stime associate al paId e al mese di riferimento.
       description: API che consente di estrarre l'elenco fatture delle stime.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
@@ -219,7 +219,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/file/{fileId}:
+  /pn-usage-estimates/estimate/{paId}/file/{fileKey}:
     get:
       tags:
         - Estimate
@@ -230,7 +230,7 @@ paths:
       description: API che consente il download della fattura del mese di riferimento.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/pathFileKey'
       responses:
         '200':
           description: OK
@@ -591,7 +591,7 @@ components:
     InfoDownloadDTO:
       type: object
       properties:
-        idFile:
+        fileKey:
           type: string
           example: 'A12C34D56789E0'
           format: '/[^A-Za-z0-9]+/'
@@ -671,8 +671,8 @@ components:
       schema:
         type: string
 
-    pathFileId:
-      name: fileId
+    pathFileKey:
+      name: fileKey
       in: path
       required: true
       schema:

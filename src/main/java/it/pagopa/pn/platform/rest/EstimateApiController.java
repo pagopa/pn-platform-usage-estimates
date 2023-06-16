@@ -28,8 +28,8 @@ public class EstimateApiController implements EstimateApi {
     }
 
     @Override
-    public Mono<ResponseEntity<InfoDownloadDTO>> downloadEstimateFile(String paId, String fileId, ServerWebExchange exchange) {
-        return this.estimateService.downloadEstimateFile(paId, fileId).map(ResponseEntity::ok);
+    public Mono<ResponseEntity<InfoDownloadDTO>> downloadEstimateFile(String paId, String fileKey, ServerWebExchange exchange) {
+        return this.estimateService.downloadEstimateFile(paId, fileKey).map(ResponseEntity::ok);
     }
 
     @Override
