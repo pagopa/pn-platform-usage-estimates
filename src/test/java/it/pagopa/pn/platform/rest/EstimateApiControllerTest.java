@@ -2,7 +2,6 @@ package it.pagopa.pn.platform.rest;
 
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
-import it.pagopa.pn.platform.utils.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import java.sql.Date;
-import java.time.Instant;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @WebFluxTest(controllers = {EstimateApiController.class})
 class EstimateApiControllerTest {
@@ -59,11 +54,12 @@ class EstimateApiControllerTest {
     void getAllEstimate() {
         PageableEstimateResponseDto response = new PageableEstimateResponseDto();
         String path = "/pn-usage-estimates/estimates";
-        Mockito.when(estimateService.getAllEstimate(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        Mockito.when(estimateService.getAllEstimate(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Mono.just(response));
 
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path(path).build())
+                .header("originFe", "PN-PLATFORM-NOTIFICATION-FE")
                 .exchange()
                 .expectStatus().isOk();
     }

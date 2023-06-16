@@ -13,7 +13,9 @@ public enum ExceptionTypeEnum {
     REFERENCE_YEAR_NOT_CORRECT("REFERENCE_YEAR_NOT_CORRECT", "L'anno di riferimento non è nel formato corretto"),
     PROFILATION_EXPIRED("PROFILATION_EXPIRED", "Profilazione scaduta"),
     PROFILATION_NOT_EXISTED("PROFILATION_NOT_EXISTED", "La profilazione non è presente nel sistema"),
-    FUTURE_PROFILATION_NOT_EXIST("FUTURE_PROFILATION_NOT_EXIST", "Profilazione futura non esistente");
+    FUTURE_PROFILATION_NOT_EXIST("FUTURE_PROFILATION_NOT_EXIST", "Profilazione futura non esistente"),
+    BAD_REQUEST("BAD_REQUEST", "Campi obbligatori mancanti.");
+
 
     private final String title;
     private final String message;

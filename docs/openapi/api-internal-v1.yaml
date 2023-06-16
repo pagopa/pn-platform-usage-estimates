@@ -117,6 +117,7 @@ paths:
       summary: ritorna elenco di stime in base alla partita iva, al nome della pa o al codice Ipa.
       description: API che estrae la lista di stime
       parameters:
+        - $ref: '#/components/parameters/OriginFe'
         - $ref: '#/components/parameters/queryPaId'
         - $ref: '#/components/parameters/queryTaxId'
         - $ref: '#/components/parameters/queryIpaId'
@@ -878,6 +879,16 @@ components:
       required: true
       schema:
         type: string
+
+    OriginFe:
+      name: originFe
+      schema:
+        type: string
+        enum:
+          - PN-PLATFORM-NOTIFICATION-FE
+          - PN-HELPDESK-FE
+      in: header
+      required: true
 
     queryPaId:
       name: paId

@@ -7,15 +7,10 @@ import it.pagopa.pn.platform.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,8 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class EstimateDAOImplTest extends BaseTest {
     @Autowired
     private EstimateDAO estimateDAO;
-    private List<PnEstimate> estimateList = new ArrayList<>();
-
     private final PnEstimate estimate1 = new PnEstimate();
     private final PnEstimate estimate2 = new PnEstimate();
 
@@ -54,7 +47,7 @@ class EstimateDAOImplTest extends BaseTest {
 
     @Test
     void getAllEstimates() {
-        estimateList = this.estimateDAO.getAllEstimates("12345").block();
+        List<PnEstimate> estimateList = this.estimateDAO.getAllEstimates("12345").block();
         assertNotNull(estimateList);
         System.out.println(estimateList);
         assertEquals(3, estimateList.size());
@@ -74,7 +67,6 @@ class EstimateDAOImplTest extends BaseTest {
         estimate1.setMailAddress("mailAddress");
         estimate1.setSplitPayment(true);
         estimate1.setRecordVersion(1);
-        estimateList.add(estimate1);
         this.estimateDAO.createOrUpdate(estimate1).block();
         log.info("ESTIMATE CREATED");
 
@@ -90,7 +82,6 @@ class EstimateDAOImplTest extends BaseTest {
         estimate2.setMailAddress("mailAddress");
         estimate2.setSplitPayment(true);
         estimate2.setRecordVersion(1);
-        estimateList.add(estimate2);
         this.estimateDAO.createOrUpdate(estimate2).block();
         log.info("ESTIMATE CREATED");
 

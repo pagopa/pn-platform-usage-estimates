@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
@@ -147,7 +148,10 @@ public class EstimateServiceImpl implements EstimateService {
 
     //PER HELP DESK
     @Override
-    public Mono<PageableEstimateResponseDto> getAllEstimate(String paId, String taxId, String ipaId, Integer page, Integer size) {
+    public Mono<PageableEstimateResponseDto> getAllEstimate(String originFe, String paId, String taxId, String ipaId, Integer page, Integer size) {
+        if (!originFe.equals("PN-PLATFORM-NOTIFICATION-FE") || paId ==  null ) {
+            throw new PnGenericException(BAD_REQUEST, BAD_REQUEST.getMessage(), HttpStatus.BAD_REQUEST);
+        }
         Pageable pageable = PageRequest.of(page - 1, size);
         return this.externalRegistriesClient.getOnePa(paId)
                 .flatMap(paInfoDto ->
