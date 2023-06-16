@@ -39,7 +39,7 @@ public class ExternalRegistriesClientImpl extends BaseClient implements External
     @Override
     public Mono<PaInfoDto> getOnePa(String id) {
         log.debug("Retrieve detail PA from external registries with id {}", id);
-        return this.infoPaApi.getOnePa(id)
+        return this.infoPaApi.getOnePa("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a")
                 .retryWhen(
                         Retry.backoff(2, Duration.ofMillis(500))
                                 .filter(throwable -> throwable instanceof TimeoutException || throwable instanceof ConnectException)

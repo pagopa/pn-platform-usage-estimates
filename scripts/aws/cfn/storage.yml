@@ -75,6 +75,28 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  ProfilationDynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-PnProfilation'
+      AttributeDefinitions:
+        - AttributeName: "paId"
+          AttributeType: "S"
+        - AttributeName: "referenceYear"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "paId"
+          KeyType: "HASH"
+        - AttributeName: "referenceYear"
+          KeyType: "RANGE"
+      KinesisStreamSpecification:
+        StreamArn: !Ref CdcKinesisSourceStreamArn
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      BillingMode: "PAY_PER_REQUEST"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
 Outputs:
   EstimateUsageBucketName:
     Description: Name of s3 bucket
@@ -87,3 +109,11 @@ Outputs:
   EstimateDynamoTableArn:
     Description: ARN of dynamodb table containing request
     Value: !Sub '${EstimateDynamoTable.Arn}'
+
+  ProfilationDynamoTableName:
+    Description: Name of dynamodb table containing request
+    Value: !Ref ProfilationDynamoTable
+
+  ProfilationDynamoTableArn:
+    Description: ARN of dynamodb table containing request
+    Value: !Sub '${ProfilationDynamoTable.Arn}'

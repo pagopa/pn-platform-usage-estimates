@@ -255,24 +255,144 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/billing/{paId}/profilation:
-    get:
+  /pn-usage-estimates/{paId}/profilation/{referenceYear}:
+    post:
       tags:
-        - Billing
-      operationId: getProfilationDetail
+        - Profilation
+      operationId: createOrUpdateProfilation
       x-api-permissions:
-        - 'profilation-read'
-      summary: ritorna il dettaglio della profilazione in base al paId.
-      description: API che ritorna il dettaglio della profilazione.
+        - 'profilation-write'
+      summary: salva o aggiorna i dati della profilazione.
+      description: API che salva o aggiorna i dettagli della profilazione.
       parameters:
+        - $ref: '#/components/parameters/queryStatus'
         - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfilationCreateBody'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Profiling'
+                $ref: '#/components/schemas/ProfilationPeriod'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+
+  /pn-usage-estimates/profilations:
+    get:
+      tags:
+        - Profilation
+      operationId: getAllProfilations
+      x-api-permissions:
+        - 'profilation-read'
+      summary: Ritorna elenco di profilazioni in base alla partita iva, al nome della pa o al codice Ipa.
+      description: API che estrae la lista di profilazioni
+      parameters:
+        - $ref: '#/components/parameters/queryPaId'
+        - $ref: '#/components/parameters/queryTaxId'
+        - $ref: '#/components/parameters/queryIpaId'
+        - $ref: '#/components/parameters/queryNumberPage'
+        - $ref: '#/components/parameters/querySizePage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableProfilationResponseDto'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pn-usage-estimates/profilation/{paId}/detail/{referenceYear}:
+    get:
+      tags:
+        - Profilation
+      operationId: getProfilationDetail
+      x-api-permissions:
+        - 'profilation-read'
+      summary: ritorna il dettaglio della profilazione in base al paId e al referenceYear.
+      description: API che ritorna il dettaglio della profilazione.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilationDetail'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+
+  /pn-usage-estimates/{paId}/profilation/{referenceYear}/validated:
+    get:
+      tags:
+        - Profilation
+      operationId: validatedProfilation
+      x-api-permissions:
+        - 'profilation-read'
+      summary: Validazione profilazione.
+      description: API che consente di modificare lo stato di una profilazione.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilationPeriod'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -353,7 +473,6 @@ components:
           type: string
       required:
         - code
-
 
     EstimateDetail:
       type: object
@@ -464,6 +583,11 @@ components:
         - $ref: '#/components/schemas/Estimate'
         - $ref: '#/components/schemas/Billing'
 
+    ProfilationCreateBody:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Billing'
+
     EstimatePeriod:
       type: object
       properties:
@@ -478,6 +602,21 @@ components:
       type: object
       allOf:
         - $ref: '#/components/schemas/Period'
+
+
+    ProfilationPeriod:
+      type: object
+      properties:
+        billing:
+          $ref: '#/components/schemas/Billing'
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
+
+    ProfilationHistory:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
+
 
 
     listEstimateFile:
@@ -495,6 +634,17 @@ components:
           $ref: '#/components/schemas/EstimatePeriod'
         history:
           $ref: '#/components/schemas/Page'
+      additionalProperties: false
+      required:
+        - content
+
+    PageableProfilationResponseDto:
+      type: object
+      properties:
+        actual:
+          $ref: '#/components/schemas/ProfilationPeriod'
+        history:
+          $ref: '#/components/schemas/PageForProfilation'
       additionalProperties: false
       required:
         - content
@@ -588,6 +738,59 @@ components:
         - totalElements
         - totalPages
 
+    PageForProfilation:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfilationHistory'
+          maxItems: 999999999
+          minItems: 1
+        empty:
+          type: boolean
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        numberOfElements:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        size:
+          type: integer
+          format: int32
+          maximum: 1024
+          minimum: 1
+        sort:
+          $ref: '#/components/schemas/Sort'
+        totalElements:
+          type: integer
+          format: int64
+          maximum: 1
+          minimum: 1
+        totalPages:
+          type: integer
+          format: int64
+          maximum: 999999999
+          minimum: 1
+      additionalProperties: false
+      required:
+        - number
+        - numberOfElements
+        - size
+        - totalElements
+        - totalPages
+
+
     InfoDownloadDTO:
       type: object
       properties:
@@ -610,37 +813,36 @@ components:
             - UPLOADING
             - UPLOADED
 
-    Profiling:
+    ProfilationDetail:
       type: object
       properties:
         paInfo:
           $ref: '#/components/schemas/PAInfo'
-        profiles:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProfilingDetail'
-          maxItems: 999999999
-          minItems: 1
-
-    ProfilingDetail:
-      type: object
-      properties:
         billing:
           $ref: '#/components/schemas/Billing'
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
+
+    PeriodForProfilation:
+      type: object
+      properties:
         status:
           type: string
-          enum: [ CREATED, VALIDATED, IN_PROGRESS, ENDED ]
+          enum: [ VALIDATED, DRAFT, ABSENT ]
         deadlineDate:
           type: string
           format: date
         referenceYear:
           type: string
+        lastModifiedDate:
+          type: string
+          format: date
         showEdit:
           type: boolean
       required:
-        - billing
         - status
         - referenceYear
+        - deadlineDate
         - showEdit
 
     Billing:

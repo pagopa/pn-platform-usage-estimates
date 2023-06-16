@@ -27,9 +27,9 @@ class ExternalRegistriesClientImplTest extends BaseTest.WithMockServer {
 
     @Test
     void externalRegistriesClient200RequestTest() {
-        PaInfoDto paInfo = externalRegistriesClient.getOnePa("12345").block();
+        PaInfoDto paInfo = externalRegistriesClient.getOnePa("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a").block();
         Assertions.assertNotNull(paInfo);
-        Assertions.assertEquals(paInfo.getId(), "12345");
+        Assertions.assertEquals(paInfo.getId(), "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a");
     }
 
     @Test
@@ -45,7 +45,7 @@ class ExternalRegistriesClientImplTest extends BaseTest.WithMockServer {
     void externalRegistriesClient500Test(){
         externalRegistriesClient.getOnePa("12345")
                 .onErrorResume(WebClientResponseException.class, ex -> {
-                    Assertions.assertEquals(ex.getStatusCode(), HttpStatus.NOT_FOUND);
+                    Assertions.assertEquals(ex.getStatusCode(), HttpStatus.NOT_FOUND);//TODO da controllare
                     return Mono.empty();
                 }).block();
     }
