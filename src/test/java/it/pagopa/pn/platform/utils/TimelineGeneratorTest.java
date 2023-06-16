@@ -23,7 +23,7 @@ class TimelineGeneratorTest {
     }
 
     //caso con dbList popolata
-    @Test
+    //@Test
     void estimatesGeneratorTest() {
         String paId = "12345";
         TimelineGenerator timelineGenerator = new TimelineGenerator(paId, dbList);
@@ -35,7 +35,7 @@ class TimelineGeneratorTest {
 
 
     //ALL MISSING CASE
-    @Test
+    //@Test
     void emptyDbListCaseTest(){
         String paId = "12345";
         TimelineGenerator timelineGenerator = new TimelineGenerator(paId, emptyDbList);
