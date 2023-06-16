@@ -18,4 +18,6 @@ public class PnPlatformConfig {
     private String clientExternalRegistriesBasepath;
     private String xPagopaExtchCxId;
 
+    private String datalakeBucketName;
+    private String datalakeReportKey;
 }
