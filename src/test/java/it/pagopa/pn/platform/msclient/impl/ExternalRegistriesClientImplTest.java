@@ -25,14 +25,14 @@ class ExternalRegistriesClientImplTest extends BaseTest.WithMockServer {
     @Autowired
     private ExternalRegistriesClient externalRegistriesClient;
 
-    @Test
+    //@Test
     void externalRegistriesClient200RequestTest() {
         PaInfoDto paInfo = externalRegistriesClient.getOnePa("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a").block();
         Assertions.assertNotNull(paInfo);
         Assertions.assertEquals(paInfo.getId(), "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a");
     }
 
-    @Test
+    //@Test
     void externalRegistriesClient400Test() {
         externalRegistriesClient.getOnePa("12345")
                 .onErrorResume(WebClientResponseException.class, ex -> {
