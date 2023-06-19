@@ -3,47 +3,79 @@ package it.pagopa.pn.platform.utils;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.TimelineEstimate;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+
+@AutoConfigureMockMvc
 class TimelineGeneratorTest {
     private List<PnEstimate> dbList ;
     private List<PnEstimate> emptyDbList ;
     private List<PnEstimate> timelineList = new ArrayList<>();
-    Instant onboardingDate = Instant.parse("2022-07-02T10:15:30Z"); //settare in base al test che si vuole fare
+    Instant onboardingDate = Instant.parse("2023-01-02T10:15:30Z"); //settare in base al test che si vuole fare
+    Instant currentDateMock = Instant.parse("2023-05-19T10:15:30Z");
+    private MockedStatic<DateUtils> dateUtilsMockedStatic;
 
     @BeforeEach
     void setUp(){
         this.initialize();
     }
 
+
+    @AfterEach
+    void afterEach(){
+        if (dateUtilsMockedStatic != null){
+            dateUtilsMockedStatic.close();
+        }
+    }
+
     //caso con dbList popolata
-    //@Test
+    @Test
     void estimatesGeneratorTest() {
         String paId = "12345";
+        this.dateUtilsMockedStatic = Mockito.mockStatic(DateUtils.class);
+        dateUtilsMockedStatic.when(DateUtils::getStartDeadLineDate)
+                .thenReturn(currentDateMock);
+
+        Mockito.when(DateUtils.minusMonth(any(), anyInt()))
+                .thenCallRealMethod();
+
         TimelineGenerator timelineGenerator = new TimelineGenerator(paId, dbList);
+
         TimelineEstimate timelineList = timelineGenerator.extractAllEstimates(onboardingDate);
         System.out.println(timelineList);
         Assertions.assertNotNull(timelineList.getActual());
-        Assertions.assertEquals(11, timelineList.getHistory().size());
+        Assertions.assertEquals(4, timelineList.getHistory().size());
     }
 
 
     //ALL MISSING CASE
-    //@Test
+    @Test
     void emptyDbListCaseTest(){
         String paId = "12345";
+        this.dateUtilsMockedStatic = Mockito.mockStatic(DateUtils.class);
+        dateUtilsMockedStatic.when(DateUtils::getStartDeadLineDate)
+                .thenReturn(currentDateMock);
+
+        Mockito.when(DateUtils.minusMonth(any(), anyInt()))
+                .thenCallRealMethod();
         TimelineGenerator timelineGenerator = new TimelineGenerator(paId, emptyDbList);
         TimelineEstimate timelineList = timelineGenerator.extractAllEstimates(onboardingDate);
         System.out.println(timelineList);
         Assertions.assertTrue(emptyDbList.isEmpty());
         Assertions.assertNotNull(timelineList.getActual());
-        Assertions.assertEquals(11,timelineList.getHistory().size());
+        Assertions.assertEquals(4,timelineList.getHistory().size());
     }
 
 
@@ -94,6 +126,7 @@ class TimelineGeneratorTest {
 
 
     private void initialize(){
+
         dbList = new ArrayList<>();
         emptyDbList = new ArrayList<>();
         PnEstimate estimate = new PnEstimate();

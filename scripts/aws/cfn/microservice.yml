@@ -190,8 +190,9 @@ Resources:
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}, http://localhost:3000, https://portale-pa.dev.pn.pagopa.it'
         ContainerEnvEntry3: !Sub 'AWS_DYNAMODBESTIMATETABLE=${EstimateDynamoTableName}'
-        ContainerEnvEntry4: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
-        ContainerEnvEntry5: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
+        ContainerEnvEntry4: !Sub 'AWS_DYNAMODBPROFILATIONTABLE=${ProfilationDynamoTableName}'
+        ContainerEnvEntry5: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
+        ContainerEnvEntry6: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -229,6 +230,8 @@ Resources:
             Resource:
               - !Sub "${EstimateDynamoTableArn}"
               - !Sub "${EstimateDynamoTableArn}/*"
+              - !Sub "${ProfilationDynamoTableName}"
+              - !Sub "${ProfilationDynamoTableArn}/*"
 
   PlatformUsageEstimatesMicroserviceCloudWatchDashboard:
     Type: AWS::CloudFormation::Stack
