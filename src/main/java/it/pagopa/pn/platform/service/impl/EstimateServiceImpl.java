@@ -4,16 +4,20 @@ import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
+import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
+import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
+import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
 import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import it.pagopa.pn.platform.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +50,12 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Autowired
     private EstimateDAO estimateDAO;
+
+    @Autowired
+    private ActivityReportMetaDAO activityReportMetaDAO;
+
+    @Autowired
+    private SafeStorageClient safeStorageClient;
 
     @Autowired
     private S3Bucket s3Bucket;
@@ -170,12 +180,26 @@ public class EstimateServiceImpl implements EstimateService {
     //PER CONSUNTIVI
     @Override
     public Mono<Flux<InfoDownloadDTO>> getAllEstimateFile(String paId, String referenceMonth) {
-        return null;
+        return this.activityReportMetaDAO.findAllFromPaId(paId, referenceMonth)
+                .collectList()
+                .map(pnActivityReportsList -> {
+                    //mappare campi con Mapper
+                    return null;
+                }) ;
     }
 
     @Override
     public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileKey) {
-        return null;
+
+        return this.safeStorageClient.getFile(fileKey)
+                .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
+                .map(file -> {
+                        //viene popolato campo url (presigned url)
+                        //mappare campi in InfoDownloadDto
+                        //tornare dto finale
+                        return null;
+                });
+
     }
 
     private Instant getInstantFromMonth(String referenceMonth) throws PnGenericException {

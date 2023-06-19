@@ -11,7 +11,7 @@ public enum ExceptionTypeEnum {
     OPERATION_NOT_ALLOWED("OPERATION_NOT_ALLOWED", "Operazione non consentita"),
     ESTIMATE_EXPIRED("ESTIMATE_EXPIRED", "Stima scaduta"),
     BAD_REQUEST("BAD_REQUEST", "Campi obbligatori mancanti."),
-
+    FILE_KEY_NOT_EXISTED("FILE_KEY_NOT_EXISTED", "File key non esistente"),
     MAPPER_ERROR("MAPPER_ERROR", "Non è stato possibile mappare l'oggetto richiesto");
 
     private final String title;
