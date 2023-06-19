@@ -13,7 +13,7 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 
 aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb create-table \
-    --table-name AAAA \
+    --table-name ProfilationDynamoTable \
     --attribute-definitions \
         AttributeName=paId,AttributeType=S \
         AttributeName=referenceYear,AttributeType=S \
