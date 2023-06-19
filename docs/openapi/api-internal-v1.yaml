@@ -606,9 +606,6 @@ components:
           example: 'http://file.com'
         status:
           type: string
-          enum:
-            - UPLOADING
-            - UPLOADED
 
     Profiling:
       type: object

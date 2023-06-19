@@ -4,6 +4,7 @@ import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
+import it.pagopa.pn.platform.mapper.FileMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
@@ -182,10 +183,8 @@ public class EstimateServiceImpl implements EstimateService {
     public Mono<Flux<InfoDownloadDTO>> getAllEstimateFile(String paId, String referenceMonth) {
         return this.activityReportMetaDAO.findAllFromPaId(paId, referenceMonth)
                 .collectList()
-                .map(pnActivityReportsList -> {
-                    //mappare campi con Mapper
-                    return null;
-                }) ;
+                .map(pnActivityReportsList ->
+                        Flux.fromIterable(FileMapper.fromPnActivityReportToInfoDownloadDTO(paId,referenceMonth,pnActivityReportsList))) ;
     }
 
     @Override
@@ -193,12 +192,7 @@ public class EstimateServiceImpl implements EstimateService {
 
         return this.safeStorageClient.getFile(fileKey)
                 .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
-                .map(file -> {
-                        //viene popolato campo url (presigned url)
-                        //mappare campi in InfoDownloadDto
-                        //tornare dto finale
-                        return null;
-                });
+                .map(file -> FileMapper.toDownloadFile(paId,file));
 
     }
 
