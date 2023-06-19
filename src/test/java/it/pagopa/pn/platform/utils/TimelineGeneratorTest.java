@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 
-@AutoConfigureMockMvc
+
 class TimelineGeneratorTest {
     private List<PnEstimate> dbList ;
     private List<PnEstimate> emptyDbList ;
