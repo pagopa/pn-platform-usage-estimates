@@ -31,6 +31,7 @@ public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> impleme
 
     @Override
     public Flux<PnActivityReport>findAllFromPaId(String paId, String referenceMonth) {
+        //TODO inserire refMonth in keyBuild
         QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId));
         String filter = "";
         Map<String, AttributeValue> values = new HashMap<>();
@@ -38,7 +39,7 @@ public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> impleme
             filter += ":referenceMonth=" + PnActivityReport.COL_REFERENCE_MONTH;
             values.put(":referenceMonth", AttributeValue.builder().s(referenceMonth).build());
         }
-        return this.getByFilter(conditional, null, values, filter);
+        return this.getByFilter(conditional, PnActivityReport.INDEX_PA_REF_MONTH, values, filter);
     }
 
     //@Override
