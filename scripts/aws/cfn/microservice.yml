@@ -230,7 +230,7 @@ Resources:
             Resource:
               - !Sub "${EstimateDynamoTableArn}"
               - !Sub "${EstimateDynamoTableArn}/*"
-              - !Sub "${ProfilationDynamoTableName}"
+              - !Sub "${ProfilationDynamoTableArn}"
               - !Sub "${ProfilationDynamoTableArn}/*"
 
   PlatformUsageEstimatesMicroserviceCloudWatchDashboard:
