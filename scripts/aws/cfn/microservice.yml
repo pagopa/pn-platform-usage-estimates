@@ -221,6 +221,7 @@ Resources:
           - !Ref BatchSecurityGroup
         Subnets: !Split [ ",", !Ref SubnetsIds ]
       State: ENABLED
+
   ## Service Role for batch
   BatchServiceRole:
     Type: AWS::IAM::Role
@@ -274,7 +275,7 @@ Resources:
             awslogs-stream-prefix: !Sub '${ProjectName}-${AppName}-logs'
         Environment:
           - Name: RETENTION_EXPORT_TYPE
-            Value: !Ref RetentionExportTypes
+            Value: '1234'
       PlatformCapabilities:
         - FARGATE
       Tags:
@@ -282,6 +283,47 @@ Resources:
         Name: JobDefinitionTag
         Expected: MergeTag
 
+  BatchTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-${AppName}-taskexec-role'
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ ecs-tasks.amazonaws.com ]
+            Action: [ "sts:AssumeRole" ]
+      Path: /
+      ManagedPolicyArns:
+        - !Ref LogsExporterPolicyArn
+      Policies:
+        - PolicyName: AmazonECSTaskExecutionRolePolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:BatchGetItem'
+                  - 'dynamodb:BatchWriteItem'
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:TransactGetItems'
+                  - 'dynamodb:TransactWriteItems'
+                  - 'dynamodb:UpdateItem'
+                Resource:
+                  - !Sub "${EstimateDynamoTableArn}"
+                  - !Sub "${EstimateDynamoTableArn}/*"
+                  - !Sub "${ProfilationDynamoTableArn}"
+                  - !Sub "${ProfilationDynamoTableArn}/*"
   ## JobQueue
   JobQueue:
     Type: AWS::Batch::JobQueue
