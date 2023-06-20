@@ -207,6 +207,17 @@ Parameters:
 
 Resources:
 
+  ## JobQueue
+  JobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref ComputeEnvironment
+      State: ENABLED
+      Priority: 1
+      JobQueueName: !Sub '${ProjectName}-${AppName}-job-queue'
+
   ## Compute Environment
   ComputeEnvironment:
     Type: AWS::Batch::ComputeEnvironment
@@ -267,12 +278,6 @@ Resources:
             Type: MEMORY
         JobRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
         ExecutionRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
-        LogConfiguration:
-          LogDriver: awslogs
-          Options:
-            awslogs-group: !Ref "BatchLogGroup"
-            awslogs-region: !Ref AWS::Region
-            awslogs-stream-prefix: !Sub '${ProjectName}-${AppName}-logs'
         Environment:
           - Name: RETENTION_EXPORT_TYPE
             Value: '1234'
@@ -294,8 +299,6 @@ Resources:
               Service: [ ecs-tasks.amazonaws.com ]
             Action: [ "sts:AssumeRole" ]
       Path: /
-      ManagedPolicyArns:
-        - !Ref LogsExporterPolicyArn
       Policies:
         - PolicyName: AmazonECSTaskExecutionRolePolicy
           PolicyDocument:
@@ -324,17 +327,6 @@ Resources:
                   - !Sub "${EstimateDynamoTableArn}/*"
                   - !Sub "${ProfilationDynamoTableArn}"
                   - !Sub "${ProfilationDynamoTableArn}/*"
-  ## JobQueue
-  JobQueue:
-    Type: AWS::Batch::JobQueue
-    Properties:
-      ComputeEnvironmentOrder:
-        - Order: 1
-          ComputeEnvironment: !Ref ComputeEnvironment
-      State: ENABLED
-      Priority: 1
-      JobQueueName: !Sub '${ProjectName}-${AppName}-job-queue'
-
 
 # PN-Platform-usage-estimates microservice
   PlatformUsageEstimatesMicroservice:
