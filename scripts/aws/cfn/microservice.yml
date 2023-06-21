@@ -176,7 +176,9 @@ Parameters:
       - FARGATE_SPOT
       - FARGATE
     Description: Enter FARGATE_SPOT or FARGATE.
-
+  ScheduleExpression:
+    Type: String
+    Description: 'Schedule rule expression'
   MaxvCpus:
     Type: String
     Default: 128
@@ -327,6 +329,24 @@ Resources:
                   - !Sub "${EstimateDynamoTableArn}/*"
                   - !Sub "${ProfilationDynamoTableArn}"
                   - !Sub "${ProfilationDynamoTableArn}/*"
+  ScheduledRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "ScheduledRule"
+      ScheduleExpression: !Ref ScheduleExpression
+      State: "ENABLED"
+      Targets:
+        - Arn:
+            Fn::GetAtt:
+              - "JobQueue"
+              - "JobQueueArn"
+          RoleArn: !GetAtt "ScheduleRole.Arn"
+          Id: !Sub '${ProjectName}-${AppName}-TargetBatchQueue'
+          BatchParameters:
+            JobDefinition: !Ref BatchDeanonimizingJobDefinition
+            JobName: !Sub '${ProjectName}-${AppName}-rule-job'
+            RetryStrategy:
+              Attempts: !Ref BatchJobMaxAttempts
 
 # PN-Platform-usage-estimates microservice
   PlatformUsageEstimatesMicroservice:
