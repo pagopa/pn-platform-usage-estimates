@@ -165,7 +165,7 @@ Parameters:
 
   AppName:
     Type: String
-    Default: 'pn-platform-usage-estimates-be'
+    Default: 'platform-usage-estimates-be'
     Description: App Name
 
   # Batch properties
