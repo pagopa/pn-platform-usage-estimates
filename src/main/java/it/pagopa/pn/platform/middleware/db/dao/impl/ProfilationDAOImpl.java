@@ -29,7 +29,7 @@ public class ProfilationDAOImpl  extends BaseDAO<PnProfilation> implements Profi
 
     @Override
     public Mono<List<PnProfilation>> getAllProfilations(String paId) {
-        QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId));
+        QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId, null));
         return this.getByFilter(conditional, null, null, null, null).collectList();
     }
 
