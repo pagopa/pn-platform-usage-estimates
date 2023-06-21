@@ -155,6 +155,49 @@ Parameters:
     Type: String
     Description: 'ARN of dynamodb table containing request'
 
+  ProfilationDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing request'
+
+  ProfilationDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing request'
+
+  AppName:
+    Type: String
+    Default: 'platform-usage-estimates-be'
+    Description: App Name
+
+  # Batch properties
+  ComputeResourceType:
+    Type: String
+    Default: FARGATE_SPOT
+    AllowedValues:
+      - FARGATE_SPOT
+      - FARGATE
+    Description: Enter FARGATE_SPOT or FARGATE.
+  ScheduleExpression:
+    Type: String
+    Description: 'Schedule rule expression'
+  MaxvCpus:
+    Type: String
+    Default: 128
+    Description: The maximum number of Amazon EC2 vCPUs that an environment can reach.
+
+  VCPU:
+    Type: String
+    Default: 0.25
+    Description: The number of vCPUs reserved for the container.
+
+  Memory:
+    Type: String
+    Default: 2048
+    Description: The memory hard limit (in MiB) present to the container.
+
+  BatchJobMaxAttempts:
+    Type: Number
+    Default: 1
+    Description: 'The maximum number of batch job attempts.'
   SandboxSafeStorageBaseUrl:
     Type: String
     Description: 'Url to the SafeStorage microservice'
@@ -169,6 +212,168 @@ Parameters:
 
 
 Resources:
+
+  ## JobQueue
+  JobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref ComputeEnvironment
+      State: ENABLED
+      Priority: 1
+      JobQueueName: !Sub '${AppName}-job-queue'
+
+  ## Compute Environment
+  ComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      Type: MANAGED
+      ServiceRole: !Ref BatchServiceRole
+      ComputeEnvironmentName: !Sub '${AppName}-compute-environment'
+      ComputeResources:
+        MaxvCpus: !Ref MaxvCpus
+        Type: !Ref ComputeResourceType
+        SecurityGroupIds:
+          - !Ref BatchSecurityGroup
+        Subnets: !Split [ ",", !Ref SubnetsIds ]
+      State: ENABLED
+
+  ## Service Role for batch
+  BatchServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: batch.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
+
+  BatchSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Batch Security Group
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: "0.0.0.0/0"
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: "0.0.0.0/0"
+
+  ## Job Definition
+  ## https://docs.aws.amazon.com/batch/latest/userguide/fargate.html#fargate-job-definitions
+  BatchDeanonimizingJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      Type: container
+      PropagateTags: true
+      JobDefinitionName: !Sub '${AppName}-job-definition'
+      ContainerProperties:
+        Image: !Ref ContainerImageUri
+        FargatePlatformConfiguration:
+          PlatformVersion: LATEST
+        ResourceRequirements:
+          - Value: !Ref VCPU
+            Type: VCPU
+          - Value: !Ref Memory
+            Type: MEMORY
+        JobRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
+        ExecutionRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
+        Environment:
+          - Name: RETENTION_EXPORT_TYPE
+            Value: '1234'
+      PlatformCapabilities:
+        - FARGATE
+      Tags:
+        Service: Batch
+        Name: JobDefinitionTag
+        Expected: MergeTag
+
+  BatchTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AppName}-taskexec-role'
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ ecs-tasks.amazonaws.com ]
+            Action: [ "sts:AssumeRole" ]
+      Path: /
+      Policies:
+        - PolicyName: AmazonECSTaskExecutionRolePolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:BatchGetItem'
+                  - 'dynamodb:BatchWriteItem'
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:TransactGetItems'
+                  - 'dynamodb:TransactWriteItems'
+                  - 'dynamodb:UpdateItem'
+                Resource:
+                  - !Sub "${EstimateDynamoTableArn}"
+                  - !Sub "${EstimateDynamoTableArn}/*"
+                  - !Sub "${ProfilationDynamoTableArn}"
+                  - !Sub "${ProfilationDynamoTableArn}/*"
+
+  ### Event Rule setup ###
+  ScheduleRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AppName}-batch-schedule-role'
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ events.amazonaws.com ]
+            Action: [ "sts:AssumeRole" ]
+      Path: /
+      Policies:
+        - PolicyName: !Sub '${AppName}-batch-schedule-policy'
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "batch:SubmitJob"
+                Resource: "*"
+
+  ScheduledRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "ScheduledRule"
+      ScheduleExpression: !Ref ScheduleExpression
+      State: "ENABLED"
+      Targets:
+        - Arn:
+            Fn::GetAtt:
+              - "JobQueue"
+              - "JobQueueArn"
+          RoleArn: !GetAtt "ScheduleRole.Arn"
+          Id: !Sub '${AppName}-TargetBatchQueue'
+          BatchParameters:
+            JobDefinition: !Ref BatchDeanonimizingJobDefinition
+            JobName: !Sub '${AppName}-rule-job'
+            RetryStrategy:
+              Attempts: !Ref BatchJobMaxAttempts
+
 # PN-Platform-usage-estimates microservice
   PlatformUsageEstimatesMicroservice:
     Type: AWS::CloudFormation::Stack
@@ -194,12 +399,15 @@ Resources:
         ContainerEnvEntry1: !Sub 'AWS_REGIONCODE=${AWS::Region}'
         ContainerEnvEntry2: !Sub 'CORS_ALLOWED_DOMAINS=${CorsAllowedDomains}, http://localhost:3000, https://portale-pa.dev.pn.pagopa.it'
         ContainerEnvEntry3: !Sub 'AWS_DYNAMODBESTIMATETABLE=${EstimateDynamoTableName}'
-        ContainerEnvEntry4: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
-        ContainerEnvEntry5: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
-        ContainerEnvEntry6: !Sub 'AWS_DYNAMODBACTIVITYREPORTTABLE{ActivityReportDynamoTableName}'
-        ContainerEnvEntry7: !Sub 'PN_PAPERCHANNEL_CLIENTSAFESTORAGEBASEPATH=${SandboxSafeStorageBaseUrl}'
-        ContainerEnvEntry8: !Sub 'PN_PAPERCHANNEL_SAFESTORAGECXID=${SafeStorageCxId}'
-        ContainerEnvEntry9: !Sub 'PN_PAPERCHANNEL_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
+        ContainerEnvEntry4: !Sub 'AWS_DYNAMODBPROFILATIONTABLE=${ProfilationDynamoTableName}'
+        ContainerEnvEntry5: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
+        ContainerEnvEntry6: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
+        ContainerEnvEntry7: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
+        ContainerEnvEntry8: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
+        ContainerEnvEntry9: !Sub 'AWS_DYNAMODBACTIVITYREPORTTABLE{ActivityReportDynamoTableName}'
+        ContainerEnvEntry10: !Sub 'PN_PAPERCHANNEL_CLIENTSAFESTORAGEBASEPATH=${SandboxSafeStorageBaseUrl}'
+        ContainerEnvEntry11: !Sub 'PN_PAPERCHANNEL_SAFESTORAGECXID=${SafeStorageCxId}'
+        ContainerEnvEntry12: !Sub 'PN_PAPERCHANNEL_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -237,6 +445,8 @@ Resources:
             Resource:
               - !Sub "${EstimateDynamoTableArn}"
               - !Sub "${EstimateDynamoTableArn}/*"
+              - !Sub "${ProfilationDynamoTableArn}"
+              - !Sub "${ProfilationDynamoTableArn}/*"
               - !Sub "${ActivityReportDynamoTableArn}"
               - !Sub "${ActivityReportDynamoTableArn}/*"
 
@@ -277,3 +487,4 @@ Resources:
         IntendedUsage: WEB
         APIGatewayARNs: !GetAtt PlatformUsageEstimatesMicroservicePublicWebAPI.Outputs.APIGatewayARN
         Limit: 6000
+

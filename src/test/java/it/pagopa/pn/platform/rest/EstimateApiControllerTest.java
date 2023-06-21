@@ -59,7 +59,7 @@ class EstimateApiControllerTest {
 
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path(path).build())
-                .header("origin-fe", "PN-PLATFORM-NOTIFICATION-FE")
+                .header("originFe", "PN-PLATFORM-NOTIFICATION-FE")
                 .exchange()
                 .expectStatus().isOk();
     }

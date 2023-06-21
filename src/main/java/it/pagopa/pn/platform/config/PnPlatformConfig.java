@@ -20,4 +20,6 @@ public class PnPlatformConfig {
     private String safeStorageCxId;
     private String clientDataVaultBasepath;
 
+    private String datalakeBucketName;
+    private String datalakeReportKey;
 }

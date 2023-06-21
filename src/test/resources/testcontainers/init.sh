@@ -9,7 +9,8 @@ for qn in  $( echo $queues | tr " " "\n" ) ; do
     echo ending create queue
 done
 
-echo " - Create pn-platform TABLES"
+echo " - Create EstimateDynamoTable"
+
 aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb create-table \
     --table-name EstimateDynamoTable \
@@ -21,6 +22,22 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
         AttributeName=referenceMonth,KeyType=RANGE \
     --provisioned-throughput \
         ReadCapacityUnits=10,WriteCapacityUnits=5
+
+echo " - Create ProfilationDynamoTable"
+
+aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    dynamodb create-table \
+    --table-name ProfilationDynamoTable \
+    --attribute-definitions \
+        AttributeName=paId,AttributeType=S \
+        AttributeName=referenceYear,AttributeType=S \
+    --key-schema \
+        AttributeName=paId,KeyType=HASH \
+        AttributeName=referenceYear,KeyType=RANGE \
+    --provisioned-throughput \
+        ReadCapacityUnits=10,WriteCapacityUnits=5
+
+echo " - Inserting element on db"
 
 aws  --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb put-item \

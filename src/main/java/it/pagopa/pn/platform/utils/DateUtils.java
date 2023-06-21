@@ -8,6 +8,7 @@ import org.springframework.data.util.Pair;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.ESTIMATE_NOT_EXISTED;
 
@@ -32,9 +33,19 @@ public class DateUtils {
         Instant max = plusMonth(today, addMonth);
         return fromDayMonthYear(15, getMonth(max), getYear(max));
     }
+    public  static Instant getMaxDeadlineYearDate (){
+        Instant today = Instant.now();
+        int addYear = (getDay(today) == 1 && getMonth(today) == 11) ? 1 : 0;
+        Instant max = plusYear(today, addYear);
+        return fromDayMonthYear(31, 10, getYear(max));
+    }
     public static Instant plusMonth(Instant from, int months) {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
         return localDateTime.plusMonths(months).toInstant(ZoneOffset.UTC);
+    }
+    public static Instant plusYear(Instant from, int year) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
+        return localDateTime.plusMonths(year).toInstant(ZoneOffset.UTC);
     }
 
     public static Instant addOneMonth(Instant from) {
@@ -42,9 +53,19 @@ public class DateUtils {
         return localDateTime.plusMonths(1).toInstant(ZoneOffset.UTC);
     }
 
+    public static Instant addOneYear(Instant from) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
+        return localDateTime.plusYears(1).toInstant(ZoneOffset.UTC);
+    }
+
     public static Instant minusMonth(Instant from, int months) {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
         return localDateTime.minusMonths(months).toInstant(ZoneOffset.UTC);
+    }
+
+    public static Instant minusYear(Instant from, int years) {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(from, ZONE_ID);
+        return localDateTime.minusYears(years).toInstant(ZoneOffset.UTC);
     }
 
     public static Instant fromDayMonthYear(int day, int month, int year){
@@ -92,6 +113,12 @@ public class DateUtils {
                 && localDateTimeUno.getYear() == localDateTimeDue.getYear();
     }
 
+    public static boolean isEqualYear (Instant uno, Instant due){
+        LocalDateTime localDateTimeUno = LocalDateTime.ofInstant(uno, ZONE_ID);
+        LocalDateTime localDateTimeDue = LocalDateTime.ofInstant(due, ZONE_ID);
+        return localDateTimeUno.getYear() == localDateTimeDue.getYear();
+    }
+
     public static Instant getStartDeadLineDate (){
 
         Instant now = Instant.now();
@@ -101,6 +128,17 @@ public class DateUtils {
             return DateUtils.addOneMonth(DateUtils.fromDayMonthYear(15, month, year));
         }
         return DateUtils.fromDayMonthYear(15, month, year);
+    }
+
+    public static Instant getStartDeadLineDateProfilation (){
+
+        Instant now = Instant.now();
+        int month = DateUtils.getMonth(now);
+        int year = DateUtils.getYear(now);
+        if (DateUtils.getDay(now) == 1 && DateUtils.getMonth(now) == 11){
+            return DateUtils.addOneYear(DateUtils.fromDayMonthYear(31, 10, year));
+        }
+        return DateUtils.fromDayMonthYear(31, 10, year);
     }
 
     public static Instant toInstant (OffsetDateTime agreementDate){
