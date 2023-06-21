@@ -285,8 +285,14 @@ Resources:
         JobRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
         ExecutionRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
         Environment:
-          - Name: RETENTION_EXPORT_TYPE
-            Value: '1234'
+          - Name: AWS_REGIONCODE
+            Value: ${AWS::Region}
+          - Name: AWS_DYNAMODBESTIMATETABLE
+            Value: ${EstimateDynamoTableName}
+          - Name: AWS_DYNAMODBPROFILATIONTABLE
+            Value: ${ProfilationDynamoTableName}
+          - Name: AWS_DYNAMODBACTIVITYREPORTTABLE
+            Value: ${ActivityReportDynamoTableName}
       PlatformCapabilities:
         - FARGATE
       Tags:
@@ -402,12 +408,12 @@ Resources:
         ContainerEnvEntry4: !Sub 'AWS_DYNAMODBPROFILATIONTABLE=${ProfilationDynamoTableName}'
         ContainerEnvEntry5: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
         ContainerEnvEntry6: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
-        ContainerEnvEntry7: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTEXTERNALREGISTRIESBASEPATH=http://${ApplicationLoadBalancerDomain}:8080'
-        ContainerEnvEntry8: !Sub 'AWS_BUCKET_NAME=${EstimateUsageBucketName}'
-        ContainerEnvEntry9: !Sub 'AWS_DYNAMODBACTIVITYREPORTTABLE{ActivityReportDynamoTableName}'
-        ContainerEnvEntry10: !Sub 'PN_PAPERCHANNEL_CLIENTSAFESTORAGEBASEPATH=${SandboxSafeStorageBaseUrl}'
-        ContainerEnvEntry11: !Sub 'PN_PAPERCHANNEL_SAFESTORAGECXID=${SafeStorageCxId}'
-        ContainerEnvEntry12: !Sub 'PN_PAPERCHANNEL_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
+        ContainerEnvEntry8: !Sub 'AWS_DYNAMODBACTIVITYREPORTTABLE=${ActivityReportDynamoTableName}'
+        ContainerEnvEntry9: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTSAFESTORAGEBASEPATH=${SandboxSafeStorageBaseUrl}'
+        ContainerEnvEntry10: !Sub 'PN_PLATFORMUSAGEESTIMATES_SAFESTORAGECXID=${SafeStorageCxId}'
+        ContainerEnvEntry11: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
+        ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${JobQueue.Properties.JobQueueName}'
+        ContainerEnvEntry13: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${BatchDeanonimizingJobDefinition.Properties.JobDefinitionName}'
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds

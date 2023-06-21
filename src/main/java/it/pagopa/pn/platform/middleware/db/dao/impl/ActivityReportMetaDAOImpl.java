@@ -6,7 +6,6 @@ import it.pagopa.pn.platform.middleware.db.dao.common.BaseDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
@@ -23,12 +22,13 @@ public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> impleme
     }
 
     @Override
-    public void createMetaData(PnActivityReport pnActivityReport) {
-        Mono.fromFuture(this.put(pnActivityReport).thenApply(item -> item));
+    public Mono<PnActivityReport> createMetaData(PnActivityReport pnActivityReport) {
+        return Mono.fromFuture(this.put(pnActivityReport).thenApply(item -> item));
     }
 
     @Override
     public Mono<PnActivityReport> getCSVName(String paId, String fileKey) {
+
         QueryConditional conditionalKey = CONDITION_EQUAL_TO.apply(keyBuild(paId, fileKey));
         return this.getByFilter(conditionalKey, null, null, null, null).collectList()
                 .flatMap(item -> {

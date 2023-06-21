@@ -22,7 +22,7 @@ public class QueueListenerServiceImpl implements QueueListenerService {
 
         return Flux.fromStream(activityReport.getRecords().stream())
                 .map(ActivityReportMapper::toEntity)
-                .doOnNext(pnActivityReport -> activityReportMetaDAO.createMetaData(pnActivityReport))
+                .flatMap(pnActivityReport -> activityReportMetaDAO.createMetaData(pnActivityReport))
                 .map(pnActivityReport -> {
                  // schedulare il BATCH
                  return pnActivityReport;

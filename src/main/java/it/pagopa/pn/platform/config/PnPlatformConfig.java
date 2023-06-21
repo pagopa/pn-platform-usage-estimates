@@ -22,4 +22,7 @@ public class PnPlatformConfig {
 
     private String datalakeBucketName;
     private String datalakeReportKey;
+
+    private String jobQueueName;
+    private String jobDefinitionName;
 }

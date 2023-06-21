@@ -2,12 +2,10 @@ package it.pagopa.pn.platform.service.impl;
 
 import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.encription.model.DataEncryption;
-import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.ActivityReportMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
 import it.pagopa.pn.platform.service.DeanonymizingService;
-import it.pagopa.pn.platform.utils.Utility;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
@@ -20,9 +18,9 @@ import java.util.List;
 
 public class DeanonymizingServiceImpl implements DeanonymizingService {
     @Autowired
-    private static ActivityReportMetaDAO activityReportMetaDAO;
+    private ActivityReportMetaDAO activityReportMetaDAO;
     @Autowired
-    private static S3Bucket s3Bucket;
+    private S3Bucket s3Bucket;
     private DataEncryption dataEncryption;
 
     public Mono<List<ActivityReportCSV>> getCSV(String paId, String fileKey) {
@@ -46,7 +44,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
                 });
     }
 
-    private List<ActivityReportCSV> deanonymizingRaw (List<ActivityReportCSV> activityReportCSVList){
+    private List<ActivityReportCSV> deanonymizingRaw(List<ActivityReportCSV> activityReportCSVList){
         List<ActivityReportCSV> fileDeanonymizing = new ArrayList<>();
         activityReportCSVList.forEach(activityReportCSV -> {
            if (activityReportCSV.getRecipientTaxId() != null){
