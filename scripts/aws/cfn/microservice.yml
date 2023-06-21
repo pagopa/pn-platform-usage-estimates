@@ -453,3 +453,8 @@ Resources:
         IntendedUsage: WEB
         APIGatewayARNs: !GetAtt PlatformUsageEstimatesMicroservicePublicWebAPI.Outputs.APIGatewayARN
         Limit: 6000
+
+
+Outputs:
+  BatchJobDefinitionArn:
+    Value: !Ref BatchDeanonimizingJobDefinition
