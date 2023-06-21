@@ -184,16 +184,45 @@ public class EstimateServiceImpl implements EstimateService {
     @Override
     public Flux<InfoDownloadDTO> getAllEstimateFile(String paId, String referenceMonth) {
         return this.activityReportMetaDAO.findAllFromPaId(paId, referenceMonth)
-                .filter(pnActivityReport ->  pnActivityReport.getStatus().equalsIgnoreCase("READY"))
+                .filter(pnActivityReport ->  pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY)))
                 .map(pnActivityReport -> FileMapper.fromPnActivityReportToInfoDownloadDTO(paId, referenceMonth, pnActivityReport));
     }
 
     @Override
-    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileKey) {
-        return this.activityReportMetaDAO.findByPaIdAndFileKey(paId, fileKey)
+    public Mono<PageableDeanonymizedFilesResponseDto> getAllDeanonymizedFiles(String paId, String status, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page-1, size);
+
+        //caso in cui non mi viene passato lo status -> mostro tutti i record
+        if (StringUtils.isBlank(status)){
+            return activityReportMetaDAO.findAllFromPaId(paId)
+                    .collectList()
+                    .map(list ->
+                            FileMapper.toPagination(pageable, list)
+                    )
+                    .map(FileMapper::toPageableResponse);
+        }
+
+        //caso in cui mi viene passato uno dei 4 stati previsti
+        else if (checkStatusReport(status)){
+            return activityReportMetaDAO.findAllFromPaIdAndStatus(paId, status)
+                    .filter(activityReport -> activityReport.getStatus().equals(status))
+                    .collectList()
+                    .map(list ->
+                            FileMapper.toPagination(pageable, list)
+                    )
+                    .map(FileMapper::toPageableResponse);
+
+        }
+        //mi viene passato uno stato diverso da quei 4
+        return Mono.error(new PnGenericException(STATUS_NOT_CORRECT, STATUS_NOT_CORRECT.getMessage()));
+    }
+
+    @Override
+    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileZipKey) {
+        return this.activityReportMetaDAO.findByPaIdAndFileKey(paId, fileZipKey)
                 .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
                 .flatMap(pnActivityReport -> {
-                    if(!pnActivityReport.getStatus().equalsIgnoreCase("READY")) {
+                    if(!pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY))) {
                         return Mono.error(new PnGenericException(STATUS_NOT_READY, STATUS_NOT_READY.getMessage()));
                     }
                     return this.safeStorageClient.getFile(pnActivityReport.getFileZipKey())
@@ -258,5 +287,12 @@ public class EstimateServiceImpl implements EstimateService {
                 }
             }
         }
+    }
+
+    private Boolean checkStatusReport(String status){
+        return status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.READY)) ||
+                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.ENQUEUED)) ||
+                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.ERROR)) ||
+                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.DEANONIMIZING));
     }
 }

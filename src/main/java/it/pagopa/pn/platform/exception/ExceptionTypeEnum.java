@@ -14,7 +14,8 @@ public enum ExceptionTypeEnum {
     FILE_KEY_NOT_EXISTED("FILE_KEY_NOT_EXISTED", "File key non esistente"),
     MAPPER_ERROR("MAPPER_ERROR", "Non è stato possibile mappare l'oggetto richiesto"),
     REPORT_NOT_EXISTS("REPORT_NOT_EXISTS", "Il report non esiste"),
-    STATUS_NOT_READY("STATUS_NOT_READY", "Il file non è pronto");
+    STATUS_NOT_READY("STATUS_NOT_READY", "Il file non è pronto"),
+    STATUS_NOT_CORRECT("STATUS_NOT_CORRECT", "Lo stato passato non è corretto");
 
     private final String title;
     private final String message;

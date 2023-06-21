@@ -219,7 +219,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/file/{fileKey}:
+  /pn-usage-estimates/estimate/{paId}/file/{fileZipKey}:
     get:
       tags:
         - Estimate
@@ -230,7 +230,7 @@ paths:
       description: API che consente il download della fattura del mese di riferimento.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathFileKey'
+        - $ref: '#/components/parameters/pathFileZipKey'
       responses:
         '200':
           description: OK
@@ -238,6 +238,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InfoDownloadDTO'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pn-usage-estimates/reports/{paId}:
+    get:
+      tags:
+        - Estimate
+      operationId: getAllDeanonymizedFiles
+      x-api-permissions:
+        - 'estimate-read'
+      summary: ritorna elenco di file deanonimizzati in base al paId e allo stato.
+      description: API che estrae la lista di file deanonimizzati.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/queryDeanonymizationStatus'
+        - $ref: '#/components/parameters/queryNumberPage'
+        - $ref: '#/components/parameters/querySizePage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableDeanonymizedFilesResponseDto'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -488,6 +526,22 @@ components:
       minItems: 1
 
 
+    PageableDeanonymizedFilesResponseDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/FilePage'
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/InfoDownloadDTO'
+          maxItems: 999999999
+          minItems: 1
+      additionalProperties: false
+      required:
+        - content
+
+
     PageableEstimateResponseDto:
       type: object
       properties:
@@ -588,10 +642,62 @@ components:
         - totalElements
         - totalPages
 
+    FilePage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/InfoDownloadDTO'
+          maxItems: 999999999
+          minItems: 1
+        empty:
+          type: boolean
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        numberOfElements:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        size:
+          type: integer
+          format: int32
+          maximum: 1024
+          minimum: 1
+        sort:
+          $ref: '#/components/schemas/Sort'
+        totalElements:
+          type: integer
+          format: int64
+          maximum: 1
+          minimum: 1
+        totalPages:
+          type: integer
+          format: int64
+          maximum: 999999999
+          minimum: 1
+      additionalProperties: false
+      required:
+        - number
+        - numberOfElements
+        - size
+        - totalElements
+        - totalPages
+
     InfoDownloadDTO:
       type: object
       properties:
-        fileKey:
+        fileZipKey:
           type: string
           example: 'A12C34D56789E0'
           format: '/[^A-Za-z0-9]+/'
@@ -604,8 +710,22 @@ components:
         url:
           type: string
           example: 'http://file.com'
+        referenceMonth:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        log:
+          type: string
+        action:
+          type: string
         status:
           type: string
+          enum:
+            - DEANONIMIZING
+            - ENQUEUED
+            - READY
+            - ERROR
 
     Profiling:
       type: object
@@ -668,8 +788,8 @@ components:
       schema:
         type: string
 
-    pathFileKey:
-      name: fileKey
+    pathFileZipKey:
+      name: fileZipKey
       in: path
       required: true
       schema:
@@ -715,6 +835,18 @@ components:
         enum:
           - VALIDATED
           - DRAFT
+
+    queryDeanonymizationStatus:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - DEANONIMIZING
+          - ENQUEUED
+          - READY
+          - ERROR
 
     pathReferenceMonth:
       name: referenceMonth

@@ -17,9 +17,10 @@ public interface ActivityReportMetaDAO {
      * @return List of estimate files from paId and referenceMonth if I have it
      */
     Flux<PnActivityReport> findAllFromPaId(String paId, String referenceMonth);
+    Flux<PnActivityReport> findAllFromPaId(String paId);
 
     Mono<PnActivityReport> findByPaIdAndFileKey(String paId, String fileKey);
 
-    //Mono<List<PnActivityReport>>getAllEstimateFile(String paId, String referenceMonth);
+    Flux<PnActivityReport> findAllFromPaIdAndStatus(String paId, String status);
 
 }
