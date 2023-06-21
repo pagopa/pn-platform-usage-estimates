@@ -11,7 +11,8 @@ public enum ExceptionTypeEnum {
     OPERATION_NOT_ALLOWED("OPERATION_NOT_ALLOWED", "Operazione non consentita"),
     ESTIMATE_EXPIRED("ESTIMATE_EXPIRED", "Stima scaduta"),
     BAD_REQUEST("BAD_REQUEST", "Campi obbligatori mancanti."),
-
+    DATA_VAULT_ENCRYPTION_ERROR("DATA_VAULT_ENCRYPTION_ERROR", "Servizio irraggiungibile od errore in fase di criptazione"),
+    DATA_VAULT_DECRYPTION_ERROR("DATA_VAULT_DECRYPTION_ERROR", "Servizio irraggiungibile od errore in fase di decriptazione"),
     MAPPER_ERROR("MAPPER_ERROR", "Non è stato possibile mappare l'oggetto richiesto");
 
     private final String title;

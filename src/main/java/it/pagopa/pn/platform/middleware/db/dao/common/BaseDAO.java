@@ -1,5 +1,6 @@
 package it.pagopa.pn.platform.middleware.db.dao.common;
 
+import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -129,8 +130,11 @@ public abstract class BaseDAO<T> {
         return getByFilter(conditional, index, values, filterExpression, null);
     }
 
-    protected Key keyBuild(String partitionKey){
+    protected Key keyBuild(String partitionKey, String sortKey){
         Key.Builder builder = Key.builder().partitionValue(partitionKey);
+        if (StringUtils.isNotBlank(sortKey)){
+            builder.sortValue(sortKey);
+        }
         return builder.build();
     }
 }

@@ -6,20 +6,33 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ActivityReport {
+    private List<Record> records;
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Record {
+        @JsonProperty("s3.object.key")
+        private String fileKey;
 
-    private String paId;
+        @JsonProperty("s3.bucket.name")
+        private String bucketName;
 
-    @JsonProperty("key")
-    private String fileKey;
+        public String getPaId() {
+            int start = bucketName.indexOf("report_attivita_pn_from_datalake/");
+            int end = bucketName.indexOf("/");
+            return bucketName.substring(start + 1, end);
+        }
 
-    private String status;
-    @JsonProperty("name")
-    private String bucketName;
+    }
 
-    private String fileZipKey;
+
+
 }

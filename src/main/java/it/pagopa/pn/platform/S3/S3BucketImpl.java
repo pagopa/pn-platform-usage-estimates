@@ -1,13 +1,17 @@
 package it.pagopa.pn.platform.S3;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import it.pagopa.pn.platform.config.AwsBucketProperties;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 @Slf4j
 public class S3BucketImpl implements S3Bucket {
@@ -35,5 +39,14 @@ public class S3BucketImpl implements S3Bucket {
             log.error("Error in upload object in s3 {}", e.getMessage());
         }
         return Mono.just(file);
+    }
+
+    public InputStreamReader getObjectData(String fileKey) {
+        S3Object fullObject = s3Client.getObject(new GetObjectRequest(this.awsBucketProperties.getName(), fileKey));
+        InputStreamReader data = null;
+        if (fullObject != null) {
+            data = new InputStreamReader(fullObject.getObjectContent());
+        }
+        return data;
     }
 }

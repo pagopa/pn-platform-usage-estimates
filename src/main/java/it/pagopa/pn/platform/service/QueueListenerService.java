@@ -1,10 +1,11 @@
 package it.pagopa.pn.platform.service;
 
 import it.pagopa.pn.platform.model.ActivityReport;
+import reactor.core.publisher.Mono;
 
 public interface QueueListenerService {
 
-    void activityReportListener(ActivityReport data);
+    Mono<Void> activityReportListener(ActivityReport data);
     void safeStorageResponseListener(String key);
 
 

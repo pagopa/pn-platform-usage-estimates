@@ -163,6 +163,10 @@ Parameters:
     Type: String
     Description: 'SafeStorage cx-id'
 
+  DataVaultBaseUrl:
+    Type: String
+    Description: 'DataVault BaseUrl'
+
 
 Resources:
 # PN-Platform-usage-estimates microservice
@@ -195,6 +199,7 @@ Resources:
         ContainerEnvEntry6: !Sub 'AWS_DYNAMODBACTIVITYREPORTTABLE{ActivityReportDynamoTableName}'
         ContainerEnvEntry7: !Sub 'PN_PAPERCHANNEL_CLIENTSAFESTORAGEBASEPATH=${SandboxSafeStorageBaseUrl}'
         ContainerEnvEntry8: !Sub 'PN_PAPERCHANNEL_SAFESTORAGECXID=${SafeStorageCxId}'
+        ContainerEnvEntry9: !Sub 'PN_PAPERCHANNEL_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds

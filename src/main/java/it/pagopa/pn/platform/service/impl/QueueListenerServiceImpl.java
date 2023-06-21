@@ -2,12 +2,13 @@ package it.pagopa.pn.platform.service.impl;
 
 import it.pagopa.pn.platform.mapper.ActivityReportMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
-import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.ActivityReport;
 import it.pagopa.pn.platform.service.QueueListenerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
@@ -17,11 +18,16 @@ public class QueueListenerServiceImpl implements QueueListenerService {
     private ActivityReportMetaDAO activityReportMetaDAO;
 
     @Override
-    public void activityReportListener(ActivityReport activityReport) {
+    public Mono<Void> activityReportListener(ActivityReport activityReport) {
 
-        PnActivityReport pnActivityReport = ActivityReportMapper.toEntity(activityReport);
-        activityReportMetaDAO.createMetaData(pnActivityReport);
-
+        return Flux.fromStream(activityReport.getRecords().stream())
+                .map(ActivityReportMapper::toEntity)
+                .doOnNext(pnActivityReport -> activityReportMetaDAO.createMetaData(pnActivityReport))
+                .map(pnActivityReport -> {
+                 // schedulare il BATCH
+                 return pnActivityReport;
+                })
+                .then();
 
     }
 

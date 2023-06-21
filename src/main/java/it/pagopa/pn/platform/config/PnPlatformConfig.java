@@ -18,5 +18,6 @@ public class PnPlatformConfig {
     private String clientExternalRegistriesBasepath;
     private String xPagopaExtchCxId;
     private String safeStorageCxId;
+    private String clientDataVaultBasepath;
 
 }
