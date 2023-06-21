@@ -199,14 +199,6 @@ Parameters:
     Default: 1
     Description: 'The maximum number of batch job attempts.'
 
-  BatchDeanonimizingGroup:
-    Type: String
-    Description: 'Batch Deanonimizing group name'
-
-  ManualBatchDeanonimizingGroup:
-    Type: String
-    Description: 'Manual batch Deanonimizing group name'
-
 Resources:
 
   ## JobQueue
@@ -454,7 +446,3 @@ Resources:
         APIGatewayARNs: !GetAtt PlatformUsageEstimatesMicroservicePublicWebAPI.Outputs.APIGatewayARN
         Limit: 6000
 
-
-Outputs:
-  BatchJobDefinitionArn:
-    Value: !Ref BatchDeanonimizingJobDefinition
