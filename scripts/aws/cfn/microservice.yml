@@ -210,7 +210,7 @@ Resources:
           ComputeEnvironment: !Ref ComputeEnvironment
       State: ENABLED
       Priority: 1
-      JobQueueName: !Sub '${ProjectName}-${AppName}-job-queue'
+      JobQueueName: !Sub '${AppName}-job-queue'
 
   ## Compute Environment
   ComputeEnvironment:
@@ -218,7 +218,7 @@ Resources:
     Properties:
       Type: MANAGED
       ServiceRole: !Ref BatchServiceRole
-      ComputeEnvironmentName: !Sub '${ProjectName}-${AppName}-compute-environment'
+      ComputeEnvironmentName: !Sub '${AppName}-compute-environment'
       ComputeResources:
         MaxvCpus: !Ref MaxvCpus
         Type: !Ref ComputeResourceType
@@ -260,7 +260,7 @@ Resources:
     Properties:
       Type: container
       PropagateTags: true
-      JobDefinitionName: !Sub '${ProjectName}-${AppName}-job-definition'
+      JobDefinitionName: !Sub '${AppName}-job-definition'
       ContainerProperties:
         Image: !Ref ContainerImageUri
         FargatePlatformConfiguration:
@@ -285,7 +285,7 @@ Resources:
   BatchTaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub '${ProjectName}-${AppName}-taskexec-role'
+      RoleName: !Sub '${AppName}-taskexec-role'
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -326,7 +326,7 @@ Resources:
   ScheduleRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub '${ProjectName}-${AppName}-batch-schedule-role'
+      RoleName: !Sub '${AppName}-batch-schedule-role'
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
@@ -335,7 +335,7 @@ Resources:
             Action: [ "sts:AssumeRole" ]
       Path: /
       Policies:
-        - PolicyName: !Sub '${ProjectName}-${AppName}-batch-schedule-policy'
+        - PolicyName: !Sub '${AppName}-batch-schedule-policy'
           PolicyDocument:
             Statement:
               - Effect: Allow
@@ -355,10 +355,10 @@ Resources:
               - "JobQueue"
               - "JobQueueArn"
           RoleArn: !GetAtt "ScheduleRole.Arn"
-          Id: !Sub '${ProjectName}-${AppName}-TargetBatchQueue'
+          Id: !Sub '${AppName}-TargetBatchQueue'
           BatchParameters:
             JobDefinition: !Ref BatchDeanonimizingJobDefinition
-            JobName: !Sub '${ProjectName}-${AppName}-rule-job'
+            JobName: !Sub '${AppName}-rule-job'
             RetryStrategy:
               Attempts: !Ref BatchJobMaxAttempts
 
@@ -368,7 +368,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/ecs-service.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-platform-usage-estimates'
+        MicroServiceUniqueName: !Sub 'platform-usage-estimates'
         CpuValue: !Ref CpuValue
         MemoryAmount: !Ref MemoryAmount
         HealthCheckTimeout: !Ref HealthCheckTimeout
@@ -435,7 +435,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/microservice-cloudwatch-dashboard.yaml"
       Parameters:
-        DashboardName: !Sub "${ProjectName}-platform-usage-estimates"
+        DashboardName: !Sub "platform-usage-estimates"
         AlarmArns: !Join
           - ','
           - - !GetAtt PlatformUsageEstimatesMicroservice.Outputs.FatalLogsMetricAlarmArn
@@ -446,7 +446,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service-openapi.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-platform-usage-estimates'
+        MicroServiceUniqueName: !Sub 'platform-usage-estimates'
         IntendedUsage: WEB
         DnsName: !Ref WebApiDnsName
         ProjectName: !Ref ProjectName
@@ -463,7 +463,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-waf-acl.yaml"
       Parameters:
-        WAFName: !Sub '${ProjectName}-platform-usage-estimates-web'
+        WAFName: !Sub 'platform-usage-estimates-web'
         IntendedUsage: WEB
         APIGatewayARNs: !GetAtt PlatformUsageEstimatesMicroservicePublicWebAPI.Outputs.APIGatewayARN
         Limit: 6000
