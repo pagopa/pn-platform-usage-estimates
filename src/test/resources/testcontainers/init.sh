@@ -42,12 +42,32 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     --table-name ActivityReportDynamoTable \
     --attribute-definitions \
         AttributeName=paId,AttributeType=S \
-        AttributeName=fileKey,AttributeType=S \
+        AttributeName=referenceMonth,AttributeType=S \
+		AttributeName=fileKey,AttributeType=S \
     --key-schema \
         AttributeName=paId,KeyType=HASH \
         AttributeName=fileKey,KeyType=RANGE \
     --provisioned-throughput \
-        ReadCapacityUnits=10,WriteCapacityUnits=5
+        ReadCapacityUnits=10,WriteCapacityUnits=5 \
+	--global-secondary-indexes \
+    "[
+        {
+            \"IndexName\": \"INDEX_PA_REF_MONTH\",
+            \"KeySchema\": [{\"AttributeName\":\"paId\",\"KeyType\":\"HASH\"}, {\"AttributeName\":\"referenceMonth\",\"KeyType\":\"RANGE\"}],
+            \"Projection\":{
+                \"ProjectionType\":\"ALL\"
+            },
+            \"ProvisionedThroughput\": {
+                \"ReadCapacityUnits\": 5,
+                \"WriteCapacityUnits\": 5
+            }
+        }
+	]"
+
+aws  --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    dynamodb put-item \
+    --table-name ActivityReportDynamoTable  \
+    --item '{"paId": {"S": "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a"}, "referenceMonth": {"S": "DIC-2022"}, "fileKey": {"S": "DICEMBRE-01"}, "status": {"S": "DOWNLOADED"}, "bucketName": {"S": "bucketName"}, "fileZipKey": {"S": "fileZipKey"}}'
 
 
 echo "Initialization terminated"

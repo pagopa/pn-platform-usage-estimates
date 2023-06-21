@@ -39,7 +39,7 @@ public class EstimateApiController implements EstimateApi {
 
     @Override
     public Mono<ResponseEntity<Flux<InfoDownloadDTO>>> getAllEstimateFile(String paId, String referenceMonth, ServerWebExchange exchange) {
-        return this.estimateService.getAllEstimateFile(paId, referenceMonth).map(ResponseEntity::ok);
+        return this.estimateService.getAllEstimateFile(paId, referenceMonth).collectList().map(list -> ResponseEntity.ok(Flux.fromStream(list.stream())));
     }
 
     @Override

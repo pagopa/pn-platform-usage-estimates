@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -180,20 +182,24 @@ public class EstimateServiceImpl implements EstimateService {
 
     //PER CONSUNTIVI
     @Override
-    public Mono<Flux<InfoDownloadDTO>> getAllEstimateFile(String paId, String referenceMonth) {
+    public Flux<InfoDownloadDTO> getAllEstimateFile(String paId, String referenceMonth) {
         return this.activityReportMetaDAO.findAllFromPaId(paId, referenceMonth)
-                .collectList()
-                .map(pnActivityReportsList ->
-                        Flux.fromIterable(FileMapper.fromPnActivityReportToInfoDownloadDTO(paId,referenceMonth,pnActivityReportsList))) ;
+                .filter(pnActivityReport ->  pnActivityReport.getStatus().equalsIgnoreCase("READY"))
+                .map(pnActivityReport -> FileMapper.fromPnActivityReportToInfoDownloadDTO(paId, referenceMonth, pnActivityReport));
     }
 
     @Override
     public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileKey) {
-
-        return this.safeStorageClient.getFile(fileKey)
-                .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
-                .map(file -> FileMapper.toDownloadFile(paId,file));
-
+        return this.activityReportMetaDAO.findByPaIdAndFileKey(paId, fileKey)
+                .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
+                .flatMap(pnActivityReport -> {
+                    if(!pnActivityReport.getStatus().equalsIgnoreCase("READY")) {
+                        return Mono.error(new PnGenericException(STATUS_NOT_READY, STATUS_NOT_READY.getMessage()));
+                    }
+                    return this.safeStorageClient.getFile(pnActivityReport.getFileZipKey())
+                            .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
+                            .map(file -> FileMapper.toDownloadFile(paId, file));
+                });
     }
 
     private Instant getInstantFromMonth(String referenceMonth) throws PnGenericException {

@@ -24,15 +24,10 @@ public class FileMapper {
         return infoDownloadDTO;
     }
 
-    public static List<InfoDownloadDTO> fromPnActivityReportToInfoDownloadDTO(String paId, String referenceMonth, List<PnActivityReport> pnActivityReportsList){
-        List<InfoDownloadDTO> list = new ArrayList<>();
-        pnActivityReportsList.stream().filter(item ->  item.getPaId().equalsIgnoreCase(paId) && item.getReferenceMonth().equalsIgnoreCase(referenceMonth) )
-                .forEach(pnActivityReport -> {
-                    InfoDownloadDTO infoDownloadDTO = new InfoDownloadDTO();
-                    infoDownloadDTO.setPaId(paId);
-                    infoDownloadDTO.setFileKey(pnActivityReport.getFileKey());
-                    list.add(infoDownloadDTO);
-                });
-        return list;
+    public static InfoDownloadDTO fromPnActivityReportToInfoDownloadDTO(String paId, String referenceMonth, PnActivityReport pnActivityReportsList){
+        InfoDownloadDTO infoDownloadDTO = new InfoDownloadDTO();
+        infoDownloadDTO.setPaId(paId);
+        infoDownloadDTO.setFileKey(pnActivityReportsList.getFileKey());
+        return infoDownloadDTO;
     }
 }

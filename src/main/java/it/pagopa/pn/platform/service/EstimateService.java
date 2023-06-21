@@ -11,5 +11,5 @@ public interface EstimateService {
     Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileKey);
     Mono<PageableEstimateResponseDto> getAllEstimate(String originFe, String paId, String taxId, String ipaId, Integer page, Integer size);
     Mono<EstimateDetail> getEstimateDetail(String paId, String referenceMonth);
-    Mono<Flux<InfoDownloadDTO>> getAllEstimateFile(String paId, String referenceMonth);
+    Flux<InfoDownloadDTO> getAllEstimateFile(String paId, String referenceMonth);
 }

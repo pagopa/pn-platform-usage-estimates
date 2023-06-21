@@ -1,14 +1,11 @@
 package it.pagopa.pn.platform.middleware.db.dao;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
-import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
-import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@Repository
 public interface ActivityReportMetaDAO {
 
     Mono<PnActivityReport> createMetaData (PnActivityReport pnActivityReport);
@@ -21,6 +18,8 @@ public interface ActivityReportMetaDAO {
      */
     Flux<PnActivityReport> findAllFromPaId(String paId, String referenceMonth);
 
-    //Mono<List<PnActivityReport>> getAllEstimateFile(String paId);
+    Mono<PnActivityReport> findByPaIdAndFileKey(String paId, String fileKey);
+
+    //Mono<List<PnActivityReport>>getAllEstimateFile(String paId, String referenceMonth);
 
 }

@@ -15,4 +15,5 @@ public class AwsPropertiesConfig extends AwsConfigs {
     private String dynamodbEstimateTable;
     private String dynamodbPublicAdministrationTable;
     private String dynamodbBillingTable;
+    private String dynamodbActivityReportTable;
 }

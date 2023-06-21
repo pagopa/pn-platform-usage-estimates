@@ -12,7 +12,9 @@ public enum ExceptionTypeEnum {
     ESTIMATE_EXPIRED("ESTIMATE_EXPIRED", "Stima scaduta"),
     BAD_REQUEST("BAD_REQUEST", "Campi obbligatori mancanti."),
     FILE_KEY_NOT_EXISTED("FILE_KEY_NOT_EXISTED", "File key non esistente"),
-    MAPPER_ERROR("MAPPER_ERROR", "Non è stato possibile mappare l'oggetto richiesto");
+    MAPPER_ERROR("MAPPER_ERROR", "Non è stato possibile mappare l'oggetto richiesto"),
+    REPORT_NOT_EXISTS("REPORT_NOT_EXISTS", "Il report non esiste"),
+    STATUS_NOT_READY("STATUS_NOT_READY", "Il file non è pronto");
 
     private final String title;
     private final String message;
