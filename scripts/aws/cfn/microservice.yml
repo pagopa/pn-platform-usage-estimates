@@ -321,6 +321,28 @@ Resources:
                   - !Sub "${EstimateDynamoTableArn}/*"
                   - !Sub "${ProfilationDynamoTableArn}"
                   - !Sub "${ProfilationDynamoTableArn}/*"
+
+  ### Event Rule setup ###
+  ScheduleRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-${AppName}-batch-schedule-role'
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ events.amazonaws.com ]
+            Action: [ "sts:AssumeRole" ]
+      Path: /
+      Policies:
+        - PolicyName: !Sub '${ProjectName}-${AppName}-batch-schedule-policy'
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "batch:SubmitJob"
+                Resource: "*"
+
   ScheduledRule:
     Type: AWS::Events::Rule
     Properties:
