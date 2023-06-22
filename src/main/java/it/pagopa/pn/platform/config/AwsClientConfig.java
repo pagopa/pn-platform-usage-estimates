@@ -1,7 +1,6 @@
 package it.pagopa.pn.platform.config;
 
 import com.amazonaws.services.batch.AWSBatch;
-import com.amazonaws.services.batch.AWSBatchClient;
 import com.amazonaws.services.batch.AWSBatchClientBuilder;
 import it.pagopa.pn.commons.configs.RuntimeMode;
 import it.pagopa.pn.commons.configs.aws.AwsConfigs;
@@ -22,7 +21,7 @@ public class AwsClientConfig extends AwsServicesClientsConfig {
 
     @Bean
     public AWSBatch awsBatchClient(){
-        final AWSBatchClientBuilder builder = AWSBatchClient.builder();
+        final AWSBatchClientBuilder builder = AWSBatchClientBuilder.standard();
         Optional.ofNullable(props.getRegionCode()).ifPresent(builder::setRegion);
         return builder.build();
     }
