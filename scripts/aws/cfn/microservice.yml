@@ -425,7 +425,7 @@ Resources:
         ContainerEnvEntry9: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTSAFESTORAGEBASEPATH=${SandboxSafeStorageBaseUrl}'
         ContainerEnvEntry10: !Sub 'PN_PLATFORMUSAGEESTIMATES_SAFESTORAGECXID=${SafeStorageCxId}'
         ContainerEnvEntry11: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
-        ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_DATALAKEQUEUE=data-lake-queue'
+        ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_QUEUEDATALAKE=data-lake-queue'
         ContainerEnvEntry13: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${AppName}-job-queue'
         ContainerEnvEntry14: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${AppName}-job-definition'
         MappedPaths: '/pn-usage-estimates/*'
