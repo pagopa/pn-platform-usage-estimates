@@ -15,10 +15,13 @@ public enum ExceptionTypeEnum {
     PROFILATION_NOT_EXISTED("PROFILATION_NOT_EXISTED", "La profilazione non è presente nel sistema"),
     FUTURE_PROFILATION_NOT_EXIST("FUTURE_PROFILATION_NOT_EXIST", "Profilazione futura non esistente"),
     BAD_REQUEST("BAD_REQUEST", "Campi obbligatori mancanti."),
+    FILE_KEY_NOT_EXISTED("FILE_KEY_NOT_EXISTED", "File key non esistente"),
+    MAPPER_ERROR("MAPPER_ERROR", "Non è stato possibile mappare l'oggetto richiesto"),
+    REPORT_NOT_EXISTS("REPORT_NOT_EXISTS", "Il report non esiste"),
+    STATUS_NOT_READY("STATUS_NOT_READY", "Il file non è pronto"),
+    STATUS_NOT_CORRECT("STATUS_NOT_CORRECT", "Lo stato passato non è corretto"),
     DATA_VAULT_ENCRYPTION_ERROR("DATA_VAULT_ENCRYPTION_ERROR", "Servizio irraggiungibile od errore in fase di criptazione"),
-    DATA_VAULT_DECRYPTION_ERROR("DATA_VAULT_DECRYPTION_ERROR", "Servizio irraggiungibile od errore in fase di decriptazione"),
-    MAPPER_ERROR("MAPPER_ERROR", "Non è stato possibile mappare l'oggetto richiesto");
-
+    DATA_VAULT_DECRYPTION_ERROR("DATA_VAULT_DECRYPTION_ERROR", "Servizio irraggiungibile od errore in fase di decriptazione");
 
     private final String title;
     private final String message;

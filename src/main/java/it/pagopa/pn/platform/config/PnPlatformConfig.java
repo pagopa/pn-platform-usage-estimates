@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Import;
 @ConfigurationProperties(prefix = "pn.platform-usage-estimates")
 @Import(SharedAutoConfiguration.class)
 public class PnPlatformConfig {
+
+    private String clientSafeStorageBasepath;
     private String clientExternalRegistriesBasepath;
     private String xPagopaExtchCxId;
     private String safeStorageCxId;

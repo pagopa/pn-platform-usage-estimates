@@ -5,10 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
-import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.*;
 
 import java.time.Instant;
 
@@ -20,16 +17,23 @@ import java.time.Instant;
 public class PnActivityReport implements Comparable<PnActivityReport>{
 
     public static final String COL_FILE_KEY = "fileKey";
+    public static final String INDEX_PA_REF_MONTH = "INDEX_PA_REF_MONTH";
     public static final String COL_PA_ID = "paId" ;
+    public static final String COL_REFERENCE_MONTH = "referenceMonth";
     public static final String COL_STATUS = "status";
     public static final String COL_BUCKET_NAME = "bucketName";
     public static final String COL_FILE_ZIP_KEY = "fileZipKey";
+    public static final String COL_LAST_MODIFIED_DATE = "lastModifiedDate" ;
+    public static final String COL_ACTION = "action" ;
 
-    @Getter(onMethod = @__({@DynamoDbPartitionKey,@DynamoDbAttribute(COL_PA_ID)}))
+    @Getter(onMethod = @__({@DynamoDbPartitionKey, @DynamoDbSecondaryPartitionKey(indexNames = INDEX_PA_REF_MONTH), @DynamoDbAttribute(COL_PA_ID)}))
     private String paId;
 
-    @Getter(onMethod = @__({@DynamoDbSortKey, @DynamoDbAttribute(COL_FILE_KEY)}))
-    private String fileKey;
+    @Getter(onMethod = @__({@DynamoDbSecondarySortKey(indexNames = INDEX_PA_REF_MONTH), @DynamoDbAttribute(COL_REFERENCE_MONTH)}))
+    private String referenceMonth;
+
+    @Getter(onMethod = @__({@DynamoDbSortKey, @DynamoDbAttribute(COL_FILE_ZIP_KEY)}))
+    private String fileZipKey;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_STATUS)}))
     private String status;
@@ -37,8 +41,14 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_BUCKET_NAME)}))
     private String bucketName;
 
-    @Getter(onMethod = @__({@DynamoDbAttribute(COL_FILE_ZIP_KEY)}))
-    private String fileZipKey;
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_FILE_KEY)}))
+    private String fileKey;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_LAST_MODIFIED_DATE)}))
+    private Instant lastModifiedDate;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_ACTION)}))
+    private String action;
 
     @Override
     public int compareTo(@NotNull PnActivityReport o) {

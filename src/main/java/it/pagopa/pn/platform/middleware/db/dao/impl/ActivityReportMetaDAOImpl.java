@@ -6,19 +6,22 @@ import it.pagopa.pn.platform.middleware.db.dao.common.BaseDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 
+
 @Repository
 @Slf4j
 public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> implements ActivityReportMetaDAO {
-    protected ActivityReportMetaDAOImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient,
+
+    public ActivityReportMetaDAOImpl(DynamoDbEnhancedAsyncClient dynamoDbEnhancedAsyncClient,
                                         DynamoDbAsyncClient dynamoDbAsyncClient,
                                         AwsPropertiesConfig awsPropertiesConfig) {
         super(dynamoDbEnhancedAsyncClient, dynamoDbAsyncClient,
-                awsPropertiesConfig.getDynamodbEstimateTable(), PnActivityReport.class);
+                awsPropertiesConfig.getDynamodbActivityReportTable(), PnActivityReport.class);
     }
 
     @Override
@@ -26,16 +29,28 @@ public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> impleme
         return Mono.fromFuture(this.put(pnActivityReport).thenApply(item -> item));
     }
 
-    @Override
-    public Mono<PnActivityReport> getCSVName(String paId, String fileKey) {
 
-        QueryConditional conditionalKey = CONDITION_EQUAL_TO.apply(keyBuild(paId, fileKey));
-        return this.getByFilter(conditionalKey, null, null, null, null).collectList()
-                .flatMap(item -> {
-                    if (item == null || item.isEmpty()){
-                        return Mono.empty();
-                    }
-                    return Mono.just(item.get(0));
-                });
+    @Override
+    public Flux<PnActivityReport> findAllFromPaId(String paId, String referenceMonth) {
+        QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId, referenceMonth));
+        return this.getByFilter(conditional, PnActivityReport.INDEX_PA_REF_MONTH, null, null);
     }
+
+    @Override
+    public Flux<PnActivityReport> findAllFromPaId(String paId) {
+        QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId));
+        return this.getByFilter(conditional, null, null, null);
+    }
+
+    @Override
+    public Mono<PnActivityReport> findByPaIdAndFileKey(String paId, String fileKey) {
+        return Mono.fromFuture(this.get(paId, fileKey).thenApply(item -> item));
+    }
+
+    @Override
+    public Flux<PnActivityReport> findAllFromPaIdAndStatus(String paId, String status) {
+        QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId));
+        return this.getByFilter(conditional, null, null, null);
+    }
+
 }

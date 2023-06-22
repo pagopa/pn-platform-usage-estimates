@@ -82,6 +82,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: "paId"
           AttributeType: "S"
+        - AttributeName: "referenceMonth"
+          AttributeType: "S"
         - AttributeName: "fileKey"
           AttributeType: "S"
       KeySchema:
@@ -89,6 +91,15 @@ Resources:
           KeyType: "HASH"
         - AttributeName: "fileKey"
           KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        - IndexName: "INDEX_PA_REF_MONTH"
+          KeySchema:
+            - AttributeName: "paId"
+              KeyType: "HASH"
+            - AttributeName: "referenceMonth"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
       KinesisStreamSpecification:
         StreamArn: !Ref CdcKinesisSourceStreamArn
       StreamSpecification:

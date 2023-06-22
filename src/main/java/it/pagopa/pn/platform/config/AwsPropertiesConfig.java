@@ -14,4 +14,5 @@ import org.springframework.context.annotation.Configuration;
 public class AwsPropertiesConfig extends AwsConfigs {
     private String dynamodbEstimateTable;
     private String dynamodbProfilationTable;
+    private String dynamodbActivityReportTable;
 }
