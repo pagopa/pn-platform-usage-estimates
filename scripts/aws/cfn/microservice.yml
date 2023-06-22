@@ -285,6 +285,8 @@ Resources:
         JobRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
         ExecutionRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
         Environment:
+          - Name: BATCHMODE
+            Value: 'true'
           - Name: AWS_REGIONCODE
             Value: ${AWS::Region}
           - Name: AWS_DYNAMODBESTIMATETABLE

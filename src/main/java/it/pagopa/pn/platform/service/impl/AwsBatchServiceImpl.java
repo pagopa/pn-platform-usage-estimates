@@ -1,13 +1,13 @@
 package it.pagopa.pn.platform.service.impl;
 
-import com.amazonaws.services.batch.AWSBatch;
-import com.amazonaws.services.batch.model.SubmitJobRequest;
-import com.amazonaws.services.batch.model.SubmitJobResult;
 import it.pagopa.pn.platform.config.PnPlatformConfig;
 import it.pagopa.pn.platform.service.AwsBatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.batch.BatchClient;
+import software.amazon.awssdk.services.batch.model.SubmitJobRequest;
+import software.amazon.awssdk.services.batch.model.SubmitJobResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @Service
 public class AwsBatchServiceImpl implements AwsBatchService {
     @Autowired
-    private AWSBatch awsBatch;
+    private BatchClient awsBatch;
     @Autowired
     private PnPlatformConfig pnPlatformConfig;
 
@@ -32,13 +32,14 @@ public class AwsBatchServiceImpl implements AwsBatchService {
         log.debug("Job Queue : {}", pnPlatformConfig.getJobQueueName());
         log.debug("Job Definition : {}", pnPlatformConfig.getJobDefinitionName());
 
-        SubmitJobRequest jobRequest = new SubmitJobRequest()
-                .withJobName(UUID.randomUUID().toString())
-                .withJobQueue(pnPlatformConfig.getJobQueueName())
-                .withJobDefinition(pnPlatformConfig.getJobDefinitionName())
-                .withParameters(map);
+        SubmitJobRequest jobRequest = SubmitJobRequest.builder()
+                .jobName(UUID.randomUUID().toString())
+                .jobQueue(pnPlatformConfig.getJobQueueName())
+                .jobDefinition(pnPlatformConfig.getJobDefinitionName())
+                .parameters(map)
+                .build();
         
-        SubmitJobResult result = awsBatch.submitJob(jobRequest);
-        return result.getJobId();
+        SubmitJobResponse result = awsBatch.submitJob(jobRequest);
+        return result.jobId();
     }
 }
