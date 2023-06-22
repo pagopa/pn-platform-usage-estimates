@@ -392,6 +392,7 @@ Resources:
             RetryStrategy:
               Attempts: !Ref BatchJobMaxAttempts
 
+
 # PN-Platform-usage-estimates microservice
   PlatformUsageEstimatesMicroservice:
     Type: AWS::CloudFormation::Stack
