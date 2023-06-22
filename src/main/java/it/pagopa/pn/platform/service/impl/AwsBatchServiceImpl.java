@@ -22,12 +22,12 @@ public class AwsBatchServiceImpl implements AwsBatchService {
     private PnPlatformConfig pnPlatformConfig;
 
     @Override
-    public String scheduleJob(String paId, String bucket, String fileKey) {
-        log.info("Schedule a new JOB for {} paId and {} fileKey", paId, fileKey);
+    public String scheduleJob(String paId, String bucket, String reportKey) {
+        log.info("Schedule a new JOB for {} paId and {} reportKey", paId, reportKey);
         Map<String, String> map = new HashMap<>();
         map.put("PA_ID", paId);
-        map.put("BUCKET_NAME", bucket);
-        map.put("FILE_KEY", fileKey);
+        map.put("PN_PLATFORMUSAGEESTIMATES_DATALAKEBUCKETNAME", bucket);
+        map.put("PN_PLATFORMUSAGEESTIMATES_DATALAKEREPORTKEY", reportKey);
 
         log.debug("Job Queue : {}", pnPlatformConfig.getJobQueueName());
         log.debug("Job Definition : {}", pnPlatformConfig.getJobDefinitionName());

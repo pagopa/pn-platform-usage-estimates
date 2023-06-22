@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class EstimateServiceTest extends BaseTest{
+class EstimateServiceTest extends BaseTest{
 
     @Autowired
     private EstimateServiceImpl estimateService;
