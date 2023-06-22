@@ -28,8 +28,8 @@ public class EstimateApiController implements EstimateApi {
     }
 
     @Override
-    public Mono<ResponseEntity<InfoDownloadDTO>> downloadEstimateFile(String paId, String fileZipKey, ServerWebExchange exchange) {
-        return this.estimateService.downloadEstimateFile(paId, fileZipKey).map(ResponseEntity::ok);
+    public Mono<ResponseEntity<InfoDownloadDTO>> downloadEstimateFile(String paId, String reportKey, ServerWebExchange exchange) {
+        return this.estimateService.downloadEstimateFile(paId, reportKey).map(ResponseEntity::ok);
     }
 
     @Override
@@ -50,5 +50,10 @@ public class EstimateApiController implements EstimateApi {
     @Override
     public Mono<ResponseEntity<PageableDeanonymizedFilesResponseDto>> getAllDeanonymizedFiles(String paId, String status, Integer page, Integer size,  final ServerWebExchange exchange){
         return this.estimateService.getAllDeanonymizedFiles(paId, status, page, size).map(ResponseEntity::ok);
+    }
+
+    @Override
+    public Mono<ResponseEntity<Void>> getScheduleDeanonymizedFiles(String paId, String reportKey,  final ServerWebExchange exchange){
+        return this.estimateService.getScheduleDeanonymizedFiles(paId, reportKey).map(ResponseEntity::ok);
     }
 }

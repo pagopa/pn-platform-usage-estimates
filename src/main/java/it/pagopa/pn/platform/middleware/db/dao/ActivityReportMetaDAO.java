@@ -18,7 +18,7 @@ public interface ActivityReportMetaDAO {
     Flux<PnActivityReport> findAllFromPaId(String paId, String referenceMonth);
     Flux<PnActivityReport> findAllFromPaId(String paId);
 
-    Mono<PnActivityReport> findByPaIdAndFileKey(String paId, String fileKey);
+    Mono<PnActivityReport> findByPaIdAndReportKey(String paId, String reportKey);
 
     Flux<PnActivityReport> findAllFromPaIdAndStatus(String paId, String status);
 
