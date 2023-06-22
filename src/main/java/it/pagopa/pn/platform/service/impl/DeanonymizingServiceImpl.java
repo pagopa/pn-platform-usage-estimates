@@ -16,6 +16,8 @@ import reactor.core.publisher.Mono;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 @Service
@@ -32,7 +34,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
 
         return activityReportMetaDAO.findByPaIdAndFileKey(paId, fileKey)
                 .map(pnActivityReport -> {
-                    List<ActivityReportCSV> activityReportCSV;
+                    List<ActivityReportCSV> activityReportDeanonymizingCSV;
                     InputStreamReader file = s3Bucket.getObjectData(pnActivityReport.getReportKey());
                     CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                             .setHeader(ActivityReportCSV.Header.class)
@@ -41,11 +43,12 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
                     try {
                         Reader in = new BufferedReader(file);
                         Iterable<CSVRecord> records = csvFormat.parse(in);
-                        activityReportCSV = ActivityReportMapper.csvToObject(records);
+                        activityReportDeanonymizingCSV = deanonymizingRaw(ActivityReportMapper.csvToObject(records));
+
                     } catch (IOException exception) {
                         throw new RuntimeException(exception);
                     }
-                    return activityReportCSV;
+                    return activityReportDeanonymizingCSV;
                 });
     }
 
@@ -73,6 +76,37 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
             }
         });
         return file;
+    }
+
+    public static void zipFile(String sourceFile, String zipFile) throws IOException {
+        // sourceFile = percorso del file file.csv; zipFile = nome del file da zippare (compressed.zip)
+        FileOutputStream fileOutputStream = new FileOutputStream(zipFile);
+        ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+
+        addFolderToZip(sourceFile, sourceFile, zipOutputStream);
+
+        zipOutputStream.close();
+        fileOutputStream.close();
+    }
+
+    private static void addFolderToZip(String folderPath, String sourceFile, ZipOutputStream zipStream) throws IOException {
+        File folder = new File(folderPath);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                String relativePath = file.getAbsolutePath().substring(sourceFile.length() + 1);
+                zipStream.putNextEntry(new ZipEntry(relativePath));
+                FileInputStream fileInputStream = new FileInputStream(file);
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = fileInputStream.read(buffer)) > 0) {
+                    zipStream.write(buffer, 0, length);
+                }
+                zipStream.closeEntry();
+                fileInputStream.close();
+            }
+        }
     }
 
 }
