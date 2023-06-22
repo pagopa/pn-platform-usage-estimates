@@ -294,15 +294,15 @@ Resources:
         ExecutionRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
         Environment:
           - Name: BATCHMODE
-            Value: 'true'
+            Value: 'batch'
           - Name: AWS_REGIONCODE
-            Value: ${AWS::Region}
+            Value: !Sub ${AWS::Region}
           - Name: AWS_DYNAMODBESTIMATETABLE
-            Value: ${EstimateDynamoTableName}
+            Value: !Sub ${EstimateDynamoTableName}
           - Name: AWS_DYNAMODBPROFILATIONTABLE
-            Value: ${ProfilationDynamoTableName}
+            Value: !Sub ${ProfilationDynamoTableName}
           - Name: AWS_DYNAMODBACTIVITYREPORTTABLE
-            Value: ${ActivityReportDynamoTableName}
+            Value: !Sub ${ActivityReportDynamoTableName}
       PlatformCapabilities:
         - FARGATE
       Tags:
