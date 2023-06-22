@@ -428,8 +428,12 @@ Resources:
         ContainerEnvEntry10: !Sub 'PN_PLATFORMUSAGEESTIMATES_SAFESTORAGECXID=${SafeStorageCxId}'
         ContainerEnvEntry11: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
         ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_QUEUEDATALAKE=data-lake-queue'
-        ContainerEnvEntry13: !GetAtt 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${JobQueue.Arn}'
-        ContainerEnvEntry14: !GetAtt 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${BatchDeanonimizingJobDefinition.Arn}'
+        ContainerEnvEntry13: !Sub
+          - 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${JobQueueArn}'
+          - JobQueueArn: !GetAtt JobQueue.Arn
+        ContainerEnvEntry14: !Sub
+          - 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${JobDefinitionArn}'
+          - JobDefinitionArn: !GetAtt BatchDeanonimizingJobDefinition.Arn
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
