@@ -43,8 +43,8 @@ public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> impleme
     }
 
     @Override
-    public Mono<PnActivityReport> findByPaIdAndFileKey(String paId, String fileKey) {
-        return Mono.fromFuture(this.get(paId, fileKey).thenApply(item -> item));
+    public Mono<PnActivityReport> findByPaIdAndReportKey(String paId, String reportKey) {
+        return Mono.fromFuture(this.get(paId, reportKey).thenApply(item -> item));
     }
 
     @Override

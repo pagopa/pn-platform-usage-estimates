@@ -30,7 +30,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
 
     public Mono<List<ActivityReportCSV>> getCSV(String paId, String fileKey) {
 
-        return activityReportMetaDAO.findByPaIdAndFileKey(paId, fileKey)
+        return activityReportMetaDAO.findByPaIdAndReportKey(paId, fileKey)
                 .map(pnActivityReport -> {
                     List<ActivityReportCSV> activityReportCSV;
                     InputStreamReader file = s3Bucket.getObjectData(pnActivityReport.getReportKey());

@@ -12,6 +12,7 @@ import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
+import it.pagopa.pn.platform.service.AwsBatchService;
 import it.pagopa.pn.platform.service.EstimateService;
 import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
@@ -61,6 +62,9 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Autowired
     private ExternalRegistriesClient externalRegistriesClient;
+
+    @Autowired
+    private AwsBatchService awsBatchService;
 
     @Override
     public Mono<EstimatePeriod> createOrUpdateEstimate(String status, String paId, String referenceMonth, EstimateCreateBody estimate) {
@@ -214,8 +218,21 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
     @Override
-    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileZipKey) {
-        return this.activityReportMetaDAO.findByPaIdAndFileKey(paId, fileZipKey)
+    public Mono<Void> getScheduleDeanonymizedFiles(String paId, String reportKey) {
+        return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
+                .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
+                .doOnNext(activityReport -> {
+                    if (!activityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.ERROR))){
+                        throw new PnGenericException(STATUS_NOT_IN_ERROR, STATUS_NOT_IN_ERROR.getMessage());
+                    }
+                    this.awsBatchService.scheduleJob(paId, activityReport.getBucketName(), reportKey);
+                }).then();
+
+    }
+
+    @Override
+    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String reportKey) {
+        return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
                 .flatMap(pnActivityReport -> {
                     if(!pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY))) {
