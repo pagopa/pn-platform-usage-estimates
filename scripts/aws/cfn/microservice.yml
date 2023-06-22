@@ -430,10 +430,10 @@ Resources:
         ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_QUEUEDATALAKE=data-lake-queue'
         ContainerEnvEntry13: !Sub
           - 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${JobQueueArn}'
-          - JobQueueArn: !GetAtt JobQueue.Arn
+          - JobQueueArn: !Ref JobQueue
         ContainerEnvEntry14: !Sub
           - 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${JobDefinitionArn}'
-          - JobDefinitionArn: !GetAtt BatchDeanonimizingJobDefinition.Arn
+          - JobDefinitionArn: !Ref BatchDeanonimizingJobDefinition
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
