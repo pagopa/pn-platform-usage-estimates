@@ -425,8 +425,8 @@ Resources:
         ContainerEnvEntry9: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTSAFESTORAGEBASEPATH=${SandboxSafeStorageBaseUrl}'
         ContainerEnvEntry10: !Sub 'PN_PLATFORMUSAGEESTIMATES_SAFESTORAGECXID=${SafeStorageCxId}'
         ContainerEnvEntry11: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
-        ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${AppName}-job-queue'
-        ContainerEnvEntry13: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${AppName}-job-definition'
+ #       ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${AppName}-job-queue'
+ #       ContainerEnvEntry13: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${AppName}-job-definition'
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
