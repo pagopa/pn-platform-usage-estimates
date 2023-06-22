@@ -163,6 +163,14 @@ Parameters:
     Type: String
     Description: 'ARN of dynamodb table containing request'
 
+  ActivityReportDynamoTableName:
+    Type: String
+    Description: 'Name of dynamodb table containing request'
+
+  ActivityReportDynamoTableArn:
+    Type: String
+    Description: 'ARN of dynamodb table containing request'
+
   AppName:
     Type: String
     Default: 'platform-usage-estimates-be'
@@ -198,6 +206,7 @@ Parameters:
     Type: Number
     Default: 1
     Description: 'The maximum number of batch job attempts.'
+
   SandboxSafeStorageBaseUrl:
     Type: String
     Description: 'Url to the SafeStorage microservice'
@@ -209,7 +218,6 @@ Parameters:
   DataVaultBaseUrl:
     Type: String
     Description: 'DataVault BaseUrl'
-
 
 Resources:
 
@@ -341,6 +349,8 @@ Resources:
                   - !Sub "${EstimateDynamoTableArn}/*"
                   - !Sub "${ProfilationDynamoTableArn}"
                   - !Sub "${ProfilationDynamoTableArn}/*"
+                  - !Sub "${ActivityReportDynamoTableArn}"
+                  - !Sub "${ActivityReportDynamoTableArn}/*"
 
   ### Event Rule setup ###
   ScheduleRole:

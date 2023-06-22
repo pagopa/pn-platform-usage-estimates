@@ -7,7 +7,6 @@ import it.pagopa.pn.platform.mapper.EstimateMapper;
 import it.pagopa.pn.platform.mapper.FileMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
-import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
@@ -32,9 +31,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
@@ -225,7 +221,7 @@ public class EstimateServiceImpl implements EstimateService {
                     if(!pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY))) {
                         return Mono.error(new PnGenericException(STATUS_NOT_READY, STATUS_NOT_READY.getMessage()));
                     }
-                    return this.safeStorageClient.getFile(pnActivityReport.getFileZipKey())
+                    return this.safeStorageClient.getFile(pnActivityReport.getReportZipKey())
                             .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
                             .map(file -> FileMapper.toDownloadFile(paId, file));
                 });

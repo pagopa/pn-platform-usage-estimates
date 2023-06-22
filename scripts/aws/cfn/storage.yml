@@ -84,12 +84,12 @@ Resources:
           AttributeType: "S"
         - AttributeName: "referenceMonth"
           AttributeType: "S"
-        - AttributeName: "fileKey"
+        - AttributeName: "reportKey"
           AttributeType: "S"
       KeySchema:
         - AttributeName: "paId"
           KeyType: "HASH"
-        - AttributeName: "fileKey"
+        - AttributeName: "reportKey"
           KeyType: "RANGE"
       GlobalSecondaryIndexes:
         - IndexName: "INDEX_PA_REF_MONTH"

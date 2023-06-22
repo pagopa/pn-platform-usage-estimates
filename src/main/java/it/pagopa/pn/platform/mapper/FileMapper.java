@@ -22,7 +22,7 @@ public class FileMapper {
         if (responseFile.getDownload().getUrl() != null ){
             infoDownloadDTO.setUrl(responseFile.getDownload().getUrl());
         }
-        infoDownloadDTO.setFileZipKey(responseFile.getKey());
+        infoDownloadDTO.setReportKey(responseFile.getKey());
         infoDownloadDTO.setStatus(InfoDownloadDTO.StatusEnum.READY);
 
         return infoDownloadDTO;
@@ -31,7 +31,7 @@ public class FileMapper {
     public static InfoDownloadDTO fromPnActivityReportToInfoDownloadDTO(String paId, String referenceMonth, PnActivityReport pnActivityReportsList){
         InfoDownloadDTO infoDownloadDTO = new InfoDownloadDTO();
         infoDownloadDTO.setPaId(paId);
-        infoDownloadDTO.setFileZipKey(pnActivityReportsList.getFileZipKey());
+        infoDownloadDTO.setReportKey(pnActivityReportsList.getReportKey());
         return infoDownloadDTO;
     }
 
@@ -60,7 +60,7 @@ public class FileMapper {
         filesList.setReferenceMonth(activityReport.getReferenceMonth());
         filesList.setLastModifiedDate(activityReport.getLastModifiedDate() != null ? Date.from(activityReport.getLastModifiedDate()) : null);
         filesList.setStatus(InfoDownloadDTO.StatusEnum.valueOf(activityReport.getStatus()));
-        filesList.setFileZipKey(activityReport.getFileZipKey());
+        filesList.setReportKey(activityReport.getReportKey());
 
 
         return filesList;

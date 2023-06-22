@@ -219,7 +219,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/file/{fileZipKey}:
+  /pn-usage-estimates/estimate/{paId}/file/{reportKey}:
     get:
       tags:
         - Estimate
@@ -230,7 +230,7 @@ paths:
       description: API che consente il download della fattura del mese di riferimento.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathFileZipKey'
+        - $ref: '#/components/parameters/pathReportKey'
       responses:
         '200':
           description: OK
@@ -900,7 +900,7 @@ components:
     InfoDownloadDTO:
       type: object
       properties:
-        fileZipKey:
+        reportKey:
           type: string
           example: 'A12C34D56789E0'
           format: '/[^A-Za-z0-9]+/'
@@ -990,8 +990,8 @@ components:
       schema:
         type: string
 
-    pathFileZipKey:
-      name: fileZipKey
+    pathReportKey:
+      name: reportKey
       in: path
       required: true
       schema:

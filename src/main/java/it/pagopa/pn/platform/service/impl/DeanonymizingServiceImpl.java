@@ -10,13 +10,18 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Service
 public class DeanonymizingServiceImpl implements DeanonymizingService {
+
+
     @Autowired
     private ActivityReportMetaDAO activityReportMetaDAO;
     @Autowired
@@ -25,10 +30,10 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
 
     public Mono<List<ActivityReportCSV>> getCSV(String paId, String fileKey) {
 
-        return activityReportMetaDAO.getCSVName(paId, fileKey)
+        return activityReportMetaDAO.findByPaIdAndFileKey(paId, fileKey)
                 .map(pnActivityReport -> {
                     List<ActivityReportCSV> activityReportCSV;
-                    InputStreamReader file = s3Bucket.getObjectData(pnActivityReport.getFileKey());
+                    InputStreamReader file = s3Bucket.getObjectData(pnActivityReport.getReportKey());
                     CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                             .setHeader(ActivityReportCSV.Header.class)
                             .setSkipHeaderRecord(true)

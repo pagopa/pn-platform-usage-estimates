@@ -4,7 +4,6 @@ import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.ActivityReport;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
 import org.apache.commons.csv.CSVRecord;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ public class ActivityReportMapper {
 
 
         entity.setBucketName(record.getBucketName());
-        entity.setFileKey(record.getFileKey());
+        entity.setReportKey(record.getFileKey());
         entity.setPaId(record.getPaId());
 
         return entity;
