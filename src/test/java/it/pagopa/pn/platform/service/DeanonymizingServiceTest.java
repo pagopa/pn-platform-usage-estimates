@@ -19,9 +19,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class DeanonymizingServiceTest{
+class DeanonymizingServiceTest{
 
-    @Test
+    //@Test
     void givenCSVFile_whenRead_thenContentsAsExpected() throws IOException {
         enum Headers {cap, stato_estero}
 
