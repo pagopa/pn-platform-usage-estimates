@@ -297,6 +297,8 @@ Resources:
             Value: 'batch'
           - Name: AWS_REGIONCODE
             Value: !Sub ${AWS::Region}
+          - Name: PN_PLATFORMUSAGEESTIMATES_QUEUEDATALAKE
+            Value: 'data-lake-queue'
           - Name: AWS_DYNAMODBESTIMATETABLE
             Value: !Sub ${EstimateDynamoTableName}
           - Name: AWS_DYNAMODBPROFILATIONTABLE
@@ -426,8 +428,8 @@ Resources:
         ContainerEnvEntry10: !Sub 'PN_PLATFORMUSAGEESTIMATES_SAFESTORAGECXID=${SafeStorageCxId}'
         ContainerEnvEntry11: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
         ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_QUEUEDATALAKE=data-lake-queue'
-        ContainerEnvEntry13: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${AppName}-job-queue'
-        ContainerEnvEntry14: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${AppName}-job-definition'
+        ContainerEnvEntry13: !GetAtt 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${JobQueue.Arn}'
+        ContainerEnvEntry14: !GetAtt 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${BatchDeanonimizingJobDefinition.Arn}'
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds

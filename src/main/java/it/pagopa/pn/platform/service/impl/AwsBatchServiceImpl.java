@@ -27,8 +27,8 @@ public class AwsBatchServiceImpl implements AwsBatchService {
         log.info("Schedule a new JOB for {} paId and {} fileKey", paId, reportKey);
         Map<String, String> map = new HashMap<>();
         map.put("PA_ID", paId);
-        map.put("BUCKET_NAME", bucket);
-        map.put("FILE_KEY", reportKey);
+        map.put("PN_PLATFORMUSAGEESTIMATES_DATALAKEBUCKETNAME", bucket);
+        map.put("PN_PLATFORMUSAGEESTIMATES_DATALAKEREPORTKEY", reportKey);
 
         log.debug("Job Queue : {}", pnPlatformConfig.getJobQueueName());
         log.debug("Job Definition : {}", pnPlatformConfig.getJobDefinitionName());
