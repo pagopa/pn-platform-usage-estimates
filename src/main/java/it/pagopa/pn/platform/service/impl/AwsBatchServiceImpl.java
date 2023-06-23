@@ -8,7 +8,6 @@ import it.pagopa.pn.platform.service.AwsBatchService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.batch.model.SubmitJobResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,15 +31,16 @@ public class AwsBatchServiceImpl implements AwsBatchService {
 
         log.debug("Job Queue : {}", pnPlatformConfig.getJobQueueName());
         log.debug("Job Definition : {}", pnPlatformConfig.getJobDefinitionName());
-        log.debug("Properties : {}", pnPlatformConfig);
 
-        com.amazonaws.services.batch.model.SubmitJobRequest jobRequest = new SubmitJobRequest()
+        SubmitJobRequest jobRequest = new SubmitJobRequest()
                 .withJobName(UUID.randomUUID().toString())
                 .withJobQueue(pnPlatformConfig.getJobQueueName())
                 .withJobDefinition(pnPlatformConfig.getJobDefinitionName())
                 .withParameters(map);
 
+
         SubmitJobResult result = awsBatch.submitJob(jobRequest);
+        log.info("Result of submit job {}", result);
         return result.getJobId();
     }
 }

@@ -54,6 +54,7 @@ public class EstimateApiController implements EstimateApi {
 
     @Override
     public Mono<ResponseEntity<Void>> getScheduleDeanonymizedFiles(String paId, String reportKey,  final ServerWebExchange exchange){
-        return this.estimateService.getScheduleDeanonymizedFiles(paId, reportKey).map(ResponseEntity::ok);
+        return this.estimateService.getScheduleDeanonymizedFiles(paId, reportKey)
+                .then(Mono.just(ResponseEntity.ok().build()));
     }
 }

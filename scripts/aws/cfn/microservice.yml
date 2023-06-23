@@ -458,6 +458,14 @@ Resources:
               - !Sub arn:aws:s3:::${EstimateUsageBucketName}/*
           - Effect: Allow
             Action:
+              - batch:Describe*,
+              - batch:List*,
+              - batch:SubmitJob
+            Resource:
+              - !Ref JobQueue
+              - !Ref BatchDeanonimizingJobDefinition
+          - Effect: Allow
+            Action:
               - dynamodb:BatchGetItem
               - dynamodb:BatchWriteItem
               - dynamodb:ExecuteTransaction
