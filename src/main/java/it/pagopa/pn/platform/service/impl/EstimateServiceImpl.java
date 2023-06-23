@@ -231,7 +231,7 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
     @Override
-    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String reportKey) {
+    public Mono<InfoDownloadDTO> downloadEstimateFileTarget(String paId, String reportKey) {
         return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
                 .flatMap(pnActivityReport -> {
@@ -240,7 +240,27 @@ public class EstimateServiceImpl implements EstimateService {
                     }
                     return this.safeStorageClient.getFile(pnActivityReport.getReportZipKey())
                             .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
-                            .map(file -> FileMapper.toDownloadFile(paId, file));
+                            .map(file -> {
+                                if (file.getDownload() != null){
+                                    return FileMapper.toDownloadFile(pnActivityReport, file.getDownload().getUrl());
+                                }
+                                return FileMapper.toDownloadFile(pnActivityReport, "");
+                            });
+                });
+    }
+
+    @Override
+    public Mono<InfoDownloadDTO> downloadEstimateFileSource(String paId, String reportKey) {
+        return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
+                .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
+                .flatMap(pnActivityReport -> {
+                    if(!pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY))) {
+                        return Mono.error(new PnGenericException(STATUS_NOT_READY, STATUS_NOT_READY.getMessage()));
+                    }
+
+                    return this.s3Bucket.getPresignedUrlFile(pnActivityReport.getReportKey(), pnActivityReport.getBucketName())
+                            .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
+                            .map(url -> FileMapper.toDownloadFile(pnActivityReport, url));
                 });
     }
 

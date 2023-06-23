@@ -219,11 +219,47 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/file/{reportKey}:
+  /pn-usage-estimates/estimate/{paId}/file/target/{reportKey}:
     get:
       tags:
         - Estimate
-      operationId: downloadEstimateFile
+      operationId: downloadEstimateFileTarget
+      x-api-permissions:
+        - 'estimate-read'
+      summary: Download fatture delle stime
+      description: API che consente il download della fattura del mese di riferimento.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReportKey'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoDownloadDTO'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pn-usage-estimates/estimate/{paId}/file/source/{reportKey}:
+    get:
+      tags:
+        - Estimate
+      operationId: downloadEstimateFileSource
       x-api-permissions:
         - 'estimate-read'
       summary: Download fatture delle stime
@@ -937,6 +973,11 @@ components:
           example: 'A12C34D56789E0'
           format: '/[^A-Za-z0-9]+/'
           maxLength: 32
+        reportZipKey:
+          type: string
+          example: 'A12C34D56789E0'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
         paId:
           type: string
           example: 'A12C34D56789E0'
@@ -950,7 +991,7 @@ components:
         lastModifiedDate:
           type: string
           format: date
-        log:
+        errorMessage:
           type: string
         action:
           type: string

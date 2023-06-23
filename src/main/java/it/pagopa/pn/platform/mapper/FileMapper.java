@@ -2,10 +2,10 @@ package it.pagopa.pn.platform.mapper;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.PageModel;
-import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileDownloadResponseDto;
 import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableDeanonymizedFilesResponseDto;
 import org.springframework.data.domain.Pageable;
+
 import java.util.Date;
 import java.util.List;
 
@@ -15,23 +15,24 @@ public class FileMapper {
         throw new IllegalCallerException();
     }
 
-    public static InfoDownloadDTO toDownloadFile(String paId, FileDownloadResponseDto responseFile){
+    public static InfoDownloadDTO toDownloadFile(PnActivityReport activityReport, String url){
         InfoDownloadDTO infoDownloadDTO = new InfoDownloadDTO();
 
-        infoDownloadDTO.setPaId(paId);
-        if (responseFile.getDownload().getUrl() != null ){
-            infoDownloadDTO.setUrl(responseFile.getDownload().getUrl());
-        }
-        infoDownloadDTO.setReportKey(responseFile.getKey());
+        infoDownloadDTO.setPaId(activityReport.getPaId());
+        infoDownloadDTO.setUrl(url);
+        infoDownloadDTO.setReportKey(activityReport.getReportKey());
         infoDownloadDTO.setStatus(InfoDownloadDTO.StatusEnum.READY);
 
         return infoDownloadDTO;
     }
 
+
     public static InfoDownloadDTO fromPnActivityReportToInfoDownloadDTO(String paId, String referenceMonth, PnActivityReport pnActivityReportsList){
         InfoDownloadDTO infoDownloadDTO = new InfoDownloadDTO();
         infoDownloadDTO.setPaId(paId);
+        infoDownloadDTO.setReferenceMonth(referenceMonth);
         infoDownloadDTO.setReportKey(pnActivityReportsList.getReportKey());
+
         return infoDownloadDTO;
     }
 
@@ -61,7 +62,9 @@ public class FileMapper {
         filesList.setLastModifiedDate(activityReport.getLastModifiedDate() != null ? Date.from(activityReport.getLastModifiedDate()) : null);
         filesList.setStatus(InfoDownloadDTO.StatusEnum.valueOf(activityReport.getStatus()));
         filesList.setReportKey(activityReport.getReportKey());
-
+        if (activityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.ERROR))){
+            filesList.setErrorMessage(activityReport.getErrorMessage());
+        }
 
         return filesList;
     }
