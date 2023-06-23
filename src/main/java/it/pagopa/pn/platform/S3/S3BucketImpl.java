@@ -1,10 +1,8 @@
 package it.pagopa.pn.platform.S3;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.*;
 import it.pagopa.pn.platform.config.AwsBucketProperties;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -12,6 +10,10 @@ import reactor.core.publisher.Mono;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 @Slf4j
 public class S3BucketImpl implements S3Bucket {
@@ -48,5 +50,14 @@ public class S3BucketImpl implements S3Bucket {
             data = new InputStreamReader(fullObject.getObjectContent());
         }
         return data;
+    }
+
+    @Override
+    public Mono<String> getPresignedUrlFile(String bucket, String fileKey) {
+        Instant expired = Instant.now().plus(30, ChronoUnit.MINUTES);
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, fileKey, HttpMethod.GET);
+        request.setExpiration(new Date(expired.getEpochSecond()));
+        URL url = s3Client.generatePresignedUrl(request);
+        return Mono.just(url.toExternalForm());
     }
 }
