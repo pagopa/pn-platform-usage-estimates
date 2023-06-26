@@ -515,7 +515,7 @@ Resources:
         IntendedUsage: BACKOFFICE
         DnsName: !Ref WebApiDnsName
         ProjectName: !Ref ProjectName
-        ServiceApiPath: 'platform-usage-estimates'
+        ServiceApiPath: 'pn-usage-estimates'
         NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
         ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
