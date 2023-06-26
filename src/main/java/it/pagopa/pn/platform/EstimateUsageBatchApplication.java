@@ -22,6 +22,7 @@ public class EstimateUsageBatchApplication implements CommandLineRunner {
 
         String datalakeBucketName = pnPlatformConfig.getDatalakeBucketName();
         String datalakeReportKey = pnPlatformConfig.getDatalakeReportKey();
+        log.debug("Properties : {}", pnPlatformConfig);
 
         log.info("Running batch with params bucketName = {}, reportKey = {}", datalakeBucketName, datalakeReportKey);
     }

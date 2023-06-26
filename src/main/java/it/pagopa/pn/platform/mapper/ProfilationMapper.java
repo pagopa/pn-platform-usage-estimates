@@ -110,17 +110,18 @@ public class ProfilationMapper {
     }
 
 
-    public static ProfilationHistory profilationsToDto(PnProfilation profilations){
-        ProfilationHistory profilationsList = new ProfilationHistory();
-        profilationsList.setReferenceYear(profilations.getReferenceYear());
-        profilationsList.setDeadlineDate(Date.from(profilations.getDeadlineDate()));
-        profilationsList.setLastModifiedDate(profilations.getLastModifiedDate() != null ? Date.from(profilations.getLastModifiedDate()) : null);
-        if (profilations.getStatus().equalsIgnoreCase(ProfilationHistory.StatusEnum.DRAFT.toString())){
-            profilationsList.setStatus(ProfilationHistory.StatusEnum.ABSENT);
+    public static ProfilationHistory profilationsToDto(PnProfilation entity){
+        ProfilationHistory dto = new ProfilationHistory();
+        dto.setReferenceYear(entity.getReferenceYear());
+        dto.setDeadlineDate(Date.from(entity.getDeadlineDate()));
+        dto.setLastModifiedDate(entity.getLastModifiedDate() != null ? Date.from(entity.getLastModifiedDate()) : null);
+        if (entity.getStatus().equalsIgnoreCase(ProfilationHistory.StatusEnum.DRAFT.toString())){
+            dto.setStatus(ProfilationHistory.StatusEnum.ABSENT);
         }else {
-            profilationsList.setStatus(ProfilationHistory.StatusEnum.fromValue(profilations.getStatus()));
+            dto.setStatus(ProfilationHistory.StatusEnum.fromValue(entity.getStatus()));
         }
-        return profilationsList;
+        dto.setShowEdit(entity.getDeadlineDate().isAfter(Instant.now()));
+        return dto;
     }
 
 

@@ -294,15 +294,17 @@ Resources:
         ExecutionRoleArn: !GetAtt "BatchTaskExecutionRole.Arn"
         Environment:
           - Name: BATCHMODE
-            Value: 'true'
+            Value: 'batch'
           - Name: AWS_REGIONCODE
-            Value: ${AWS::Region}
+            Value: !Sub ${AWS::Region}
+          - Name: PN_PLATFORMUSAGEESTIMATES_QUEUEDATALAKE
+            Value: 'data-lake-queue'
           - Name: AWS_DYNAMODBESTIMATETABLE
-            Value: ${EstimateDynamoTableName}
+            Value: !Sub ${EstimateDynamoTableName}
           - Name: AWS_DYNAMODBPROFILATIONTABLE
-            Value: ${ProfilationDynamoTableName}
+            Value: !Sub ${ProfilationDynamoTableName}
           - Name: AWS_DYNAMODBACTIVITYREPORTTABLE
-            Value: ${ActivityReportDynamoTableName}
+            Value: !Sub ${ActivityReportDynamoTableName}
       PlatformCapabilities:
         - FARGATE
       Tags:
@@ -392,6 +394,7 @@ Resources:
             RetryStrategy:
               Attempts: !Ref BatchJobMaxAttempts
 
+
 # PN-Platform-usage-estimates microservice
   PlatformUsageEstimatesMicroservice:
     Type: AWS::CloudFormation::Stack
@@ -424,8 +427,13 @@ Resources:
         ContainerEnvEntry9: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTSAFESTORAGEBASEPATH=${SandboxSafeStorageBaseUrl}'
         ContainerEnvEntry10: !Sub 'PN_PLATFORMUSAGEESTIMATES_SAFESTORAGECXID=${SafeStorageCxId}'
         ContainerEnvEntry11: !Sub 'PN_PLATFORMUSAGEESTIMATES_CLIENTDATAVAULTBASEPATH=${DataVaultBaseUrl}'
-        ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${JobQueue.Properties.JobQueueName}'
-        ContainerEnvEntry13: !Sub 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${BatchDeanonimizingJobDefinition.Properties.JobDefinitionName}'
+        ContainerEnvEntry12: !Sub 'PN_PLATFORMUSAGEESTIMATES_QUEUEDATALAKE=data-lake-queue'
+        ContainerEnvEntry13: !Sub
+          - 'PN_PLATFORMUSAGEESTIMATES_JOBQUEUENAME=${JobQueueArn}'
+          - JobQueueArn: !Ref JobQueue
+        ContainerEnvEntry14: !Sub
+          - 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${JobDefinitionArn}'
+          - JobDefinitionArn: !Ref BatchDeanonimizingJobDefinition
         MappedPaths: '/pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
@@ -448,6 +456,14 @@ Resources:
             Resource:
               - !Sub arn:aws:s3:::${EstimateUsageBucketName}
               - !Sub arn:aws:s3:::${EstimateUsageBucketName}/*
+          - Effect: Allow
+            Action:
+              - batch:Describe*,
+              - batch:List*,
+              - batch:SubmitJob
+            Resource:
+              - !Ref JobQueue
+              - !Ref BatchDeanonimizingJobDefinition
           - Effect: Allow
             Action:
               - dynamodb:BatchGetItem
