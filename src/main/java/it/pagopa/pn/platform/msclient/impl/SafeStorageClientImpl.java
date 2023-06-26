@@ -3,6 +3,9 @@ package it.pagopa.pn.platform.msclient.impl;
 import it.pagopa.pn.platform.config.PnPlatformConfig;
 import it.pagopa.pn.platform.exception.PnRetryStorageException;
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.api.FileDownloadApi;
+import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.api.FileUploadApi;
+import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreationRequestDto;
+import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreationResponseDto;
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileDownloadResponseDto;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import lombok.extern.slf4j.Slf4j;
@@ -18,13 +21,21 @@ import java.util.concurrent.TimeoutException;
 @Component
 @Slf4j
 public class SafeStorageClientImpl implements SafeStorageClient {
-    private PnPlatformConfig pnPlatformConfig;
-    private FileDownloadApi fileDownloadApi;
+    private final PnPlatformConfig pnPlatformConfig;
+    private final FileDownloadApi fileDownloadApi;
+    private final FileUploadApi fileUploadApi;
+
+    private static final String DOCUMENT_TYPE = "PN_INVOICING_ACTIVITY_REPORT";
+
+    private static final String CONTENT_TYPE = "application/zip";
+    private static final String STATUS = "PRELOADED";
 
     public SafeStorageClientImpl(PnPlatformConfig cfg,
-                                 FileDownloadApi fileDownloadApi) {
+                                 FileDownloadApi fileDownloadApi,
+                                 FileUploadApi fileUploadApi) {
         this.pnPlatformConfig = cfg;
         this.fileDownloadApi = fileDownloadApi;
+        this.fileUploadApi = fileUploadApi;
     }
 
 
@@ -54,5 +65,16 @@ public class SafeStorageClientImpl implements SafeStorageClient {
                     log.error(ex.getResponseBodyAsString());
                     return Mono.error(ex);
                 });
+    }
+
+    @Override
+    public Mono<FileCreationResponseDto> getPresignedUrl() {
+
+        FileCreationRequestDto fileCreationRequestDto = new FileCreationRequestDto();
+        fileCreationRequestDto.setContentType(CONTENT_TYPE);
+        fileCreationRequestDto.setDocumentType(DOCUMENT_TYPE);
+        fileCreationRequestDto.setStatus(STATUS);
+
+        return fileUploadApi.createFile(this.pnPlatformConfig.getSafeStorageCxId(), fileCreationRequestDto);
     }
 }

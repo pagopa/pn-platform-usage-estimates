@@ -4,7 +4,10 @@ import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.encription.model.DataEncryption;
 import it.pagopa.pn.platform.mapper.ActivityReportMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
+import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
+import it.pagopa.pn.platform.msclient.SafeStorageClient;
+import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreationResponseDto;
 import it.pagopa.pn.platform.service.DeanonymizingService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -30,9 +33,25 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
     private S3Bucket s3Bucket;
     private DataEncryption dataEncryption;
 
-    public Mono<List<ActivityReportCSV>> getCSV(String paId, String fileKey) {
+    private static SafeStorageClient safeStorageClient;
 
-        return activityReportMetaDAO.findByPaIdAndFileKey(paId, fileKey)
+    @Override
+    public Mono<Void> execute(String paId, String fileKey) {
+        return getCSV(paId, fileKey)
+                .flatMap(activityReportCSVList -> activityReportMetaDAO.findByPaIdAndFileKey(paId, fileKey)
+                        .map(pnActivityReport -> {
+                            File file = writeObjectsToCSV(activityReportCSVList, pnActivityReport.getBucketName());
+                            zipFile(file.getPath(), "compressed.zip");
+                            return getAndSavePresignedUrl(pnActivityReport);
+                        })).map(fileCreationResponseDtoMono -> {
+//                            TODO coricamento file su safestorage
+                    return Mono.empty();
+                }).then();
+    }
+
+    private Mono<List<ActivityReportCSV>> getCSV(String paId, String fileKey) {
+
+        return this.activityReportMetaDAO.findByPaIdAndFileKey(paId, fileKey)
                 .map(pnActivityReport -> {
                     List<ActivityReportCSV> activityReportDeanonymizingCSV;
                     InputStreamReader file = s3Bucket.getObjectData(pnActivityReport.getReportKey());
@@ -44,7 +63,6 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
                         Reader in = new BufferedReader(file);
                         Iterable<CSVRecord> records = csvFormat.parse(in);
                         activityReportDeanonymizingCSV = deanonymizingRaw(ActivityReportMapper.csvToObject(records));
-
                     } catch (IOException exception) {
                         throw new RuntimeException(exception);
                     }
@@ -71,22 +89,28 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
                          CSVFormat.DEFAULT.builder().setHeader(ActivityReportCSV.Header.class).build())) {
                 csvPrinter.printRecord(activityReportCSV);
                 csvPrinter.flush();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
             }
         });
         return file;
     }
 
-    public static void zipFile(String sourceFile, String zipFile) throws IOException {
+    public static void zipFile(String sourceFile, String zipFile) {
         // sourceFile = percorso del file file.csv; zipFile = nome del file da zippare (compressed.zip)
-        FileOutputStream fileOutputStream = new FileOutputStream(zipFile);
-        ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(zipFile);
+            ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
 
-        addFolderToZip(sourceFile, sourceFile, zipOutputStream);
+            addFolderToZip(sourceFile, sourceFile, zipOutputStream);
 
-        zipOutputStream.close();
-        fileOutputStream.close();
+            zipOutputStream.close();
+            fileOutputStream.close();
+
+        }catch (IOException exception){
+            throw new RuntimeException(exception);
+        }
+
     }
 
     private static void addFolderToZip(String folderPath, String sourceFile, ZipOutputStream zipStream) throws IOException {
@@ -108,5 +132,18 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
             }
         }
     }
+
+    private Mono<FileCreationResponseDto> getAndSavePresignedUrl (PnActivityReport pnActivityReport){
+
+        return safeStorageClient.getPresignedUrl().map(fileCreationResponseDto -> {
+            String url = fileCreationResponseDto.getUploadUrl();
+            pnActivityReport.setUrlSafeStorage(url);
+            activityReportMetaDAO.createMetaData(pnActivityReport);
+            return fileCreationResponseDto;
+        });
+
+
+    }
+
 
 }
