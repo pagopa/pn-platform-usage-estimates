@@ -251,7 +251,7 @@ paths:
         - ReportBo
       operationId: getAllDeanonymizedFiles
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: ritorna elenco di file deanonimizzati in base al paId e allo stato.
       description: API che estrae la lista di file deanonimizzati.
       parameters:
