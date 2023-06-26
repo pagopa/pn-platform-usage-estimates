@@ -505,7 +505,6 @@ Resources:
           - ','
           - - !Sub '/aws/ecs/${ProjectName}-platform-usage-estimates'
 
-
   PlatformUsageEstimatesGateway:
     Type: AWS::CloudFormation::Stack
     Properties:
