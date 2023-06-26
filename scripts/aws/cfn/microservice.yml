@@ -510,11 +510,11 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-platform-usage-estimates-bo'
+        MicroServiceUniqueName: !Sub '${ProjectName}-pn-usage-estimates'
         IntendedUsage: BACKOFFICE
         DnsName: !Ref WebApiDnsName
         ProjectName: !Ref ProjectName
-        ServiceApiPath: 'pn-usage-estimates'
+        ServiceApiPath: 'pn-usage-estimates-bo'
         NetworkLoadBalancerLink: !Ref NetworkLoadBalancerLink
         ApplicationLoadBalancerDomain: !Ref ApplicationLoadBalancerDomain
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
