@@ -510,7 +510,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBucketBaseUrl}/fragments/api-gw-expose-service.yaml"
       Parameters:
-        MicroServiceUniqueName: !Sub '${ProjectName}-pn-usage-estimates'
+        MicroServiceUniqueName: !Sub '${ProjectName}-platform-usage-estimates-bo'
         IntendedUsage: BACKOFFICE
         DnsName: !Ref WebApiDnsName
         ProjectName: !Ref ProjectName
@@ -520,7 +520,7 @@ Resources:
         AlarmSNSTopicArn: !Ref AlarmSNSTopicArn
         CloudwatchLogKinesisStreamArn: !Ref LogsKinesisSourceStreamArn
         OpenApiBucketName: !Ref MicroserviceBucketName
-        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/api-internal-v1.yaml
+        OpenApiBucketKey: !Sub ${MicroserviceBucketBaseKey}/docs/openapi/api-external-bo-v1.yaml
 
   # Expose PN-Usage-platform-estimates microservice public API with API-GW for WEB usage
   PlatformUsageEstimatesMicroservicePublicWebAPI:
