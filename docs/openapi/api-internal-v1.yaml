@@ -183,11 +183,11 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/files/{referenceMonth}:
+  /pn-usage-estimates/{paId}/reports/{referenceMonth}:
     get:
       tags:
-        - Estimate
-      operationId: getAllEstimateFile
+        - Report
+      operationId: getAllReportFile
       x-api-permissions:
         - 'estimate-read'
       summary: estrae tutti i consuntivi delle stime associate al paId e al mese di riferimento.
@@ -219,18 +219,19 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/file/target/{reportKey}:
+  /pn-usage-estimates/estimate/{paId}/reports/{reportKey}:
     get:
       tags:
-        - Estimate
-      operationId: downloadEstimateFileTarget
+        - Report
+      operationId: downloadReportFile
       x-api-permissions:
         - 'estimate-read'
-      summary: Download fatture delle stime
-      description: API che consente il download della fattura del mese di riferimento.
+      summary: Download file di un report
+      description: API che consente il download del file di un report relativo alla reportKey.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
         - $ref: '#/components/parameters/pathReportKey'
+        - $ref: '#/components/parameters/queryFileType'
       responses:
         '200':
           description: OK
@@ -255,46 +256,11 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/file/source/{reportKey}:
-    get:
-      tags:
-        - Estimate
-      operationId: downloadEstimateFileSource
-      x-api-permissions:
-        - 'estimate-read'
-      summary: Download fatture delle stime
-      description: API che consente il download della fattura del mese di riferimento.
-      parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReportKey'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InfoDownloadDTO'
-        '400':
-          description: Errore di validazione sintattica della richiesta
-          content:
-            application/problem+json:
-              schema:
-                $ref: '#/components/schemas/Problem'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '405':
-          $ref: '#/components/responses/NotAllowed'
-        '500':
-          $ref: '#/components/responses/InternalError'
 
   /pn-usage-estimates/reports/{paId}:
     get:
       tags:
-        - Estimate
+        - Report
       operationId: getAllDeanonymizedFiles
       x-api-permissions:
         - 'estimate-read'
@@ -332,7 +298,7 @@ paths:
   /pn-usage-estimates/reports/{paId}/schedule/{reportKey}:
     get:
       tags:
-        - Estimate
+        - Report
       operationId: getScheduleDeanonymizedFiles
       x-api-permissions:
         - 'estimate-read'
@@ -1122,6 +1088,17 @@ components:
           - ENQUEUED
           - READY
           - ERROR
+
+
+    queryFileType:
+      name: type
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - SOURCE
+          - TARGET
 
     pathReferenceMonth:
       name: referenceMonth

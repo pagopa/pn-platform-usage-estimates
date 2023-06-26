@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -28,23 +27,8 @@ public class EstimateApiController implements EstimateApi {
     }
 
     @Override
-    public Mono<ResponseEntity<InfoDownloadDTO>> downloadEstimateFileTarget(String paId, String reportKey, ServerWebExchange exchange) {
-        return this.estimateService.downloadEstimateFileTarget(paId, reportKey).map(ResponseEntity::ok);
-    }
-
-    @Override
-    public Mono<ResponseEntity<InfoDownloadDTO>> downloadEstimateFileSource(String paId, String reportKey,  final ServerWebExchange exchange){
-        return this.estimateService.downloadEstimateFileSource(paId, reportKey).map(ResponseEntity::ok);
-    }
-
-    @Override
     public Mono<ResponseEntity<PageableEstimateResponseDto>> getAllEstimate(String originFe, String paId, String taxId, String ipaId, Integer page, Integer size, ServerWebExchange exchange) {
         return this.estimateService.getAllEstimate(originFe, paId, taxId, ipaId, page, size).map(ResponseEntity::ok);
-    }
-
-    @Override
-    public Mono<ResponseEntity<Flux<InfoDownloadDTO>>> getAllEstimateFile(String paId, String referenceMonth, ServerWebExchange exchange) {
-        return this.estimateService.getAllEstimateFile(paId, referenceMonth).collectList().map(list -> ResponseEntity.ok(Flux.fromStream(list.stream())));
     }
 
     @Override
@@ -52,13 +36,4 @@ public class EstimateApiController implements EstimateApi {
         return this.estimateService.getEstimateDetail(paId, referenceMonth).map(ResponseEntity::ok);
     }
 
-    @Override
-    public Mono<ResponseEntity<PageableDeanonymizedFilesResponseDto>> getAllDeanonymizedFiles(String paId, String status, Integer page, Integer size,  final ServerWebExchange exchange){
-        return this.estimateService.getAllDeanonymizedFiles(paId, status, page, size).map(ResponseEntity::ok);
-    }
-
-    @Override
-    public Mono<ResponseEntity<Void>> getScheduleDeanonymizedFiles(String paId, String reportKey,  final ServerWebExchange exchange){
-        return this.estimateService.getScheduleDeanonymizedFiles(paId, reportKey).map(ResponseEntity::ok);
-    }
 }
