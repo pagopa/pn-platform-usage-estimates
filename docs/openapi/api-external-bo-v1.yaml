@@ -22,7 +22,7 @@ paths:
         - EstimateBo
       operationId: createOrUpdateEstimate
       x-api-permissions:
-        - 'estimate-write'
+        - 'tender-read'
       summary: Inserimento o modifica di una stima.
       description: API che consente di aggiungere o di modificare i dettagli di una stima.
       parameters:
@@ -65,7 +65,7 @@ paths:
         - EstimateBo
       operationId: validated
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: Validazione stima.
       description: API che consente di modificare lo stato di una stima.
       parameters:
@@ -101,7 +101,7 @@ paths:
         - EstimateBo
       operationId: getAllEstimate
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: ritorna elenco di stime in base alla partita iva, al nome della pa o al codice Ipa.
       description: API che estrae la lista di stime
       parameters:
@@ -141,7 +141,7 @@ paths:
         - EstimateBo
       operationId: getEstimateDetail
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: ritorna il dettaglio delle stime in base al mese di riferimento e al paId.
       description: API che ritorna il dettaglio di una stima.
       parameters:
@@ -177,7 +177,7 @@ paths:
         - ReportBo
       operationId: getAllReportFile
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: estrae tutti i consuntivi delle stime associate al paId e al mese di riferimento.
       description: API che consente di estrarre l'elenco fatture delle stime.
       parameters:
@@ -213,7 +213,7 @@ paths:
         - ReportBo
       operationId: downloadReportFile
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: Download file di un report
       description: API che consente il download del file di un report relativo alla reportKey.
       parameters:
@@ -289,7 +289,7 @@ paths:
         - ReportBo
       operationId: getScheduleDeanonymizedFiles
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: rischedula il caricamento dell'elenco elenco di file deanonimizzati in base al paId e al reportKey.
       description: API che rischedula la lista di file deanonimizzati.
       parameters:
