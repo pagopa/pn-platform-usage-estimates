@@ -434,7 +434,7 @@ Resources:
         ContainerEnvEntry14: !Sub
           - 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${JobDefinitionArn}'
           - JobDefinitionArn: !Ref BatchDeanonimizingJobDefinition
-        MappedPaths: '/pn-usage-estimates/*'
+        MappedPaths:  '/pn-usage-estimates-bo/*, /pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds
         VpcId: !Ref VpcId
