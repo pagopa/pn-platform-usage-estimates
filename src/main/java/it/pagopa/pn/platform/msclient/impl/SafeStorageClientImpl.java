@@ -9,11 +9,21 @@ import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreatio
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileDownloadResponseDto;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.concurrent.TimeoutException;
 
@@ -76,5 +86,24 @@ public class SafeStorageClientImpl implements SafeStorageClient {
         fileCreationRequestDto.setStatus(STATUS);
 
         return fileUploadApi.createFile(this.pnPlatformConfig.getSafeStorageCxId(), fileCreationRequestDto);
+    }
+
+    @Override
+    public Mono<String> uploadFile(String url, byte [] bytes) {
+        log.info("Url to download: " + url);
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", BodyInserters.fromValue(bytes));
+        try {
+            return WebClient.create()
+                    .post()
+                    .uri(new URI(url))
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .flatMap(Mono::just);
+        } catch (URISyntaxException e) {
+            return Mono.error(e);
+        }
     }
 }

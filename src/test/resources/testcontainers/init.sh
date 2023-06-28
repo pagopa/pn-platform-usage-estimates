@@ -9,6 +9,18 @@ for qn in  $( echo $queues | tr " " "\n" ) ; do
     echo ending create queue
 done
 
+echo "### CREATE BUCKETS ###"
+buckets="local-doc-bucket local-legal-bucket"
+for buck in  $( echo $buckets | tr " " "\n" ) ; do
+  echo creating bucket $buck ...
+  aws --profile default --region us-east-1 --endpoint-url http://localstack:4566 \
+      s3 mb s3://$buck
+  aws --profile default --region us-east-1 --endpoint-url http://localstack:4566 \
+      s3api put-bucket-versioning \
+      --bucket $buck \
+      --versioning-configuration Status=Enabled
+done
+
 echo " - Create EstimateDynamoTable"
 
 aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \

@@ -1,11 +1,14 @@
 package it.pagopa.pn.platform.service;
 
+import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.config.BaseTest;
+import it.pagopa.pn.platform.service.impl.DeanonymizingServiceImpl;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,7 +22,13 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DeanonymizingServiceTest{
+class DeanonymizingServiceTest extends BaseTest{
+
+    @Autowired
+    DeanonymizingServiceImpl deanonymizingServiceImpl;
+
+    @Autowired
+    S3Bucket s3Bucket;
 
     //@Test
     void givenCSVFile_whenRead_thenContentsAsExpected() throws IOException {
@@ -79,5 +88,17 @@ class DeanonymizingServiceTest{
             });
         }
         assertEquals("00012, Italia", sw.toString().trim());
+    }
+
+    @Test
+    void testZipFile() {
+        deanonymizingServiceImpl.zipFile("src/test/resources/filecsv", "src/test/resources/compressed.zip");
+    }
+
+    @Test
+    void testgetFileS3() throws IOException {
+        String presignedUrl = s3Bucket.getPresignedUploadFile("1234", "test1234").block();
+        deanonymizingServiceImpl.uploadZipFile(presignedUrl);
+
     }
 }
