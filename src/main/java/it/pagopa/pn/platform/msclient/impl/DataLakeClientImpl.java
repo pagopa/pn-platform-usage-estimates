@@ -7,12 +7,13 @@ import it.pagopa.pn.platform.msclient.DataLakeClient;
 import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
 import it.pagopa.pn.platform.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
+@Component
 public class DataLakeClientImpl implements DataLakeClient {
 
     @Autowired

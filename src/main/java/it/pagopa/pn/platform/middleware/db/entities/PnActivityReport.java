@@ -26,6 +26,7 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     public static final String COL_LAST_MODIFIED_DATE = "lastModifiedDate" ;
     public static final String COL_ACTION = "action" ;
     public static final String COL_KEY_SAFESTORAGE = "keySafeStorage";
+    public static final String COL_ERROR_MESSAGE = "errorMessage" ;
 
     @Getter(onMethod = @__({@DynamoDbPartitionKey, @DynamoDbSecondaryPartitionKey(indexNames = INDEX_PA_REF_MONTH), @DynamoDbAttribute(COL_PA_ID)}))
     private String paId;
@@ -50,6 +51,9 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_ACTION)}))
     private String action;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_ERROR_MESSAGE)}))
+    private String errorMessage;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_KEY_SAFESTORAGE)}))
     private String keySafeStorage;

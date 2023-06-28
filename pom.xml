@@ -237,6 +237,36 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>generate-platform-external-bo-api</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>process-resources</phase>
+						<configuration>
+							<inputSpec>${project.basedir}/docs/openapi/api-external-bo-v1.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<library>spring-boot</library>
+							<generateApiDocumentation>false</generateApiDocumentation>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<configOptions>
+								<dateLibrary>java11</dateLibrary>
+								<delegatePattern>true</delegatePattern>
+								<interfaceOnly>true</interfaceOnly>
+								<annotationLibrary>none</annotationLibrary>
+								<documentationProvider>source</documentationProvider>
+								<openApiNullable>false</openApiNullable>
+								<reactive>true</reactive>
+								<skipDefaultInterface>false</skipDefaultInterface>
+								<useTags>true</useTags>
+								<basePackage>${project.groupId}.platform.rest.v1</basePackage>
+								<modelPackage>${project.groupId}.platform.rest.v1.dto</modelPackage>
+								<apiPackage>${project.groupId}.platform.rest.v1.api</apiPackage>
+								<configPackage>${project.groupId}.platform.rest.v1.config</configPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
 						<id>generate-datalake</id>
 						<goals>
 							<goal>generate</goal>

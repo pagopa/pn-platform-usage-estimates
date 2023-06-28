@@ -9,12 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 @Slf4j
 public class S3BucketImpl implements S3Bucket {
@@ -54,7 +51,7 @@ public class S3BucketImpl implements S3Bucket {
     }
 
     @Override
-    public Mono<String> getPresignedUploadFile(String bucket, String fileKey) {
+    public Mono<String> getPresignedUrlFile(String bucket, String fileKey) {
         java.util.Date expiration = new java.util.Date();
         long expTimeMillis = Instant.now().toEpochMilli();
         expTimeMillis += 1000 * 60 * 60;

@@ -4,27 +4,22 @@ import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.datalake.v1.dto.MonthlyNotificationPreorderDto;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.EstimateMapper;
-import it.pagopa.pn.platform.mapper.FileMapper;
-import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
-import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
 import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import it.pagopa.pn.platform.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
@@ -49,12 +44,6 @@ public class EstimateServiceImpl implements EstimateService {
 
     @Autowired
     private EstimateDAO estimateDAO;
-
-    @Autowired
-    private ActivityReportMetaDAO activityReportMetaDAO;
-
-    @Autowired
-    private SafeStorageClient safeStorageClient;
 
     @Autowired
     private S3Bucket s3Bucket;
@@ -175,57 +164,6 @@ public class EstimateServiceImpl implements EstimateService {
                 .map(list -> EstimateMapper.toPageableResponse(pageable, list));
     }
 
-
-    //PER CONSUNTIVI
-    @Override
-    public Flux<InfoDownloadDTO> getAllEstimateFile(String paId, String referenceMonth) {
-        return this.activityReportMetaDAO.findAllFromPaId(paId, referenceMonth)
-                .filter(pnActivityReport ->  pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY)))
-                .map(pnActivityReport -> FileMapper.fromPnActivityReportToInfoDownloadDTO(paId, referenceMonth, pnActivityReport));
-    }
-
-    @Override
-    public Mono<PageableDeanonymizedFilesResponseDto> getAllDeanonymizedFiles(String paId, String status, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page-1, size);
-
-        //caso in cui non mi viene passato lo status -> mostro tutti i record
-        if (StringUtils.isBlank(status)){
-            return activityReportMetaDAO.findAllFromPaId(paId)
-                    .collectList()
-                    .map(list ->
-                            FileMapper.toPagination(pageable, list)
-                    )
-                    .map(FileMapper::toPageableResponse);
-        }
-
-        //caso in cui mi viene passato uno dei 4 stati previsti
-        else if (checkStatusReport(status)){
-            return activityReportMetaDAO.findAllFromPaIdAndStatus(paId, status)
-                    .filter(activityReport -> activityReport.getStatus().equals(status))
-                    .collectList()
-                    .map(list ->
-                            FileMapper.toPagination(pageable, list)
-                    )
-                    .map(FileMapper::toPageableResponse);
-
-        }
-        //mi viene passato uno stato diverso da quei 4
-        return Mono.error(new PnGenericException(STATUS_NOT_CORRECT, STATUS_NOT_CORRECT.getMessage()));
-    }
-
-    @Override
-    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileZipKey) {
-        return this.activityReportMetaDAO.findByPaIdAndFileKey(paId, fileZipKey)
-                .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
-                .flatMap(pnActivityReport -> {
-                    if(!pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY))) {
-                        return Mono.error(new PnGenericException(STATUS_NOT_READY, STATUS_NOT_READY.getMessage()));
-                    }
-                    return this.safeStorageClient.getFile(pnActivityReport.getReportZipKey())
-                            .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
-                            .map(file -> FileMapper.toDownloadFile(paId, file));
-                });
-    }
 
     private Instant getInstantFromMonth(String referenceMonth) throws PnGenericException {
         Instant result = null;
