@@ -224,9 +224,9 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
     private Boolean checkStatusReport(String status){
-        return status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.READY)) ||
-                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.ENQUEUED)) ||
-                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.ERROR)) ||
-                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.DEANONIMIZING));
+        return status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.READY)) ||
+                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.ENQUEUED)) ||
+                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.ERROR)) ||
+                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.DEANONIMIZING));
     }
 }

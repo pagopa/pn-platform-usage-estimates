@@ -5,12 +5,12 @@ import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.FileMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableDeanonymizedFilesResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.ReportDTO;
+import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import it.pagopa.pn.platform.service.AwsBatchService;
 import it.pagopa.pn.platform.service.ReportService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +38,7 @@ public class ReportServiceImpl implements ReportService {
     private AwsBatchService awsBatchService;
 
     @Override
-    public Mono<InfoDownloadDTO> downloadReportFile(String paId, String reportKey, String type) {
+    public Mono<ReportDTO> downloadReportFile(String paId, String reportKey, String type) {
 
         return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
@@ -51,7 +51,7 @@ public class ReportServiceImpl implements ReportService {
                                 .map(url -> FileMapper.toDownloadFile(pnActivityReport, url));
                     }
 
-                    if(!pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY))) {
+                    if(!pnActivityReport.getStatus().equals(String.valueOf(ReportStatusEnum.READY))) {
                         return Mono.error(new PnGenericException(STATUS_NOT_READY, STATUS_NOT_READY.getMessage()));
                     }
 
@@ -70,11 +70,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Mono<PageableDeanonymizedFilesResponseDto> getAllDeanonymizedFiles(String paId, String status, Integer page, Integer size) {
+    public Mono<PageableDeanonymizedFilesResponseDto> getAllDeanonymizedFiles(String paId, ReportStatusEnum status, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page-1, size);
 
         //caso in cui non mi viene passato lo status -> mostro tutti i record
-        if (StringUtils.isBlank(status)){
+        if (status == null){
             return activityReportMetaDAO.findAllFromPaId(paId)
                     .collectList()
                     .map(list ->
@@ -84,9 +84,9 @@ public class ReportServiceImpl implements ReportService {
         }
 
         //caso in cui mi viene passato uno dei 4 stati previsti
-        else if (checkStatusReport(status)){
-            return activityReportMetaDAO.findAllFromPaIdAndStatus(paId, status)
-                    .filter(activityReport -> activityReport.getStatus().equals(status))
+        else {
+            return activityReportMetaDAO.findAllFromPaIdAndStatus(paId, status.getValue())
+                    .filter(activityReport -> activityReport.getStatus().equals(status.getValue()))
                     .collectList()
                     .map(list ->
                             FileMapper.toPagination(pageable, list)
@@ -94,14 +94,12 @@ public class ReportServiceImpl implements ReportService {
                     .map(FileMapper::toPageableResponse);
 
         }
-        //mi viene passato uno stato diverso da quei 4
-        return Mono.error(new PnGenericException(STATUS_NOT_CORRECT, STATUS_NOT_CORRECT.getMessage()));
     }
 
     @Override
-    public Flux<InfoDownloadDTO> getAllReportFile(String paId, String referenceMonth) {
+    public Flux<ReportDTO> getAllReportFile(String paId, String referenceMonth) {
         return this.activityReportMetaDAO.findAllFromPaId(paId, referenceMonth)
-                .filter(pnActivityReport ->  pnActivityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.READY)))
+                .filter(pnActivityReport ->  pnActivityReport.getStatus().equals(String.valueOf(ReportStatusEnum.READY)))
                 .map(pnActivityReport -> FileMapper.fromPnActivityReportToInfoDownloadDTO(paId, referenceMonth, pnActivityReport));
     }
 
@@ -110,17 +108,10 @@ public class ReportServiceImpl implements ReportService {
         return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
                 .doOnNext(activityReport -> {
-                    if (!activityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.ERROR))){
+                    if (!activityReport.getStatus().equals(String.valueOf(ReportStatusEnum.ERROR))){
                         throw new PnGenericException(STATUS_NOT_IN_ERROR, STATUS_NOT_IN_ERROR.getMessage());
                     }
                     this.awsBatchService.scheduleJob(paId, activityReport.getBucketName(), reportKey);
                 }).then();
-    }
-
-    private Boolean checkStatusReport(String status){
-        return status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.READY)) ||
-                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.ENQUEUED)) ||
-                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.ERROR)) ||
-                status.equalsIgnoreCase(String.valueOf(InfoDownloadDTO.StatusEnum.DEANONIMIZING));
     }
 }
