@@ -136,7 +136,7 @@ public class ProfilationServiceImpl implements ProfilationService {
             return Mono.error(new PnGenericException(PROFILATION_EXPIRED, PROFILATION_EXPIRED.getMessage()));
         }
 
-        if (Integer.parseInt(referenceYear) > DateUtils.getYear(refYearInstant)){
+        if (Integer.parseInt(referenceYear) > DateUtils.getYear(refYearInstant)+1){
             return Mono.error(new PnGenericException(FUTURE_PROFILATION_NOT_EXIST, FUTURE_PROFILATION_NOT_EXIST.getMessage()));
         }
 
@@ -147,7 +147,7 @@ public class ProfilationServiceImpl implements ProfilationService {
                             && pnProfilation.getDeadlineDate().isAfter(refYearInstant)){
                         pnProfilation.setStatus(ProfilationPeriod.StatusEnum.VALIDATED.getValue());
                         pnProfilation.setLastModifiedDate(refYearInstant);
-                        profilationDAO.createOrUpdate(pnProfilation);
+                        return profilationDAO.createOrUpdate(pnProfilation);
                     }
                     return Mono.just(pnProfilation);
                 }).map(ProfilationMapper::profilationPeriodToDto);
