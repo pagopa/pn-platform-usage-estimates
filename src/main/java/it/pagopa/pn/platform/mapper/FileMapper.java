@@ -2,8 +2,10 @@ package it.pagopa.pn.platform.mapper;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.PageModel;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
+import it.pagopa.pn.platform.rest.v1.dto.ReportDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableDeanonymizedFilesResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.ReportDTO;
+import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
@@ -15,25 +17,25 @@ public class FileMapper {
         throw new IllegalCallerException();
     }
 
-    public static InfoDownloadDTO toDownloadFile(PnActivityReport activityReport, String url){
-        InfoDownloadDTO infoDownloadDTO = new InfoDownloadDTO();
+    public static ReportDTO toDownloadFile(PnActivityReport activityReport, String url){
+        ReportDTO reportDTO = new ReportDTO();
 
-        infoDownloadDTO.setPaId(activityReport.getPaId());
-        infoDownloadDTO.setUrl(url);
-        infoDownloadDTO.setReportKey(activityReport.getReportKey());
-        infoDownloadDTO.setStatus(InfoDownloadDTO.StatusEnum.READY);
+        reportDTO.setPaId(activityReport.getPaId());
+        reportDTO.setUrl(url);
+        reportDTO.setReportKey(activityReport.getReportKey());
+        reportDTO.setStatus(ReportStatusEnum.READY);
 
-        return infoDownloadDTO;
+        return reportDTO;
     }
 
 
-    public static InfoDownloadDTO fromPnActivityReportToInfoDownloadDTO(String paId, String referenceMonth, PnActivityReport pnActivityReportsList){
-        InfoDownloadDTO infoDownloadDTO = new InfoDownloadDTO();
-        infoDownloadDTO.setPaId(paId);
-        infoDownloadDTO.setReferenceMonth(referenceMonth);
-        infoDownloadDTO.setReportKey(pnActivityReportsList.getReportKey());
+    public static ReportDTO fromPnActivityReportToInfoDownloadDTO(String paId, String referenceMonth, PnActivityReport pnActivityReportsList){
+        ReportDTO reportDTO = new ReportDTO();
+        reportDTO.setPaId(paId);
+        reportDTO.setReferenceMonth(referenceMonth);
+        reportDTO.setReportKey(pnActivityReportsList.getReportKey());
 
-        return infoDownloadDTO;
+        return reportDTO;
     }
 
     public static PageableDeanonymizedFilesResponseDto toPageableResponse(PageModel<PnActivityReport> pnActivityReportPageModel){
@@ -55,14 +57,14 @@ public class FileMapper {
         return PageModel.builder(list, pageable);
     }
 
-    public static InfoDownloadDTO deanonymizedFilesToDto(PnActivityReport activityReport){
-        InfoDownloadDTO filesList = new InfoDownloadDTO();
+    public static ReportDTO deanonymizedFilesToDto(PnActivityReport activityReport){
+        ReportDTO filesList = new ReportDTO();
         filesList.setPaId(activityReport.getPaId());
         filesList.setReferenceMonth(activityReport.getReferenceMonth());
         filesList.setLastModifiedDate(activityReport.getLastModifiedDate() != null ? Date.from(activityReport.getLastModifiedDate()) : null);
-        filesList.setStatus(InfoDownloadDTO.StatusEnum.valueOf(activityReport.getStatus()));
+        filesList.setStatus(ReportStatusEnum.valueOf(activityReport.getStatus()));
         filesList.setReportKey(activityReport.getReportKey());
-        if (activityReport.getStatus().equals(String.valueOf(InfoDownloadDTO.StatusEnum.ERROR))){
+        if (activityReport.getStatus().equals(String.valueOf(ReportStatusEnum.ERROR))){
             filesList.setErrorMessage(activityReport.getErrorMessage());
         }
 

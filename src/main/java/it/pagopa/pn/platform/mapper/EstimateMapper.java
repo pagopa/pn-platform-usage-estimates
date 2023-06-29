@@ -93,7 +93,7 @@ public class EstimateMapper {
     public static EstimatePeriod estimatePeriodToDto(PnEstimate pnEstimate) {
         EstimatePeriod estimatePeriod = new EstimatePeriod();
         Estimate estimate = new Estimate();
-        Billing billing = new Billing();
+        Profilation billing = new Profilation();
 
         //STIME
         estimate.setTotalDigitalNotif(pnEstimate.getTotalDigitalNotif());
@@ -124,7 +124,7 @@ public class EstimateMapper {
         EstimateDetail estimateDetail = new EstimateDetail();
         Estimate estimate = new Estimate();
         PAInfo paInfo = new PAInfo();
-        Billing billing = new Billing();
+        Profilation profilation = new Profilation();
 
         //INFO PA
         paInfo.setPaId(paInfoDto.getId());
@@ -138,14 +138,14 @@ public class EstimateMapper {
 
 
         //FATTURAZIONE
-        billing.setMailAddress(pnEstimate.getMailAddress());
-        billing.setDescription(pnEstimate.getDescription());
-        billing.setSplitPayment(pnEstimate.getSplitPayment());
+        profilation.setMailAddress(pnEstimate.getMailAddress());
+        profilation.setDescription(pnEstimate.getDescription());
+        profilation.setSplitPayment(pnEstimate.getSplitPayment());
 
         //PERIODO
         estimateDetail.setEstimate(estimate);
         estimateDetail.setPaInfo(paInfo);
-        estimateDetail.setBilling(billing);
+        estimateDetail.setBilling(profilation);
 
         estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());

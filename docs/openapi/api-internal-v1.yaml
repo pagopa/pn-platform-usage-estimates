@@ -201,7 +201,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/listEstimateFile'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ListReports'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -238,7 +238,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/InfoDownloadDTO'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ReportDTO'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:

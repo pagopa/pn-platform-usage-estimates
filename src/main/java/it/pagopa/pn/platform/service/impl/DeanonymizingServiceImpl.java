@@ -6,7 +6,7 @@ import it.pagopa.pn.platform.dao.ZipDAO;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
+import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import it.pagopa.pn.platform.service.DeanonymizingService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +40,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
     public Mono<Void> execute(String paId, String reportKey) {
         return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .flatMap(pnActivityReport -> {
-                    pnActivityReport.setStatus(InfoDownloadDTO.StatusEnum.DEANONIMIZING.name());
+                    pnActivityReport.setStatus(ReportStatusEnum.DEANONIMIZING.name());
                     return this.activityReportMetaDAO.createMetaData(pnActivityReport);
                 })
                 .flatMap(pnActivityReport -> this.getCSV(pnActivityReport.getReportKey())
@@ -61,7 +61,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
                             })
                 )
                 .map(activityReport -> {
-                    activityReport.setStatus(InfoDownloadDTO.StatusEnum.READY.name());
+                    activityReport.setStatus(ReportStatusEnum.READY.name());
                     return this.activityReportMetaDAO.createMetaData(activityReport);
                 })
                 .then();
