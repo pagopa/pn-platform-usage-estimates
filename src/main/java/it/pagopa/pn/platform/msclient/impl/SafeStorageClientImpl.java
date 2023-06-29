@@ -9,18 +9,15 @@ import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreatio
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileDownloadResponseDto;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -51,25 +48,25 @@ public class SafeStorageClientImpl implements SafeStorageClient {
 
     @Override
     public Mono<FileDownloadResponseDto> getFile(String fileKey) {
-        String reqFileKey = fileKey;
         log.info("Getting file with {} key", fileKey);
-        String BASE_URL = "safestorage://";
+        final String BASE_URL = "safestorage://";
         if (fileKey.contains(BASE_URL)){
             fileKey = fileKey.replace(BASE_URL, "");
         }
         log.debug("Req params : {}", fileKey);
 
+        String finalFileKey = fileKey;
         return fileDownloadApi.getFile(fileKey, this.pnPlatformConfig.getSafeStorageCxId(), false)
                 .retryWhen(
                         Retry.backoff(2, Duration.ofMillis(500))
                                 .filter(throwable -> throwable instanceof TimeoutException || throwable instanceof ConnectException)
                 )
-                .map(response -> {
+                .flatMap(response -> {
                     if(response.getDownload() != null && response.getDownload().getRetryAfter() != null) {
-                        throw new PnRetryStorageException(response.getDownload().getRetryAfter());
+                        return Mono.error(new PnRetryStorageException(response.getDownload().getRetryAfter()));
                     }
-                    response.setKey(reqFileKey);
-                    return response;
+                    response.setKey(finalFileKey);
+                    return Mono.just(response);
                 })
                 .onErrorResume(WebClientResponseException.class, ex -> {
                     log.error(ex.getResponseBodyAsString());
@@ -79,7 +76,6 @@ public class SafeStorageClientImpl implements SafeStorageClient {
 
     @Override
     public Mono<FileCreationResponseDto> getPresignedUrl() {
-
         FileCreationRequestDto fileCreationRequestDto = new FileCreationRequestDto();
         fileCreationRequestDto.setContentType(CONTENT_TYPE);
         fileCreationRequestDto.setDocumentType(DOCUMENT_TYPE);
@@ -89,16 +85,17 @@ public class SafeStorageClientImpl implements SafeStorageClient {
     }
 
     @Override
-    public Mono<String> uploadFile(String url, byte [] bytes) {
-        log.info("Url to download: " + url);
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", BodyInserters.fromValue(bytes));
+    public Mono<String> uploadFile(String url, byte [] zipFile) {
         try {
+            var dataFactory = new DefaultDataBufferFactory();
+            var dataBuffer = dataFactory.allocateBuffer(zipFile.length);
+            dataBuffer.write(zipFile);
+
             return WebClient.create()
-                    .post()
+                    .put()
                     .uri(new URI(url))
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .bodyValue(body)
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(Flux.just(zipFile), byte[].class)
                     .retrieve()
                     .bodyToMono(String.class)
                     .flatMap(Mono::just);

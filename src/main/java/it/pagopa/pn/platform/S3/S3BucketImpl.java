@@ -40,6 +40,7 @@ public class S3BucketImpl implements S3Bucket {
         }
         return Mono.just(file);
     }
+
     @Override
     public InputStreamReader getObjectData(String fileKey) {
         S3Object fullObject = s3Client.getObject(new GetObjectRequest(this.awsBucketProperties.getName(), fileKey));
@@ -54,9 +55,13 @@ public class S3BucketImpl implements S3Bucket {
     public Mono<String> getPresignedUrlFile(String bucket, String fileKey) {
         java.util.Date expiration = new java.util.Date();
         long expTimeMillis = Instant.now().toEpochMilli();
-        expTimeMillis += 1000 * 60 * 60;
+        expTimeMillis += 100000 * 60 * 60;
         expiration.setTime(expTimeMillis);
-        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, fileKey, HttpMethod.POST);
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(
+                this.awsBucketProperties.getName(),
+                fileKey,
+                HttpMethod.PUT
+        );
         request.setExpiration(expiration);
         URL url = s3Client.generatePresignedUrl(request);
         return Mono.just(url.toExternalForm());

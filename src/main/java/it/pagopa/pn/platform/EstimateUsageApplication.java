@@ -37,10 +37,14 @@ public class EstimateUsageApplication {
         S3Bucket s3Bucket;
 
         @GetMapping("")
-        public Mono<String> home() throws IOException {
-            String presignedUrl = s3Bucket.getPresignedUploadFile("pippo", "paperino").block();
-            return deanonymizingService.uploadZipFile(presignedUrl).map(unused -> "Ok");
-        }
+        public Mono<String> home() {
+            //return this.s3Bucket.getPresignedUrlFile("local-doc-bucket", "test_anonymized.csv");
+
+            this.deanonymizingService.execute("PA-1234", "test_anonymized.csv")
+                    .subscribe();
+            return Mono.just("OK");
+
+                    }
     }
 
 }

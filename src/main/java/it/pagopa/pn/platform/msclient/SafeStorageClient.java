@@ -5,7 +5,9 @@ import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreatio
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileDownloadResponseDto;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 
 public interface SafeStorageClient {
 

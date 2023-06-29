@@ -89,16 +89,4 @@ class DeanonymizingServiceTest extends BaseTest{
         }
         assertEquals("00012, Italia", sw.toString().trim());
     }
-
-    @Test
-    void testZipFile() {
-        deanonymizingServiceImpl.zipFile("src/test/resources/filecsv", "src/test/resources/compressed.zip");
-    }
-
-    @Test
-    void testgetFileS3() throws IOException {
-        String presignedUrl = s3Bucket.getPresignedUploadFile("1234", "test1234").block();
-        deanonymizingServiceImpl.uploadZipFile(presignedUrl);
-
-    }
 }
