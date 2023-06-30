@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: 9sSyCbOSzSqraUjNOBLSXgrjeTzi84ZbOlhJItaitCw=
+  version: rL2YyojQeCb1BPEhD2lF/9w6c8ecYxN/dn94W1HgGbU=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -169,6 +169,7 @@ paths:
         codice Ipa.
       description: API che estrae la lista di stime
       parameters:
+        - $ref: '#/components/parameters/OriginFe'
         - $ref: '#/components/parameters/queryPaId'
         - $ref: '#/components/parameters/queryTaxId'
         - $ref: '#/components/parameters/queryIpaId'
@@ -300,15 +301,15 @@ paths:
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-  /estimate/{paId}/files/{referenceMonth}:
+  /{paId}/reports/{referenceMonth}:
     get:
       tags:
-        - Estimate
-      operationId: getAllEstimateFile
+        - Report
+      operationId: getAllReportFile
       x-api-permissions:
         - estimate-read
       summary: >-
-        estrae tutte le fatture delle stime associate al pa e al mese di
+        estrae tutti i consuntivi delle stime associate al paId e al mese di
         riferimento.
       description: API che consente di estrarre l'elenco fatture delle stime.
       parameters:
@@ -320,7 +321,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/listEstimateFile'
+                $ref: '#/components/schemas/ListReports'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -341,7 +342,7 @@ paths:
         - pn-auth-fleet_jwtAuthorizer_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/files/{referenceMonth}
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/reports/{referenceMonth}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
@@ -359,10 +360,10 @@ paths:
         timeoutInMillis: 29000
         type: http_proxy
     options:
-      operationId: Options for /estimate/{paId}/files/{referenceMonth} API CORS
+      operationId: Options for /{paId}/reports/{referenceMonth} API CORS
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/files/{referenceMonth}
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/reports/{referenceMonth}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
@@ -372,25 +373,28 @@ paths:
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-  /estimate/{paId}/file/{fileId}:
+  /estimate/{paId}/reports/{reportKey}:
     get:
       tags:
-        - Estimate
-      operationId: downloadEstimateFile
+        - Report
+      operationId: downloadReportFile
       x-api-permissions:
         - estimate-read
-      summary: Download fatture delle stime
-      description: API che consente il download della fattura del mese di riferimento.
+      summary: Download file di un report
+      description: >-
+        API che consente il download del file di un report relativo alla
+        reportKey.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathFileId'
+        - $ref: '#/components/parameters/pathReportKey'
+        - $ref: '#/components/parameters/queryFileType'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InfoDownloadDTO'
+                $ref: '#/components/schemas/ReportDTO'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -411,7 +415,7 @@ paths:
         - pn-auth-fleet_jwtAuthorizer_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/file/{fileId}
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/reports/{reportKey}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
@@ -423,43 +427,331 @@ paths:
           integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
           integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
           integration.request.path.paId: method.request.path.paId
-          integration.request.path.fileId: method.request.path.fileId
+          integration.request.path.reportKey: method.request.path.reportKey
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
     options:
-      operationId: Options for /estimate/{paId}/file/{fileId} API CORS
+      operationId: Options for /estimate/{paId}/reports/{reportKey} API CORS
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/file/{fileId}
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/estimate/{paId}/reports/{reportKey}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
           integration.request.path.paId: method.request.path.paId
-          integration.request.path.fileId: method.request.path.fileId
+          integration.request.path.reportKey: method.request.path.reportKey
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
-  /billing/{paId}/profilation:
+  /reports/{paId}:
     get:
       tags:
-        - Billing
+        - Report
+      operationId: getAllDeanonymizedFiles
+      x-api-permissions:
+        - estimate-read
+      summary: ritorna elenco di file deanonimizzati in base al paId e allo stato.
+      description: API che estrae la lista di file deanonimizzati.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/queryDeanonymizationStatus'
+        - $ref: '#/components/parameters/queryNumberPage'
+        - $ref: '#/components/parameters/querySizePage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableDeanonymizedFilesResponseDto'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - pn-auth-fleet_jwtAuthorizer_openapi: []
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/reports/{paId}
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
+          integration.request.header.x-pagopa-pn-cx-role: context.authorizer.cx_role
+          integration.request.header.x-pagopa-pn-uid: context.authorizer.uid
+          integration.request.header.x-pagopa-pn-jti: context.authorizer.cx_jti
+          integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
+          integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
+          integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+    options:
+      operationId: Options for /reports/{paId} API CORS
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/reports/{paId}
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+  /reports/{paId}/schedule/{reportKey}:
+    get:
+      tags:
+        - Report
+      operationId: getScheduleDeanonymizedFiles
+      x-api-permissions:
+        - estimate-read
+      summary: >-
+        rischedula il caricamento dell'elenco elenco di file deanonimizzati in
+        base al paId e al reportKey.
+      description: API che rischedula la lista di file deanonimizzati.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReportKey'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - pn-auth-fleet_jwtAuthorizer_openapi: []
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/reports/{paId}/schedule/{reportKey}
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
+          integration.request.header.x-pagopa-pn-cx-role: context.authorizer.cx_role
+          integration.request.header.x-pagopa-pn-uid: context.authorizer.uid
+          integration.request.header.x-pagopa-pn-jti: context.authorizer.cx_jti
+          integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
+          integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
+          integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.reportKey: method.request.path.reportKey
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+    options:
+      operationId: Options for /reports/{paId}/schedule/{reportKey} API CORS
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/reports/{paId}/schedule/{reportKey}
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.reportKey: method.request.path.reportKey
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+  /{paId}/profilation/{referenceYear}:
+    post:
+      tags:
+        - Profilation
+      operationId: createOrUpdateProfilation
+      x-api-permissions:
+        - profilation-write
+      summary: salva o aggiorna i dati della profilazione.
+      description: API che salva o aggiorna i dettagli della profilazione.
+      parameters:
+        - $ref: '#/components/parameters/queryStatus'
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfilationCreateBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilationPeriod'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - pn-auth-fleet_jwtAuthorizer_openapi: []
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/profilation/{referenceYear}
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
+          integration.request.header.x-pagopa-pn-cx-role: context.authorizer.cx_role
+          integration.request.header.x-pagopa-pn-uid: context.authorizer.uid
+          integration.request.header.x-pagopa-pn-jti: context.authorizer.cx_jti
+          integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
+          integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
+          integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceYear: method.request.path.referenceYear
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+    options:
+      operationId: Options for /{paId}/profilation/{referenceYear} API CORS
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/profilation/{referenceYear}
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceYear: method.request.path.referenceYear
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+  /profilations:
+    get:
+      tags:
+        - Profilation
+      operationId: getAllProfilations
+      x-api-permissions:
+        - profilation-read
+      summary: >-
+        Ritorna elenco di profilazioni in base alla partita iva, al nome della
+        pa o al codice Ipa.
+      description: API che estrae la lista di profilazioni
+      parameters:
+        - $ref: '#/components/parameters/queryPaId'
+        - $ref: '#/components/parameters/queryTaxId'
+        - $ref: '#/components/parameters/queryIpaId'
+        - $ref: '#/components/parameters/queryNumberPage'
+        - $ref: '#/components/parameters/querySizePage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageableProfilationResponseDto'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - pn-auth-fleet_jwtAuthorizer_openapi: []
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/profilations
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
+          integration.request.header.x-pagopa-pn-cx-role: context.authorizer.cx_role
+          integration.request.header.x-pagopa-pn-uid: context.authorizer.uid
+          integration.request.header.x-pagopa-pn-jti: context.authorizer.cx_jti
+          integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
+          integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
+          integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+    options:
+      operationId: Options for /profilations API CORS
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/profilations
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters: {}
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+  /profilation/{paId}/detail/{referenceYear}:
+    get:
+      tags:
+        - Profilation
       operationId: getProfilationDetail
       x-api-permissions:
         - profilation-read
-      summary: ritorna il dettaglio della profilazione in base al paId.
+      summary: >-
+        ritorna il dettaglio della profilazione in base al paId e al
+        referenceYear.
       description: API che ritorna il dettaglio della profilazione.
       parameters:
         - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Profiling'
+                $ref: '#/components/schemas/ProfilationDetail'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -480,7 +772,7 @@ paths:
         - pn-auth-fleet_jwtAuthorizer_openapi: []
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/billing/{paId}/profilation
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/profilation/{paId}/detail/{referenceYear}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
@@ -492,37 +784,128 @@ paths:
           integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
           integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
           integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceYear: method.request.path.referenceYear
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
     options:
-      operationId: Options for /billing/{paId}/profilation API CORS
+      operationId: Options for /profilation/{paId}/detail/{referenceYear} API CORS
       x-amazon-apigateway-integration:
         uri: >-
-          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/billing/{paId}/profilation
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/profilation/{paId}/detail/{referenceYear}
         connectionId: ${stageVariables.NetworkLoadBalancerLink}
         httpMethod: ANY
         requestParameters:
           integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceYear: method.request.path.referenceYear
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+  /{paId}/profilation/{referenceYear}/validated:
+    get:
+      tags:
+        - Profilation
+      operationId: validatedProfilation
+      x-api-permissions:
+        - profilation-read
+      summary: Validazione profilazione.
+      description: API che consente di modificare lo stato di una profilazione.
+      parameters:
+        - $ref: '#/components/parameters/pathPaId'
+        - $ref: '#/components/parameters/pathReferenceYear'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilationPeriod'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/NotAllowed'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - pn-auth-fleet_jwtAuthorizer_openapi: []
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/profilation/{referenceYear}/validated
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.header.x-pagopa-pn-cx-id: context.authorizer.cx_id
+          integration.request.header.x-pagopa-pn-cx-role: context.authorizer.cx_role
+          integration.request.header.x-pagopa-pn-uid: context.authorizer.uid
+          integration.request.header.x-pagopa-pn-jti: context.authorizer.cx_jti
+          integration.request.header.x-pagopa-pn-src-ch: '''WEB'''
+          integration.request.header.x-pagopa-pn-cx-type: context.authorizer.cx_type
+          integration.request.header.x-pagopa-pn-cx-groups: context.authorizer.cx_groups
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceYear: method.request.path.referenceYear
+        passthroughBehavior: when_no_match
+        connectionType: VPC_LINK
+        timeoutInMillis: 29000
+        type: http_proxy
+    options:
+      operationId: Options for /{paId}/profilation/{referenceYear}/validated API CORS
+      x-amazon-apigateway-integration:
+        uri: >-
+          http://${stageVariables.ApplicationLoadBalancerDomain}:8080/${stageVariables.ServiceApiPath}/{paId}/profilation/{referenceYear}/validated
+        connectionId: ${stageVariables.NetworkLoadBalancerLink}
+        httpMethod: ANY
+        requestParameters:
+          integration.request.path.paId: method.request.path.paId
+          integration.request.path.referenceYear: method.request.path.referenceYear
         passthroughBehavior: when_no_match
         connectionType: VPC_LINK
         timeoutInMillis: 29000
         type: http_proxy
 components:
   parameters:
+    queryStatus:
+      name: status
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - VALIDATED
+          - DRAFT
     pathPaId:
       name: paId
       in: path
       required: true
       schema:
         type: string
-    pathFileId:
-      name: fileId
+    pathReferenceMonth:
+      name: referenceMonth
       in: path
       required: true
+      example: MAR-2023
       schema:
         type: string
+    OriginFe:
+      name: originFe
+      schema:
+        type: string
+        enum:
+          - PN-PLATFORM-NOTIFICATION-FE
+          - PN-HELPDESK-FE
+      in: header
+      required: true
     queryPaId:
       name: paId
       in: query
@@ -541,38 +924,6 @@ components:
       required: false
       schema:
         type: string
-    queryStatus:
-      name: status
-      in: query
-      required: true
-      schema:
-        type: string
-        enum:
-          - VALIDATED
-          - DRAFT
-    pathReferenceMonth:
-      name: referenceMonth
-      in: path
-      required: true
-      example: MAR-2023
-      schema:
-        type: string
-    pathReferenceYear:
-      name: referenceYear
-      in: path
-      required: true
-      schema:
-        type: string
-    querySizePage:
-      name: size
-      in: query
-      description: Numero di elementi per pagina.
-      required: false
-      schema:
-        type: number
-        default: 5
-        maximum: 999999999
-        minimum: 1
     queryNumberPage:
       name: page
       in: query
@@ -583,7 +934,141 @@ components:
         default: 0
         maximum: 999999999
         minimum: 0
+    querySizePage:
+      name: size
+      in: query
+      description: Numero di elementi per pagina.
+      required: false
+      schema:
+        type: number
+        default: 5
+        maximum: 999999999
+        minimum: 1
+    pathReportKey:
+      name: reportKey
+      in: path
+      required: true
+      schema:
+        type: string
+    queryFileType:
+      name: type
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - SOURCE
+          - TARGET
+    queryDeanonymizationStatus:
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/ReportStatusEnum'
+    pathReferenceYear:
+      name: referenceYear
+      in: path
+      required: true
+      schema:
+        type: string
   schemas:
+    Estimate:
+      type: object
+      properties:
+        totalDigitalNotif:
+          type: number
+          maximum: 999999999
+          minimum: 1
+        total890Notif:
+          type: number
+          maximum: 999999999
+          minimum: 1
+        totalAnalogNotif:
+          type: number
+          maximum: 999999999
+          minimum: 1
+      required:
+        - totalDigitalNotif
+        - total890Notif
+        - totalAnalogNotif
+    Profilation:
+      type: object
+      properties:
+        splitPayment:
+          type: boolean
+          example: 'true'
+        description:
+          type: string
+          example: altre info
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        mailAddress:
+          type: string
+          example: test@comune.milano.it
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+      required:
+        - splitPayment
+        - mailAddress
+    EstimateCreateBody:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Estimate'
+        - $ref: '#/components/schemas/Profilation'
+    Period:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - VALIDATED
+            - DRAFT
+            - ABSENT
+        deadlineDate:
+          type: string
+          format: date
+        referenceMonth:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        showEdit:
+          type: boolean
+      required:
+        - status
+        - referenceMonth
+        - deadlineDate
+        - showEdit
+    EstimatePeriod:
+      type: object
+      properties:
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+        billing:
+          $ref: '#/components/schemas/Profilation'
+      allOf:
+        - $ref: '#/components/schemas/Period'
+    ProblemError:
+      properties:
+        code:
+          description: Internal code of the error, in human-readable format
+          example: >-
+            PN_PARAMETER_TOO_LONG | PN_PARAMETER_TOO_SHORT | PN_DUPLICATE_ENTRY
+            | etc...
+          type: string
+        element:
+          description: Parameter or request body field name for validation error
+          example: body.order.item[2].quantity
+          type: string
+        detail:
+          description: >-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: Parameter not valid
+          maxLength: 1024
+          type: string
+      required:
+        - code
     Problem:
       properties:
         type:
@@ -629,160 +1114,20 @@ components:
       required:
         - status
         - errors
-    ProblemError:
-      properties:
-        code:
-          description: Internal code of the error, in human-readable format
-          example: >-
-            PN_PARAMETER_TOO_LONG | PN_PARAMETER_TOO_SHORT | PN_DUPLICATE_ENTRY
-            | etc...
-          type: string
-        element:
-          description: Parameter or request body field name for validation error
-          example: body.order.item[2].quantity
-          type: string
-        detail:
-          description: >-
-            A human readable explanation specific to this occurrence of the
-            problem.
-          example: Parameter not valid
-          maxLength: 1024
-          type: string
-      required:
-        - code
-    EstimateDetail:
-      type: object
-      properties:
-        paInfo:
-          $ref: '#/components/schemas/PAInfo'
-        billing:
-          $ref: '#/components/schemas/Billing'
-        estimate:
-          $ref: '#/components/schemas/Estimate'
-      allOf:
-        - $ref: '#/components/schemas/Period'
-      required:
-        - paInfo
-        - billing
-        - status
-        - referenceMonth
-        - estimate
-        - showEdit
-    PAInfo:
-      type: object
-      properties:
-        paId:
-          type: string
-          example: '12345678900'
-          format: /^[0-9]{11}$/
-          maxLength: 32
-        paName:
-          type: string
-          example: Comune di Roma
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        taxId:
-          type: string
-          example: '3242214145'
-          format: /^[0-9]{11}$/
-          maxLength: 32
-        registeredOffice:
-          type: string
-          example: piazza gaeaulenti 56, Milano
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        pec:
-          type: string
-          example: test@pec.it
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        ipaCode:
-          type: string
-          example: abc12324
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        sdiCode:
-          type: string
-          example: abc1334324
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-    Period:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-            - VALIDATED
-            - DRAFT
-            - ABSENT
-        deadlineDate:
-          type: string
-          format: date
-        referenceMonth:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        showEdit:
-          type: boolean
-      required:
-        - status
-        - referenceMonth
-        - deadlineDate
-        - showEdit
-    Estimate:
-      type: object
-      properties:
-        totalDigitalNotif:
-          type: number
-          maximum: 999999999
-          minimum: 1
-        total890Notif:
-          type: number
-          maximum: 999999999
-          minimum: 1
-        totalAnalogNotif:
-          type: number
-          maximum: 999999999
-          minimum: 1
-      required:
-        - totalDigitalNotif
-        - total890Notif
-        - totalAnalogNotif
-    EstimateCreateBody:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Estimate'
-        - $ref: '#/components/schemas/Billing'
-    EstimatePeriod:
-      type: object
-      properties:
-        estimate:
-          $ref: '#/components/schemas/Estimate'
-        billing:
-          $ref: '#/components/schemas/Billing'
-      allOf:
-        - $ref: '#/components/schemas/Period'
     EstimateHistory:
       type: object
       allOf:
         - $ref: '#/components/schemas/Period'
-    listEstimateFile:
-      type: array
-      items:
-        $ref: '#/components/schemas/InfoDownloadDTO'
-      maxItems: 999999999
-      minItems: 1
-    PageableEstimateResponseDto:
+    Sort:
       type: object
       properties:
-        actual:
-          $ref: '#/components/schemas/EstimatePeriod'
-        history:
-          $ref: '#/components/schemas/Page'
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
       additionalProperties: false
-      required:
-        - content
     Pageable:
       type: object
       properties:
@@ -803,16 +1148,6 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         unpaged:
-          type: boolean
-      additionalProperties: false
-    Sort:
-      type: object
-      properties:
-        empty:
-          type: boolean
-        sorted:
-          type: boolean
-        unsorted:
           type: boolean
       additionalProperties: false
     Page:
@@ -861,15 +1196,94 @@ components:
         - size
         - totalElements
         - totalPages
-    InfoDownloadDTO:
+    PageableEstimateResponseDto:
       type: object
       properties:
-        idFile:
+        actual:
+          $ref: '#/components/schemas/EstimatePeriod'
+        history:
+          $ref: '#/components/schemas/Page'
+      additionalProperties: false
+      required:
+        - content
+    PAInfo:
+      type: object
+      properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: /^[0-9]{11}$/
+          maxLength: 32
+        paName:
+          type: string
+          example: Comune di Roma
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        taxId:
+          type: string
+          example: '3242214145'
+          format: /^[0-9]{11}$/
+          maxLength: 32
+        registeredOffice:
+          type: string
+          example: piazza gaeaulenti 56, Milano
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        pec:
+          type: string
+          example: test@pec.it
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        ipaCode:
+          type: string
+          example: abc12324
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        sdiCode:
+          type: string
+          example: abc1334324
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+    EstimateDetail:
+      type: object
+      properties:
+        paInfo:
+          $ref: '#/components/schemas/PAInfo'
+        billing:
+          $ref: '#/components/schemas/Profilation'
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+      allOf:
+        - $ref: '#/components/schemas/Period'
+      required:
+        - paInfo
+        - billing
+        - status
+        - referenceMonth
+        - estimate
+        - showEdit
+    ReportStatusEnum:
+      type: string
+      enum:
+        - DEANONIMIZING
+        - RAW
+        - ENQUEUED
+        - READY
+        - ERROR
+    ReportDTO:
+      type: object
+      properties:
+        paId:
           type: string
           example: A12C34D56789E0
           format: /[^A-Za-z0-9]+/
           maxLength: 32
-        paId:
+        reportKey:
+          type: string
+          example: A12C34D56789E0
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        reportZipKey:
           type: string
           example: A12C34D56789E0
           format: /[^A-Za-z0-9]+/
@@ -877,78 +1291,198 @@ components:
         url:
           type: string
           example: http://file.com
-        status:
+        referenceMonth:
           type: string
-          enum:
-            - UPLOADING
-            - UPLOADED
-    Profiling:
+        lastModifiedDate:
+          type: string
+          format: date
+        errorMessage:
+          type: string
+        action:
+          type: string
+        status:
+          $ref: '#/components/schemas/ReportStatusEnum'
+    ListReports:
+      type: array
+      items:
+        $ref: '#/components/schemas/ReportDTO'
+      maxItems: 999999999
+      minItems: 1
+    FilePage:
       type: object
       properties:
-        paInfo:
-          $ref: '#/components/schemas/PAInfo'
-        profiles:
+        content:
           type: array
           items:
-            $ref: '#/components/schemas/ProfilingDetail'
+            $ref: '#/components/schemas/ReportDTO'
           maxItems: 999999999
           minItems: 1
-    ProfilingDetail:
+        empty:
+          type: boolean
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: number
+          maximum: 999999999
+          minimum: 1
+        numberOfElements:
+          type: number
+          maximum: 999999999
+          minimum: 1
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        size:
+          type: number
+          maximum: 1024
+          minimum: 1
+        sort:
+          $ref: '#/components/schemas/Sort'
+        totalElements:
+          type: number
+          maximum: 1
+          minimum: 1
+        totalPages:
+          type: number
+          maximum: 999999999
+          minimum: 1
+      additionalProperties: false
+      required:
+        - number
+        - numberOfElements
+        - size
+        - totalElements
+        - totalPages
+    PageableDeanonymizedFilesResponseDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/FilePage'
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportDTO'
+          maxItems: 999999999
+          minItems: 1
+      additionalProperties: false
+      required:
+        - content
+    ProfilationCreateBody:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Profilation'
+    PeriodForProfilation:
       type: object
       properties:
-        billing:
-          $ref: '#/components/schemas/Billing'
         status:
           type: string
           enum:
-            - CREATED
             - VALIDATED
-            - IN_PROGRESS
-            - ENDED
+            - DRAFT
+            - ABSENT
         deadlineDate:
           type: string
           format: date
         referenceYear:
           type: string
+        lastModifiedDate:
+          type: string
+          format: date
         showEdit:
           type: boolean
       required:
-        - billing
         - status
         - referenceYear
+        - deadlineDate
         - showEdit
-    Billing:
+    ProfilationPeriod:
       type: object
       properties:
-        splitPayment:
+        profilation:
+          $ref: '#/components/schemas/Profilation'
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
+    ProfilationHistory:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
+    PageForProfilation:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfilationHistory'
+          maxItems: 999999999
+          minItems: 1
+        empty:
           type: boolean
-          example: 'true'
-        description:
-          type: string
-          example: altre info
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        mailAddress:
-          type: string
-          example: test@comune.milano.it
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: number
+          maximum: 999999999
+          minimum: 1
+        numberOfElements:
+          type: number
+          maximum: 999999999
+          minimum: 1
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        size:
+          type: number
+          maximum: 1024
+          minimum: 1
+        sort:
+          $ref: '#/components/schemas/Sort'
+        totalElements:
+          type: number
+          maximum: 1
+          minimum: 1
+        totalPages:
+          type: number
+          maximum: 999999999
+          minimum: 1
+      additionalProperties: false
       required:
-        - splitPayment
-        - mailAddress
+        - number
+        - numberOfElements
+        - size
+        - totalElements
+        - totalPages
+    PageableProfilationResponseDto:
+      type: object
+      properties:
+        actual:
+          $ref: '#/components/schemas/ProfilationPeriod'
+        history:
+          $ref: '#/components/schemas/PageForProfilation'
+      additionalProperties: false
+      required:
+        - content
+    ProfilationDetail:
+      type: object
+      properties:
+        paInfo:
+          $ref: '#/components/schemas/PAInfo'
+        profilation:
+          $ref: '#/components/schemas/Profilation'
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
   responses:
+    Unauthorized:
+      description: Unauthorized
     Forbidden:
       description: Forbidden
     NotFound:
       description: Not found
-    Invalid:
-      description: Bad Request
     NotAllowed:
       description: Method not allowed
     InternalError:
       description: Internal Server Error
-    Unauthorized:
-      description: Unauthorized
   securitySchemes:
     pn-auth-fleet_jwtAuthorizer_openapi:
       type: apiKey

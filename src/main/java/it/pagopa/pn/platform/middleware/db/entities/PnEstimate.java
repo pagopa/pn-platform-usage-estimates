@@ -31,6 +31,7 @@ public class PnEstimate implements Comparable<PnEstimate> {
     public static final String COL_DESCRIPTION = "description" ;
     public static final String COL_MAIL_ADDRESS = "mailAddress" ;
     public static final String COL_RECORD_VERSION = "recordVersion";
+    public static final String COL_SEND_TO_DATALAKE = "sendToDatalake";
     @Getter(onMethod = @__({@DynamoDbPartitionKey,@DynamoDbAttribute(COL_PA_ID)}))
     private String paId;
 
@@ -66,6 +67,9 @@ public class PnEstimate implements Comparable<PnEstimate> {
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_RECORD_VERSION)}))
     private Integer recordVersion;
+
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_SEND_TO_DATALAKE)}))
+    private Boolean sendToDatalake;
 
     @Override
     public int compareTo(@NotNull PnEstimate o) {

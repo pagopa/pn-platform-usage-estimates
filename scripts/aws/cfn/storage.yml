@@ -75,6 +75,39 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  ActivityReportDynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-PnActivityReport'
+      AttributeDefinitions:
+        - AttributeName: "paId"
+          AttributeType: "S"
+        - AttributeName: "referenceMonth"
+          AttributeType: "S"
+        - AttributeName: "reportKey"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "paId"
+          KeyType: "HASH"
+        - AttributeName: "reportKey"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        - IndexName: "INDEX_PA_REF_MONTH"
+          KeySchema:
+            - AttributeName: "paId"
+              KeyType: "HASH"
+            - AttributeName: "referenceMonth"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+      KinesisStreamSpecification:
+        StreamArn: !Ref CdcKinesisSourceStreamArn
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+      BillingMode: "PAY_PER_REQUEST"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
   ProfilationDynamoTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -117,3 +150,11 @@ Outputs:
   ProfilationDynamoTableArn:
     Description: ARN of dynamodb table containing request
     Value: !Sub '${ProfilationDynamoTable.Arn}'
+
+  ActivityReportDynamoTableName:
+    Description: Name of dynamodb table containing request
+    Value: !Ref ActivityReportDynamoTable
+
+  ActivityReportDynamoTableArn:
+    Description: ARN of dynamodb table containing request
+    Value: !Sub '${ActivityReportDynamoTable.Arn}'

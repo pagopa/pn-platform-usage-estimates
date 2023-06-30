@@ -34,7 +34,7 @@ public class ProfilationMapper {
     public static ProfilationDetail profilationDetailToDto(PnProfilation pnProfilation, PaInfoDto paInfoDto){
         ProfilationDetail profilationDetail = new ProfilationDetail();
         PAInfo paInfo = new PAInfo();
-        Billing billing = new Billing();
+        Profilation profilation = new Profilation();
 
         //INFO PA
         paInfo.setPaId(paInfoDto.getId());
@@ -42,13 +42,13 @@ public class ProfilationMapper {
         paInfo.setTaxId(paInfoDto.getTaxId());
 
         //FATTURAZIONE
-        billing.setMailAddress(pnProfilation.getMailAddress());
-        billing.setDescription(pnProfilation.getDescription());
-        billing.setSplitPayment(pnProfilation.getSplitPayment());
+        profilation.setMailAddress(pnProfilation.getMailAddress());
+        profilation.setDescription(pnProfilation.getDescription());
+        profilation.setSplitPayment(pnProfilation.getSplitPayment());
 
         //PERIODO
         profilationDetail.setPaInfo(paInfo);
-        profilationDetail.setBilling(billing);
+        profilationDetail.setProfilation(profilation);
 
         profilationDetail.setStatus(ProfilationDetail.StatusEnum.fromValue(pnProfilation.getStatus()));
         profilationDetail.setReferenceYear(pnProfilation.getReferenceYear());
@@ -63,15 +63,15 @@ public class ProfilationMapper {
 
     public static ProfilationPeriod profilationPeriodToDto(PnProfilation pnProfilation) {
         ProfilationPeriod profilationPeriod = new ProfilationPeriod();
-        Billing billing = new Billing();
+        Profilation profilation = new Profilation();
 
         //FATTURAZIONE
-        billing.setMailAddress(pnProfilation.getMailAddress());
-        billing.setDescription(pnProfilation.getDescription());
-        billing.setSplitPayment(pnProfilation.getSplitPayment());
+        profilation.setMailAddress(pnProfilation.getMailAddress());
+        profilation.setDescription(pnProfilation.getDescription());
+        profilation.setSplitPayment(pnProfilation.getSplitPayment());
 
         //PERIODO
-        profilationPeriod.setBilling(billing);
+        profilationPeriod.setProfilation(profilation);
 
         profilationPeriod.setStatus(ProfilationPeriod.StatusEnum.fromValue(pnProfilation.getStatus()));
         profilationPeriod.setReferenceYear(pnProfilation.getReferenceYear());
@@ -110,17 +110,18 @@ public class ProfilationMapper {
     }
 
 
-    public static ProfilationHistory profilationsToDto(PnProfilation profilations){
-        ProfilationHistory profilationsList = new ProfilationHistory();
-        profilationsList.setReferenceYear(profilations.getReferenceYear());
-        profilationsList.setDeadlineDate(Date.from(profilations.getDeadlineDate()));
-        profilationsList.setLastModifiedDate(profilations.getLastModifiedDate() != null ? Date.from(profilations.getLastModifiedDate()) : null);
-        if (profilations.getStatus().equalsIgnoreCase(ProfilationHistory.StatusEnum.DRAFT.toString())){
-            profilationsList.setStatus(ProfilationHistory.StatusEnum.ABSENT);
+    public static ProfilationHistory profilationsToDto(PnProfilation entity){
+        ProfilationHistory dto = new ProfilationHistory();
+        dto.setReferenceYear(entity.getReferenceYear());
+        dto.setDeadlineDate(Date.from(entity.getDeadlineDate()));
+        dto.setLastModifiedDate(entity.getLastModifiedDate() != null ? Date.from(entity.getLastModifiedDate()) : null);
+        if (entity.getStatus().equalsIgnoreCase(ProfilationHistory.StatusEnum.DRAFT.toString())){
+            dto.setStatus(ProfilationHistory.StatusEnum.ABSENT);
         }else {
-            profilationsList.setStatus(ProfilationHistory.StatusEnum.fromValue(profilations.getStatus()));
+            dto.setStatus(ProfilationHistory.StatusEnum.fromValue(entity.getStatus()));
         }
-        return profilationsList;
+        dto.setShowEdit(entity.getDeadlineDate().isAfter(Instant.now()));
+        return dto;
     }
 
 

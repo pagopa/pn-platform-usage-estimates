@@ -20,14 +20,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.UUID;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
@@ -167,17 +165,6 @@ public class EstimateServiceImpl implements EstimateService {
     }
 
 
-    //PER CONSUNTIVI
-    @Override
-    public Mono<Flux<InfoDownloadDTO>> getAllEstimateFile(String paId, String referenceMonth) {
-        return null;
-    }
-
-    @Override
-    public Mono<InfoDownloadDTO> downloadEstimateFile(String paId, String fileId) {
-        return null;
-    }
-
     private Instant getInstantFromMonth(String referenceMonth) throws PnGenericException {
         Instant result = null;
         String[] splitMonth = referenceMonth.split("-");
@@ -234,5 +221,12 @@ public class EstimateServiceImpl implements EstimateService {
                 }
             }
         }
+    }
+
+    private Boolean checkStatusReport(String status){
+        return status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.READY)) ||
+                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.ENQUEUED)) ||
+                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.ERROR)) ||
+                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.DEANONIMIZING));
     }
 }

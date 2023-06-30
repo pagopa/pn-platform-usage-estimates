@@ -30,4 +30,14 @@ public class Utility {
             return null;
         }
     }
+
+    public static <T> T jsonToObject(ObjectMapper objectMapper, String json, Class<T> tClass){
+        try {
+
+            return objectMapper.readValue(json, tClass);
+        } catch (JsonProcessingException e) {
+            log.error("Error with mapping : {}", e.getMessage(), e);
+            return null;
+        }
+    }
 }

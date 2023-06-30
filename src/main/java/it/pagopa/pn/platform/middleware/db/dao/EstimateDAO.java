@@ -10,4 +10,5 @@ public interface EstimateDAO {
     Mono<List<PnEstimate>> getAllEstimates(String paId);
     Mono<PnEstimate> getEstimate(String paId);
     Mono<PnEstimate> getEstimateDetail(String paId, String referenceMonth);
+    Mono<List<PnEstimate>> getAllEstimates();
 }

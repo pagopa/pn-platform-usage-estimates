@@ -59,7 +59,7 @@
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
-			<version>8.0.0.Final</version>
+			<version>6.0.20.Final</version>
 		</dependency>
 
 		<dependency>
@@ -75,6 +75,11 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.12.266</version>
+		</dependency>
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-batch</artifactId>
 			<version>1.12.266</version>
 		</dependency>
 		<dependency>
@@ -115,9 +120,28 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>io.awspring.cloud</groupId>
+			<artifactId>spring-cloud-aws-messaging</artifactId>
+			<version>2.4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.awspring.cloud</groupId>
+			<artifactId>spring-cloud-aws-context</artifactId>
+			<version>2.4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>de.idealo.spring</groupId>
+			<artifactId>spring-cloud-stream-binder-sqs</artifactId>
+			<version>1.9.0</version>
+		</dependency>
+		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>dynamodb-enhanced</artifactId>
 			<version>2.20.47</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>batch</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.modelmapper</groupId>
@@ -146,6 +170,11 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-commons</artifactId>
 			<version>3.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.10.0</version>
 		</dependency>
 	</dependencies>
 
@@ -185,6 +214,36 @@
 						<phase>process-resources</phase>
 						<configuration>
 							<inputSpec>${project.basedir}/docs/openapi/api-internal-v1.yaml</inputSpec>
+							<generatorName>spring</generatorName>
+							<library>spring-boot</library>
+							<generateApiDocumentation>false</generateApiDocumentation>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<configOptions>
+								<dateLibrary>java11</dateLibrary>
+								<delegatePattern>true</delegatePattern>
+								<interfaceOnly>true</interfaceOnly>
+								<annotationLibrary>none</annotationLibrary>
+								<documentationProvider>source</documentationProvider>
+								<openApiNullable>false</openApiNullable>
+								<reactive>true</reactive>
+								<skipDefaultInterface>false</skipDefaultInterface>
+								<useTags>true</useTags>
+								<basePackage>${project.groupId}.platform.rest.v1</basePackage>
+								<modelPackage>${project.groupId}.platform.rest.v1.dto</modelPackage>
+								<apiPackage>${project.groupId}.platform.rest.v1.api</apiPackage>
+								<configPackage>${project.groupId}.platform.rest.v1.config</configPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-platform-external-bo-api</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>process-resources</phase>
+						<configuration>
+							<inputSpec>${project.basedir}/docs/openapi/api-external-bo-v1.yaml</inputSpec>
 							<generatorName>spring</generatorName>
 							<library>spring-boot</library>
 							<generateApiDocumentation>false</generateApiDocumentation>
@@ -249,6 +308,52 @@
 							</configOptions>
 							<modelPackage>${project.groupId}.platform.msclient.generated.pnexternalregistries.v1.dto</modelPackage>
 							<apiPackage>${project.groupId}.platform.msclient.generated.pnexternalregistries.v1.api</apiPackage>
+							<modelNameSuffix>Dto</modelNameSuffix>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-client-pn-safe-storage</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pn-safe-storage/59b1c5255759262e4eb645ad3e8345bc810d03e1/docs/openapi/pn-safestorage-v1-api.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<library>webclient</library>
+							<generateApiDocumentation>false</generateApiDocumentation>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<configOptions>
+								<swaggerAnnotations>false</swaggerAnnotations>
+								<openApiNullable>false</openApiNullable>
+							</configOptions>
+							<modelPackage>${project.groupId}.platform.msclient.generated.pnsafestorage.v1.dto</modelPackage>
+							<apiPackage>${project.groupId}.platform.msclient.generated.pnsafestorage.v1.api</apiPackage>
+							<modelNameSuffix>Dto</modelNameSuffix>
+						</configuration>
+					</execution>
+					<execution>
+						<id>generate-client-pn-data-vault</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<inputSpec>https://raw.githubusercontent.com/pagopa/pn-data-vault/43455b4cc0ab02eef418448595eb8b86d9a609cd/docs/openapi/pn-datavault-api-v1.yaml</inputSpec>
+							<generatorName>java</generatorName>
+							<library>webclient</library>
+							<generateApiDocumentation>false</generateApiDocumentation>
+							<generateApiTests>false</generateApiTests>
+							<generateModelTests>false</generateModelTests>
+							<generateSupportingFiles>true</generateSupportingFiles>
+							<configOptions>
+								<swaggerAnnotations>false</swaggerAnnotations>
+								<openApiNullable>false</openApiNullable>
+							</configOptions>
+							<modelPackage>${project.groupId}.platform.generated.openapi.msclient.pndatavault.v1.dto</modelPackage>
+							<apiPackage>${project.groupId}.platform.generated.openapi.msclient.pndatavault.v1.api</apiPackage>
 							<modelNameSuffix>Dto</modelNameSuffix>
 						</configuration>
 					</execution>

@@ -160,6 +160,14 @@ public class DateUtils {
                 .concat(getSecond(timeStamp).toString());
     }
 
+    public static Instant getDateBeforeOneMonth() {
+        Instant datebeforeOneMonth = DateUtils.minusMonth(Instant.now(), 1);
+        if (Instant.now().isBefore(DateUtils.fromDayMonthYear(15, DateUtils.getMonth(Instant.now()), DateUtils.getYear(Instant.now())))){
+            datebeforeOneMonth = DateUtils.minusMonth(Instant.now(), 2);
+        }
+        return  datebeforeOneMonth;
+    }
+
     public static Instant parseStringTOInstant(String date) {
         return Instant.parse(date);
     }

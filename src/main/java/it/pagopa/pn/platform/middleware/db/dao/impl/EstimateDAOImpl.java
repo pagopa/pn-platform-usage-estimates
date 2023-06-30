@@ -29,7 +29,7 @@ public class EstimateDAOImpl extends BaseDAO<PnEstimate> implements EstimateDAO 
 
     @Override
     public Mono<List<PnEstimate>> getAllEstimates(String paId) {
-        QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId));
+        QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId, null));
         return this.getByFilter(conditional, null, null, null, null).collectList();
     }
 
@@ -41,6 +41,10 @@ public class EstimateDAOImpl extends BaseDAO<PnEstimate> implements EstimateDAO 
     @Override
     public Mono<PnEstimate> getEstimateDetail(String paId, String referenceMonth) {
         return Mono.fromFuture(this.get(paId, referenceMonth).thenApply(item -> item));
+    }
+
+    public Mono<List<PnEstimate>> getAllEstimates() {
+        return this.getByFilter(null, null, null, null, null).collectList();
     }
 
 

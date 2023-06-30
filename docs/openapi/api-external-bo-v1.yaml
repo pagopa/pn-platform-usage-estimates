@@ -1,0 +1,319 @@
+openapi: 3.0.1
+info:
+  title: PN Usage Estimates BE Microservice
+  description: Documentation APIs v1.0
+  termsOfService: https://termofservice.it
+  x-api-id: api-internal-template
+  x-summary: 'Piattaforma Stime: API'
+  version: '1.0.0'
+  contact:
+    email: pn@pagopa.it
+  license:
+    name: Licenza di PN
+    url: 'https://da-definire/'
+servers:
+  - url: https://api.pn.pagopa.it
+    description: Generated server url
+paths:
+
+  /pn-usage-estimates-bo/{paId}/estimate/{referenceMonth}:
+    post:
+      tags:
+        - EstimateBo
+      operationId: createOrUpdateEstimate
+      x-api-permissions:
+        - 'tender-read'
+      summary: Inserimento o modifica di una stima.
+      description: API che consente di aggiungere o di modificare i dettagli di una stima.
+      parameters:
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryStatus'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceMonth'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/EstimateCreateBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/EstimatePeriod'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
+        '401':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
+        '500':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
+
+
+  /pn-usage-estimates-bo/{paId}/estimate/{referenceMonth}/validated:
+    get:
+      tags:
+        - EstimateBo
+      operationId: validated
+      x-api-permissions:
+        - 'tender-read'
+      summary: Validazione stima.
+      description: API che consente di modificare lo stato di una stima.
+      parameters:
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceMonth'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/EstimatePeriod'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
+        '401':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
+        '500':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
+
+  /pn-usage-estimates-bo/estimates:
+    get:
+      tags:
+        - EstimateBo
+      operationId: getAllEstimate
+      x-api-permissions:
+        - 'tender-read'
+      summary: ritorna elenco di stime in base alla partita iva, al nome della pa o al codice Ipa.
+      description: API che estrae la lista di stime
+      parameters:
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/OriginFe'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryTaxId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryIpaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryNumberPage'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/querySizePage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/PageableEstimateResponseDto'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
+        '401':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
+        '500':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
+
+  /pn-usage-estimates-bo/estimate/{paId}/detail/{referenceMonth}:
+    get:
+      tags:
+        - EstimateBo
+      operationId: getEstimateDetail
+      x-api-permissions:
+        - 'tender-read'
+      summary: ritorna il dettaglio delle stime in base al mese di riferimento e al paId.
+      description: API che ritorna il dettaglio di una stima.
+      parameters:
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceMonth'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/EstimateDetail'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
+        '401':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
+        '500':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
+
+  /pn-usage-estimates-bo/{paId}/reports/{referenceMonth}:
+    get:
+      tags:
+        - ReportBo
+      operationId: getAllReportFile
+      x-api-permissions:
+        - 'tender-read'
+      summary: estrae tutti i consuntivi delle stime associate al paId e al mese di riferimento.
+      description: API che consente di estrarre l'elenco fatture delle stime.
+      parameters:
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceMonth'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ListReports'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
+        '401':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
+        '500':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
+
+  /pn-usage-estimates-bo/estimate/{paId}/reports/{reportKey}:
+    get:
+      tags:
+        - ReportBo
+      operationId: downloadReportFile
+      x-api-permissions:
+        - 'tender-read'
+      summary: Download file di un report
+      description: API che consente il download del file di un report relativo alla reportKey.
+      parameters:
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReportKey'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryFileType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ReportDTO'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
+        '401':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
+        '500':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
+
+
+  /pn-usage-estimates-bo/reports/{paId}:
+    get:
+      tags:
+        - ReportBo
+      operationId: getAllDeanonymizedFiles
+      x-api-permissions:
+        - 'tender-read'
+      summary: ritorna elenco di file deanonimizzati in base al paId e allo stato.
+      description: API che estrae la lista di file deanonimizzati.
+      parameters:
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryDeanonymizationStatus'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryNumberPage'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/querySizePage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/PageableDeanonymizedFilesResponseDto'
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
+        '401':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
+        '500':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
+
+  /pn-usage-estimates-bo/reports/{paId}/schedule/{reportKey}:
+    get:
+      tags:
+        - ReportBo
+      operationId: getScheduleDeanonymizedFiles
+      x-api-permissions:
+        - 'tender-read'
+      summary: rischedula il caricamento dell'elenco elenco di file deanonimizzati in base al paId e al reportKey.
+      description: API che rischedula la lista di file deanonimizzati.
+      parameters:
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReportKey'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Errore di validazione sintattica della richiesta
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
+        '401':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
+        '403':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
+        '404':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
+        '405':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
+        '500':
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
+
+
+
