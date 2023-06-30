@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: zopsalLQoFgx1o9at9eRVLJqessJQLQzWTjWpYHkB4A=
+  version: rL2YyojQeCb1BPEhD2lF/9w6c8ecYxN/dn94W1HgGbU=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -321,7 +321,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/listEstimateFile'
+                $ref: '#/components/schemas/ListReports'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -394,7 +394,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InfoDownloadDTO'
+                $ref: '#/components/schemas/ReportDTO'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
@@ -875,16 +875,26 @@ paths:
         type: http_proxy
 components:
   parameters:
+    queryStatus:
+      name: status
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - VALIDATED
+          - DRAFT
     pathPaId:
       name: paId
       in: path
       required: true
       schema:
         type: string
-    pathReportKey:
-      name: reportKey
+    pathReferenceMonth:
+      name: referenceMonth
       in: path
       required: true
+      example: MAR-2023
       schema:
         type: string
     OriginFe:
@@ -914,58 +924,6 @@ components:
       required: false
       schema:
         type: string
-    queryStatus:
-      name: status
-      in: query
-      required: true
-      schema:
-        type: string
-        enum:
-          - VALIDATED
-          - DRAFT
-    queryDeanonymizationStatus:
-      name: status
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - DEANONIMIZING
-          - ENQUEUED
-          - READY
-          - ERROR
-    queryFileType:
-      name: type
-      in: query
-      required: true
-      schema:
-        type: string
-        enum:
-          - SOURCE
-          - TARGET
-    pathReferenceMonth:
-      name: referenceMonth
-      in: path
-      required: true
-      example: MAR-2023
-      schema:
-        type: string
-    pathReferenceYear:
-      name: referenceYear
-      in: path
-      required: true
-      schema:
-        type: string
-    querySizePage:
-      name: size
-      in: query
-      description: Numero di elementi per pagina.
-      required: false
-      schema:
-        type: number
-        default: 5
-        maximum: 999999999
-        minimum: 1
     queryNumberPage:
       name: page
       in: query
@@ -976,7 +934,141 @@ components:
         default: 0
         maximum: 999999999
         minimum: 0
+    querySizePage:
+      name: size
+      in: query
+      description: Numero di elementi per pagina.
+      required: false
+      schema:
+        type: number
+        default: 5
+        maximum: 999999999
+        minimum: 1
+    pathReportKey:
+      name: reportKey
+      in: path
+      required: true
+      schema:
+        type: string
+    queryFileType:
+      name: type
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - SOURCE
+          - TARGET
+    queryDeanonymizationStatus:
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/ReportStatusEnum'
+    pathReferenceYear:
+      name: referenceYear
+      in: path
+      required: true
+      schema:
+        type: string
   schemas:
+    Estimate:
+      type: object
+      properties:
+        totalDigitalNotif:
+          type: number
+          maximum: 999999999
+          minimum: 1
+        total890Notif:
+          type: number
+          maximum: 999999999
+          minimum: 1
+        totalAnalogNotif:
+          type: number
+          maximum: 999999999
+          minimum: 1
+      required:
+        - totalDigitalNotif
+        - total890Notif
+        - totalAnalogNotif
+    Profilation:
+      type: object
+      properties:
+        splitPayment:
+          type: boolean
+          example: 'true'
+        description:
+          type: string
+          example: altre info
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        mailAddress:
+          type: string
+          example: test@comune.milano.it
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+      required:
+        - splitPayment
+        - mailAddress
+    EstimateCreateBody:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Estimate'
+        - $ref: '#/components/schemas/Profilation'
+    Period:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - VALIDATED
+            - DRAFT
+            - ABSENT
+        deadlineDate:
+          type: string
+          format: date
+        referenceMonth:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        showEdit:
+          type: boolean
+      required:
+        - status
+        - referenceMonth
+        - deadlineDate
+        - showEdit
+    EstimatePeriod:
+      type: object
+      properties:
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+        billing:
+          $ref: '#/components/schemas/Profilation'
+      allOf:
+        - $ref: '#/components/schemas/Period'
+    ProblemError:
+      properties:
+        code:
+          description: Internal code of the error, in human-readable format
+          example: >-
+            PN_PARAMETER_TOO_LONG | PN_PARAMETER_TOO_SHORT | PN_DUPLICATE_ENTRY
+            | etc...
+          type: string
+        element:
+          description: Parameter or request body field name for validation error
+          example: body.order.item[2].quantity
+          type: string
+        detail:
+          description: >-
+            A human readable explanation specific to this occurrence of the
+            problem.
+          example: Parameter not valid
+          maxLength: 1024
+          type: string
+      required:
+        - code
     Problem:
       properties:
         type:
@@ -1022,199 +1114,20 @@ components:
       required:
         - status
         - errors
-    ProblemError:
-      properties:
-        code:
-          description: Internal code of the error, in human-readable format
-          example: >-
-            PN_PARAMETER_TOO_LONG | PN_PARAMETER_TOO_SHORT | PN_DUPLICATE_ENTRY
-            | etc...
-          type: string
-        element:
-          description: Parameter or request body field name for validation error
-          example: body.order.item[2].quantity
-          type: string
-        detail:
-          description: >-
-            A human readable explanation specific to this occurrence of the
-            problem.
-          example: Parameter not valid
-          maxLength: 1024
-          type: string
-      required:
-        - code
-    EstimateDetail:
-      type: object
-      properties:
-        paInfo:
-          $ref: '#/components/schemas/PAInfo'
-        billing:
-          $ref: '#/components/schemas/Billing'
-        estimate:
-          $ref: '#/components/schemas/Estimate'
-      allOf:
-        - $ref: '#/components/schemas/Period'
-      required:
-        - paInfo
-        - billing
-        - status
-        - referenceMonth
-        - estimate
-        - showEdit
-    PAInfo:
-      type: object
-      properties:
-        paId:
-          type: string
-          example: '12345678900'
-          format: /^[0-9]{11}$/
-          maxLength: 32
-        paName:
-          type: string
-          example: Comune di Roma
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        taxId:
-          type: string
-          example: '3242214145'
-          format: /^[0-9]{11}$/
-          maxLength: 32
-        registeredOffice:
-          type: string
-          example: piazza gaeaulenti 56, Milano
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        pec:
-          type: string
-          example: test@pec.it
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        ipaCode:
-          type: string
-          example: abc12324
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        sdiCode:
-          type: string
-          example: abc1334324
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-    Period:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-            - VALIDATED
-            - DRAFT
-            - ABSENT
-        deadlineDate:
-          type: string
-          format: date
-        referenceMonth:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        showEdit:
-          type: boolean
-      required:
-        - status
-        - referenceMonth
-        - deadlineDate
-        - showEdit
-    Estimate:
-      type: object
-      properties:
-        totalDigitalNotif:
-          type: number
-          maximum: 999999999
-          minimum: 1
-        total890Notif:
-          type: number
-          maximum: 999999999
-          minimum: 1
-        totalAnalogNotif:
-          type: number
-          maximum: 999999999
-          minimum: 1
-      required:
-        - totalDigitalNotif
-        - total890Notif
-        - totalAnalogNotif
-    EstimateCreateBody:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Estimate'
-        - $ref: '#/components/schemas/Billing'
-    ProfilationCreateBody:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Billing'
-    EstimatePeriod:
-      type: object
-      properties:
-        estimate:
-          $ref: '#/components/schemas/Estimate'
-        billing:
-          $ref: '#/components/schemas/Billing'
-      allOf:
-        - $ref: '#/components/schemas/Period'
     EstimateHistory:
       type: object
       allOf:
         - $ref: '#/components/schemas/Period'
-    ProfilationPeriod:
+    Sort:
       type: object
       properties:
-        billing:
-          $ref: '#/components/schemas/Billing'
-      allOf:
-        - $ref: '#/components/schemas/PeriodForProfilation'
-    ProfilationHistory:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/PeriodForProfilation'
-    listEstimateFile:
-      type: array
-      items:
-        $ref: '#/components/schemas/InfoDownloadDTO'
-      maxItems: 999999999
-      minItems: 1
-    PageableDeanonymizedFilesResponseDto:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/FilePage'
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/InfoDownloadDTO'
-          maxItems: 999999999
-          minItems: 1
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
       additionalProperties: false
-      required:
-        - content
-    PageableEstimateResponseDto:
-      type: object
-      properties:
-        actual:
-          $ref: '#/components/schemas/EstimatePeriod'
-        history:
-          $ref: '#/components/schemas/Page'
-      additionalProperties: false
-      required:
-        - content
-    PageableProfilationResponseDto:
-      type: object
-      properties:
-        actual:
-          $ref: '#/components/schemas/ProfilationPeriod'
-        history:
-          $ref: '#/components/schemas/PageForProfilation'
-      additionalProperties: false
-      required:
-        - content
     Pageable:
       type: object
       properties:
@@ -1235,16 +1148,6 @@ components:
         sort:
           $ref: '#/components/schemas/Sort'
         unpaged:
-          type: boolean
-      additionalProperties: false
-    Sort:
-      type: object
-      properties:
-        empty:
-          type: boolean
-        sorted:
-          type: boolean
-        unsorted:
           type: boolean
       additionalProperties: false
     Page:
@@ -1293,13 +1196,125 @@ components:
         - size
         - totalElements
         - totalPages
+    PageableEstimateResponseDto:
+      type: object
+      properties:
+        actual:
+          $ref: '#/components/schemas/EstimatePeriod'
+        history:
+          $ref: '#/components/schemas/Page'
+      additionalProperties: false
+      required:
+        - content
+    PAInfo:
+      type: object
+      properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: /^[0-9]{11}$/
+          maxLength: 32
+        paName:
+          type: string
+          example: Comune di Roma
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        taxId:
+          type: string
+          example: '3242214145'
+          format: /^[0-9]{11}$/
+          maxLength: 32
+        registeredOffice:
+          type: string
+          example: piazza gaeaulenti 56, Milano
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        pec:
+          type: string
+          example: test@pec.it
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        ipaCode:
+          type: string
+          example: abc12324
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        sdiCode:
+          type: string
+          example: abc1334324
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+    EstimateDetail:
+      type: object
+      properties:
+        paInfo:
+          $ref: '#/components/schemas/PAInfo'
+        billing:
+          $ref: '#/components/schemas/Profilation'
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+      allOf:
+        - $ref: '#/components/schemas/Period'
+      required:
+        - paInfo
+        - billing
+        - status
+        - referenceMonth
+        - estimate
+        - showEdit
+    ReportStatusEnum:
+      type: string
+      enum:
+        - DEANONIMIZING
+        - RAW
+        - ENQUEUED
+        - READY
+        - ERROR
+    ReportDTO:
+      type: object
+      properties:
+        paId:
+          type: string
+          example: A12C34D56789E0
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        reportKey:
+          type: string
+          example: A12C34D56789E0
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        reportZipKey:
+          type: string
+          example: A12C34D56789E0
+          format: /[^A-Za-z0-9]+/
+          maxLength: 32
+        url:
+          type: string
+          example: http://file.com
+        referenceMonth:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        errorMessage:
+          type: string
+        action:
+          type: string
+        status:
+          $ref: '#/components/schemas/ReportStatusEnum'
+    ListReports:
+      type: array
+      items:
+        $ref: '#/components/schemas/ReportDTO'
+      maxItems: 999999999
+      minItems: 1
     FilePage:
       type: object
       properties:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/InfoDownloadDTO'
+            $ref: '#/components/schemas/ReportDTO'
           maxItems: 999999999
           minItems: 1
         empty:
@@ -1339,6 +1354,59 @@ components:
         - size
         - totalElements
         - totalPages
+    PageableDeanonymizedFilesResponseDto:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/FilePage'
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportDTO'
+          maxItems: 999999999
+          minItems: 1
+      additionalProperties: false
+      required:
+        - content
+    ProfilationCreateBody:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Profilation'
+    PeriodForProfilation:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - VALIDATED
+            - DRAFT
+            - ABSENT
+        deadlineDate:
+          type: string
+          format: date
+        referenceYear:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        showEdit:
+          type: boolean
+      required:
+        - status
+        - referenceYear
+        - deadlineDate
+        - showEdit
+    ProfilationPeriod:
+      type: object
+      properties:
+        profilation:
+          $ref: '#/components/schemas/Profilation'
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
+    ProfilationHistory:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
     PageForProfilation:
       type: object
       properties:
@@ -1385,108 +1453,36 @@ components:
         - size
         - totalElements
         - totalPages
-    InfoDownloadDTO:
+    PageableProfilationResponseDto:
       type: object
       properties:
-        reportKey:
-          type: string
-          example: A12C34D56789E0
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        reportZipKey:
-          type: string
-          example: A12C34D56789E0
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        paId:
-          type: string
-          example: A12C34D56789E0
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        url:
-          type: string
-          example: http://file.com
-        referenceMonth:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        errorMessage:
-          type: string
-        action:
-          type: string
-        status:
-          type: string
-          enum:
-            - DEANONIMIZING
-            - ENQUEUED
-            - READY
-            - ERROR
+        actual:
+          $ref: '#/components/schemas/ProfilationPeriod'
+        history:
+          $ref: '#/components/schemas/PageForProfilation'
+      additionalProperties: false
+      required:
+        - content
     ProfilationDetail:
       type: object
       properties:
         paInfo:
           $ref: '#/components/schemas/PAInfo'
-        billing:
-          $ref: '#/components/schemas/Billing'
+        profilation:
+          $ref: '#/components/schemas/Profilation'
       allOf:
         - $ref: '#/components/schemas/PeriodForProfilation'
-    PeriodForProfilation:
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-            - VALIDATED
-            - DRAFT
-            - ABSENT
-        deadlineDate:
-          type: string
-          format: date
-        referenceYear:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        showEdit:
-          type: boolean
-      required:
-        - status
-        - referenceYear
-        - deadlineDate
-        - showEdit
-    Billing:
-      type: object
-      properties:
-        splitPayment:
-          type: boolean
-          example: 'true'
-        description:
-          type: string
-          example: altre info
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-        mailAddress:
-          type: string
-          example: test@comune.milano.it
-          format: /[^A-Za-z0-9]+/
-          maxLength: 32
-      required:
-        - splitPayment
-        - mailAddress
   responses:
+    Unauthorized:
+      description: Unauthorized
     Forbidden:
       description: Forbidden
     NotFound:
       description: Not found
-    Invalid:
-      description: Bad Request
     NotAllowed:
       description: Method not allowed
     InternalError:
       description: Internal Server Error
-    Unauthorized:
-      description: Unauthorized
   securitySchemes:
     pn-auth-fleet_jwtAuthorizer_openapi:
       type: apiKey

@@ -15,26 +15,14 @@ servers:
   - url: https://api.pn.pagopa.it
     description: Generated server url
 paths:
-  /status:
-    get:
-      summary: healthCheck path
-      description: health check path per verificare lo stato del micro servizio
-      tags:
-        - HealthCheck
-      operationId: status
-      responses:
-        '200':
-          description: Ok
-        '500':
-          description: Internal Server Error
 
-  /pn-usage-estimates/{paId}/estimate/{referenceMonth}:
+  /pn-usage-estimates-bo/{paId}/estimate/{referenceMonth}:
     post:
       tags:
-        - Estimate
+        - EstimateBo
       operationId: createOrUpdateEstimate
       x-api-permissions:
-        - 'estimate-write'
+        - 'tender-read'
       summary: Inserimento o modifica di una stima.
       description: API che consente di aggiungere o di modificare i dettagli di una stima.
       parameters:
@@ -71,13 +59,13 @@ paths:
           $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
 
-  /pn-usage-estimates/{paId}/estimate/{referenceMonth}/validated:
+  /pn-usage-estimates-bo/{paId}/estimate/{referenceMonth}/validated:
     get:
       tags:
-        - Estimate
+        - EstimateBo
       operationId: validated
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: Validazione stima.
       description: API che consente di modificare lo stato di una stima.
       parameters:
@@ -107,13 +95,13 @@ paths:
         '500':
           $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimates:
+  /pn-usage-estimates-bo/estimates:
     get:
       tags:
-        - Estimate
+        - EstimateBo
       operationId: getAllEstimate
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: ritorna elenco di stime in base alla partita iva, al nome della pa o al codice Ipa.
       description: API che estrae la lista di stime
       parameters:
@@ -147,13 +135,13 @@ paths:
         '500':
           $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/detail/{referenceMonth}:
+  /pn-usage-estimates-bo/estimate/{paId}/detail/{referenceMonth}:
     get:
       tags:
-        - Estimate
+        - EstimateBo
       operationId: getEstimateDetail
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: ritorna il dettaglio delle stime in base al mese di riferimento e al paId.
       description: API che ritorna il dettaglio di una stima.
       parameters:
@@ -183,13 +171,13 @@ paths:
         '500':
           $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
-  /pn-usage-estimates/{paId}/reports/{referenceMonth}:
+  /pn-usage-estimates-bo/{paId}/reports/{referenceMonth}:
     get:
       tags:
-        - Report
+        - ReportBo
       operationId: getAllReportFile
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: estrae tutti i consuntivi delle stime associate al paId e al mese di riferimento.
       description: API che consente di estrarre l'elenco fatture delle stime.
       parameters:
@@ -219,13 +207,13 @@ paths:
         '500':
           $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
-  /pn-usage-estimates/estimate/{paId}/reports/{reportKey}:
+  /pn-usage-estimates-bo/estimate/{paId}/reports/{reportKey}:
     get:
       tags:
-        - Report
+        - ReportBo
       operationId: downloadReportFile
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: Download file di un report
       description: API che consente il download del file di un report relativo alla reportKey.
       parameters:
@@ -257,13 +245,13 @@ paths:
           $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
 
-  /pn-usage-estimates/reports/{paId}:
+  /pn-usage-estimates-bo/reports/{paId}:
     get:
       tags:
-        - Report
+        - ReportBo
       operationId: getAllDeanonymizedFiles
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: ritorna elenco di file deanonimizzati in base al paId e allo stato.
       description: API che estrae la lista di file deanonimizzati.
       parameters:
@@ -295,13 +283,13 @@ paths:
         '500':
           $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
-  /pn-usage-estimates/reports/{paId}/schedule/{reportKey}:
+  /pn-usage-estimates-bo/reports/{paId}/schedule/{reportKey}:
     get:
       tags:
-        - Report
+        - ReportBo
       operationId: getScheduleDeanonymizedFiles
       x-api-permissions:
-        - 'estimate-read'
+        - 'tender-read'
       summary: rischedula il caricamento dell'elenco elenco di file deanonimizzati in base al paId e al reportKey.
       description: API che rischedula la lista di file deanonimizzati.
       parameters:
@@ -327,158 +315,5 @@ paths:
         '500':
           $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
-  /pn-usage-estimates/{paId}/profilation/{referenceYear}:
-    post:
-      tags:
-        - Profilation
-      operationId: createOrUpdateProfilation
-      x-api-permissions:
-        - 'profilation-write'
-      summary: salva o aggiorna i dati della profilazione.
-      description: API che salva o aggiorna i dettagli della profilazione.
-      parameters:
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryStatus'
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceYear'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ProfilationCreateBody'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ProfilationPeriod'
-        '400':
-          description: Errore di validazione sintattica della richiesta
-          content:
-            application/problem+json:
-              schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
-        '401':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
-        '500':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
-
-  /pn-usage-estimates/profilations:
-    get:
-      tags:
-        - Profilation
-      operationId: getAllProfilations
-      x-api-permissions:
-        - 'profilation-read'
-      summary: Ritorna elenco di profilazioni in base alla partita iva, al nome della pa o al codice Ipa.
-      description: API che estrae la lista di profilazioni
-      parameters:
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryPaId'
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryTaxId'
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryIpaId'
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryNumberPage'
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/querySizePage'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/PageableProfilationResponseDto'
-        '400':
-          description: Errore di validazione sintattica della richiesta
-          content:
-            application/problem+json:
-              schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
-        '401':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
-        '500':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
-
-  /pn-usage-estimates/profilation/{paId}/detail/{referenceYear}:
-    get:
-      tags:
-        - Profilation
-      operationId: getProfilationDetail
-      x-api-permissions:
-        - 'profilation-read'
-      summary: ritorna il dettaglio della profilazione in base al paId e al referenceYear.
-      description: API che ritorna il dettaglio della profilazione.
-      parameters:
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceYear'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ProfilationDetail'
-        '400':
-          description: Errore di validazione sintattica della richiesta
-          content:
-            application/problem+json:
-              schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
-        '401':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
-        '500':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
-
-
-  /pn-usage-estimates/{paId}/profilation/{referenceYear}/validated:
-    get:
-      tags:
-        - Profilation
-      operationId: validatedProfilation
-      x-api-permissions:
-        - 'profilation-read'
-      summary: Validazione profilazione.
-      description: API che consente di modificare lo stato di una profilazione.
-      parameters:
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
-        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceYear'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ProfilationPeriod'
-        '400':
-          description: Errore di validazione sintattica della richiesta
-          content:
-            application/problem+json:
-              schema:
-                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
-        '401':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
-        '403':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
-        '404':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
-        '405':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
-        '500':
-          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 

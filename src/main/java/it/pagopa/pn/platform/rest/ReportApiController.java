@@ -1,8 +1,9 @@
 package it.pagopa.pn.platform.rest;
 
 import it.pagopa.pn.platform.rest.v1.api.ReportApi;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableDeanonymizedFilesResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.ReportDTO;
+import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import it.pagopa.pn.platform.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,17 +19,17 @@ public class ReportApiController implements ReportApi {
     private ReportService reportService;
 
     @Override
-    public Mono<ResponseEntity<InfoDownloadDTO>> downloadReportFile(String paId, String reportKey,  String type,  ServerWebExchange exchange) {
+    public Mono<ResponseEntity<ReportDTO>> downloadReportFile(String paId, String reportKey, String type, ServerWebExchange exchange) {
         return this.reportService.downloadReportFile(paId, reportKey, type).map(ResponseEntity::ok);
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<InfoDownloadDTO>>> getAllReportFile(String paId, String referenceMonth, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Flux<ReportDTO>>> getAllReportFile(String paId, String referenceMonth, ServerWebExchange exchange) {
         return this.reportService.getAllReportFile(paId, referenceMonth).collectList().map(list -> ResponseEntity.ok(Flux.fromStream(list.stream())));
     }
 
     @Override
-    public Mono<ResponseEntity<PageableDeanonymizedFilesResponseDto>> getAllDeanonymizedFiles(String paId, String status, Integer page, Integer size, final ServerWebExchange exchange){
+    public Mono<ResponseEntity<PageableDeanonymizedFilesResponseDto>> getAllDeanonymizedFiles(String paId, ReportStatusEnum status, Integer page, Integer size, final ServerWebExchange exchange){
         return this.reportService.getAllDeanonymizedFiles(paId, status, page, size).map(ResponseEntity::ok);
     }
 

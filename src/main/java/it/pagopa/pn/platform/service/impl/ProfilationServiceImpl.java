@@ -147,7 +147,7 @@ public class ProfilationServiceImpl implements ProfilationService {
                             && pnProfilation.getDeadlineDate().isAfter(refYearInstant)){
                         pnProfilation.setStatus(ProfilationPeriod.StatusEnum.VALIDATED.getValue());
                         pnProfilation.setLastModifiedDate(refYearInstant);
-                        profilationDAO.createOrUpdate(pnProfilation);
+                        return profilationDAO.createOrUpdate(pnProfilation);
                     }
                     return Mono.just(pnProfilation);
                 }).map(ProfilationMapper::profilationPeriodToDto);
