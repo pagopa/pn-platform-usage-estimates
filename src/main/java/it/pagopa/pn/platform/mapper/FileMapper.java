@@ -64,6 +64,8 @@ public class FileMapper {
         filesList.setLastModifiedDate(activityReport.getLastModifiedDate() != null ? Date.from(activityReport.getLastModifiedDate()) : null);
         filesList.setStatus(ReportStatusEnum.valueOf(activityReport.getStatus()));
         filesList.setReportKey(activityReport.getReportKey());
+        filesList.setPart(activityReport.getPart());
+        filesList.setGenerationDate(Date.from(activityReport.getGenerationDate()));
         if (activityReport.getStatus().equals(String.valueOf(ReportStatusEnum.ERROR))){
             filesList.setErrorMessage(activityReport.getErrorMessage());
         }

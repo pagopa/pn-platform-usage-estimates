@@ -21,10 +21,11 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     public static final String COL_PA_ID = "paId" ;
     public static final String COL_REFERENCE_MONTH = "referenceMonth";
     public static final String COL_STATUS = "status";
+    public static final String COL_PART = "part";
     public static final String COL_BUCKET_NAME = "bucketName";
     public static final String COL_REPORT_ZIP_KEY = "reportZipKey";
     public static final String COL_LAST_MODIFIED_DATE = "lastModifiedDate" ;
-    public static final String COL_ACTION = "action" ;
+    public static final String COL_GENERATION_DATE = "generationDate" ;
     public static final String COL_KEY_SAFESTORAGE = "keySafeStorage";
     public static final String COL_ERROR_MESSAGE = "errorMessage" ;
 
@@ -40,6 +41,9 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_STATUS)}))
     private String status;
 
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_PART)}))
+    private String part;
+
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_BUCKET_NAME)}))
     private String bucketName;
 
@@ -49,8 +53,8 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_LAST_MODIFIED_DATE)}))
     private Instant lastModifiedDate;
 
-    @Getter(onMethod = @__({@DynamoDbAttribute(COL_ACTION)}))
-    private String action;
+    @Getter(onMethod = @__({@DynamoDbAttribute(COL_GENERATION_DATE)}))
+    private Instant generationDate;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_ERROR_MESSAGE)}))
     private String errorMessage;

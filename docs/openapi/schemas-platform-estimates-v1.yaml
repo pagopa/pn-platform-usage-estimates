@@ -529,7 +529,10 @@ components:
           format: date
         errorMessage:
           type: string
-        action:
+        generationDate:
+          type: string
+          format: date
+        part:
           type: string
         status:
           $ref: "#/components/schemas/ReportStatusEnum"
