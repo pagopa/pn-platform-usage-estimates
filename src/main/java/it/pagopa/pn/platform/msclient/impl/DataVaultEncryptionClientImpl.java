@@ -1,7 +1,7 @@
-package it.pagopa.pn.platform.encription.impl;
+package it.pagopa.pn.platform.msclient.impl;
 
 import it.pagopa.pn.platform.config.PnPlatformConfig;
-import it.pagopa.pn.platform.encription.model.DataEncryption;
+import it.pagopa.pn.platform.msclient.DataVaultEncryptionClient;
 import it.pagopa.pn.platform.exception.ExceptionTypeEnum;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.generated.openapi.msclient.pndatavault.v1.ApiClient;
@@ -24,14 +24,14 @@ import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Component("dataVaultEncryption")
-public class DataVaultEncryptionImpl extends BaseClient implements DataEncryption {
+public class DataVaultEncryptionClientImpl extends BaseClient implements DataVaultEncryptionClient {
 
     private RecipientsApi recipientsApi;
 
     private final PnPlatformConfig pnPlatformConfig;
 
 
-    public DataVaultEncryptionImpl(PnPlatformConfig pnPlatformConfig) {
+    public DataVaultEncryptionClientImpl(PnPlatformConfig pnPlatformConfig) {
         this.pnPlatformConfig = pnPlatformConfig;
     }
 

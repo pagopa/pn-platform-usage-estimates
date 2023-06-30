@@ -3,10 +3,9 @@ package it.pagopa.pn.platform.msclient.impl;
 import it.pagopa.pn.platform.config.PnPlatformConfig;
 import it.pagopa.pn.platform.exception.PnRetryStorageException;
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.api.FileDownloadApi;
+import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.api.FileMetadataUpdateApi;
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.api.FileUploadApi;
-import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreationRequestDto;
-import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreationResponseDto;
-import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileDownloadResponseDto;
+import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.*;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -32,17 +31,22 @@ public class SafeStorageClientImpl implements SafeStorageClient {
     private final FileDownloadApi fileDownloadApi;
     private final FileUploadApi fileUploadApi;
 
+    private final FileMetadataUpdateApi fileMetadataUpdateApi;
+
     private static final String DOCUMENT_TYPE = "PN_INVOICING_ACTIVITY_REPORT";
 
     private static final String CONTENT_TYPE = "application/zip";
     private static final String STATUS = "PRELOADED";
+    private static final String ATTACHED = "ATTACHED";
 
     public SafeStorageClientImpl(PnPlatformConfig cfg,
                                  FileDownloadApi fileDownloadApi,
-                                 FileUploadApi fileUploadApi) {
+                                 FileUploadApi fileUploadApi,
+                                 FileMetadataUpdateApi fileMetadataUpdateApi) {
         this.pnPlatformConfig = cfg;
         this.fileDownloadApi = fileDownloadApi;
         this.fileUploadApi = fileUploadApi;
+        this.fileMetadataUpdateApi = fileMetadataUpdateApi;
     }
 
 
@@ -102,5 +106,18 @@ public class SafeStorageClientImpl implements SafeStorageClient {
         } catch (URISyntaxException e) {
             return Mono.error(e);
         }
+    }
+
+    @Override
+    public Mono<OperationResultCodeResponseDto> notifyFileUploaded(String fileKey){
+        log.debug("Req params : {}", fileKey);
+
+        UpdateFileMetadataRequestDto request = new UpdateFileMetadataRequestDto();
+        request.setStatus(ATTACHED);
+        return fileMetadataUpdateApi.updateFileMetadata(fileKey, this.pnPlatformConfig.getSafeStorageCxId(), request)
+                .retryWhen(
+                        Retry.backoff(2, Duration.ofMillis(500))
+                                .filter(throwable -> throwable instanceof TimeoutException || throwable instanceof ConnectException)
+                );
     }
 }

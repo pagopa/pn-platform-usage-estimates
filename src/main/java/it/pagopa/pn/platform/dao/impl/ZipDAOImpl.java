@@ -24,7 +24,7 @@ public class ZipDAOImpl implements ZipDAO {
                 ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
         ) {
             File directory = new File(directoryPath);
-            if (!directory.isDirectory()) throw new DAOException("The folder of the reports doesn't exist");
+            if (!directory.isDirectory()) throw new DAOException(DAOException.DaoName.ZIPDAO, "The folder of the reports doesn't exist");
 
             for (File file : Objects.requireNonNull(directory.listFiles())) {
                 if (!file.getName().contains(".zip")) {
@@ -44,7 +44,7 @@ public class ZipDAOImpl implements ZipDAO {
 
         } catch (IOException exception) {
             log.error("exception zip files {}", exception.getMessage());
-            throw new DAOException("Error with creating zip file");
+            throw new DAOException(DAOException.DaoName.ZIPDAO, "Error with creating zip file");
         }
     }
 
@@ -56,7 +56,7 @@ public class ZipDAOImpl implements ZipDAO {
             return bytes;
         } catch (IOException ex) {
             log.error("Error with read of zip file");
-            throw new DAOException("Zip file not found");
+            throw new DAOException(DAOException.DaoName.ZIPDAO, "Zip file not found");
         }
     }
 

@@ -23,7 +23,8 @@ public enum ExceptionTypeEnum {
     STATUS_NOT_CORRECT("STATUS_NOT_CORRECT", "Lo stato passato non è corretto"),
     SCHEDULE_JOB_ERROR("SCHEDULE_JOB_ERROR", "Errore nella schedulazione del job"),
     DATA_VAULT_ENCRYPTION_ERROR("DATA_VAULT_ENCRYPTION_ERROR", "Servizio irraggiungibile od errore in fase di criptazione"),
-    DATA_VAULT_DECRYPTION_ERROR("DATA_VAULT_DECRYPTION_ERROR", "Servizio irraggiungibile od errore in fase di decriptazione");
+    DATA_VAULT_DECRYPTION_ERROR("DATA_VAULT_DECRYPTION_ERROR", "Servizio irraggiungibile od errore in fase di decriptazione"),
+    DEANONIMIZING_JOB_EXCEPTION("DEANONIMIZING_JOB_EXCEPTION", "Errore durante il flusso di deanonimizzazione");
 
     private final String title;
     private final String message;

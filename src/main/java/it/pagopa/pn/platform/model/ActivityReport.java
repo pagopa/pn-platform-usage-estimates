@@ -31,6 +31,12 @@ public class ActivityReport {
             return bucketName.substring(start + 1, end);
         }
 
+        public String getPartNum() {
+            int start = bucketName.indexOf("part-");
+            int end = bucketName.indexOf(".csv");
+            return bucketName.substring(start +1, end);
+        }
+
     }
 
 

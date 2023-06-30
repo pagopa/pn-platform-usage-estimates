@@ -1,6 +1,6 @@
-package it.pagopa.pn.platform.encription.model;
+package it.pagopa.pn.platform.msclient;
 
-public interface DataEncryption {
+public interface DataVaultEncryptionClient {
     default String encode(String data) { return data; }
     default String encode(String data, String type) { return data; }
     String decode(String data);

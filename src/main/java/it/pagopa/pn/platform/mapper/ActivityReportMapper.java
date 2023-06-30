@@ -3,9 +3,11 @@ package it.pagopa.pn.platform.mapper;
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.ActivityReport;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
+import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import org.apache.commons.csv.CSVRecord;
 import reactor.core.publisher.Flux;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,12 +27,15 @@ public class ActivityReportMapper {
 //    }
 
     public static PnActivityReport toEntity (ActivityReport.Record record){
-        PnActivityReport entity = new PnActivityReport();
 
+        PnActivityReport entity = new PnActivityReport();
 
         entity.setBucketName(record.getBucketName());
         entity.setReportKey(record.getFileKey());
         entity.setPaId(record.getPaId());
+        entity.setGenerationDate(Instant.now());
+        entity.setStatus(ReportStatusEnum.RAW.getValue());
+        entity.setPart(record.getPartNum());
 
         return entity;
 
@@ -51,5 +56,11 @@ public class ActivityReportMapper {
         activityReportCSV.setRecipientType(record.get(ActivityReportCSV.Header.recipient_type));
         activityReportCSV.setRecipientTaxId(record.get(ActivityReportCSV.Header.recipient_tax_id));
         return activityReportCSV;
+    }
+
+    public static void changeReportStatus (PnActivityReport activityReport, ReportStatusEnum reportStatusEnum, String error){
+        activityReport.setStatus(reportStatusEnum.getValue());
+        activityReport.setLastModifiedDate(Instant.now());
+        activityReport.setErrorMessage(error);
     }
 }
