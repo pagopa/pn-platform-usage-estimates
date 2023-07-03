@@ -78,6 +78,7 @@ public class EstimateMapper {
 
     public static EstimateHistory estimatesToDto(PnEstimate entity){
         EstimateHistory dto = new EstimateHistory();
+        dto.setPaId(entity.getPaId());
         dto.setReferenceMonth(entity.getReferenceMonth());
         dto.setDeadlineDate(Date.from(entity.getDeadlineDate()));
         dto.setLastModifiedDate(entity.getLastModifiedDate() != null ? Date.from(entity.getLastModifiedDate()) : null);

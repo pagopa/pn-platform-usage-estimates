@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: >-
     ${stageVariables.ProjectName}-${stageVariables.MicroServiceUniqueName}-${stageVariables.IntendedUsage}
-  version: rL2YyojQeCb1BPEhD2lF/9w6c8ecYxN/dn94W1HgGbU=
+  version: hs4nQAnSQfDAhc6RoY0Sx+lGkeesFRJvVm/mxt6XPrQ=
 servers:
   - url: https://${stageVariables.DnsName}/{basePath}
     variables:
@@ -1018,6 +1018,11 @@ components:
     Period:
       type: object
       properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: /^[0-9]{11}$/
+          maxLength: 32
         status:
           type: string
           enum:
@@ -1298,7 +1303,10 @@ components:
           format: date
         errorMessage:
           type: string
-        action:
+        generationDate:
+          type: string
+          format: date
+        part:
           type: string
         status:
           $ref: '#/components/schemas/ReportStatusEnum'
