@@ -65,6 +65,20 @@ class EstimateApiControllerTest {
     }
 
     @Test
+    void getAllEstimateLastDateNull() {
+        PageableEstimateResponseDto response = new PageableEstimateResponseDto();
+        String path = "/pn-usage-estimates/estimates";
+        Mockito.when(estimateService.getAllEstimate(Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(Mono.just(response));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path(path).build())
+                .header("originFe", "PN-PLATFORM-NOTIFICATION-FE")
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
     void getEstimateDetail() {
         EstimateDetail response = new EstimateDetail();
         String path = "/pn-usage-estimates/estimate/12345/detail/MAR-2023";
