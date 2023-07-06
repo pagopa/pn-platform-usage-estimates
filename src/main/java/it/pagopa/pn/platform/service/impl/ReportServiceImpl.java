@@ -77,6 +77,7 @@ public class ReportServiceImpl implements ReportService {
         if (status == null){
             return activityReportMetaDAO.findAllFromPaId(paId)
                     .collectList()
+                    .doOnNext(list -> log.info("Number of elements {}", list.size()))
                     .map(list ->
                             FileMapper.toPagination(pageable, list)
                     )
