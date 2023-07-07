@@ -3,7 +3,6 @@ package it.pagopa.pn.platform.service.impl;
 import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.config.PnPlatformConfig;
 import it.pagopa.pn.platform.dao.CsvDAO;
-import it.pagopa.pn.platform.dao.DAOException;
 import it.pagopa.pn.platform.dao.ZipDAO;
 import it.pagopa.pn.platform.exception.ExceptionTypeEnum;
 import it.pagopa.pn.platform.exception.PnGenericException;
@@ -50,7 +49,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
     public Mono<Void> execute(String paId, String reportKey) {
         return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .flatMap(pnActivityReport -> {
-                    pnActivityReport.setStatus(ReportStatusEnum.DEANONIMIZING.name());
+                    pnActivityReport.setStatusReport(ReportStatusEnum.DEANONIMIZING.name());
                     return this.activityReportMetaDAO.createMetaData(pnActivityReport);
                 })
                 .flatMap(pnActivityReport -> this.getCSV(pnActivityReport.getReportKey())
@@ -84,7 +83,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
                             })
                 )
                 .flatMap(activityReport -> {
-                    activityReport.setStatus(ReportStatusEnum.ENQUEUED.name());
+                    activityReport.setStatusReport(ReportStatusEnum.ENQUEUED.name());
                     return this.activityReportMetaDAO.createMetaData(activityReport);
                 })
                 .then();

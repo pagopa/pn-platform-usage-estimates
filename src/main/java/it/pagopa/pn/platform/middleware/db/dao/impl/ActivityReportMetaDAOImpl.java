@@ -11,6 +11,10 @@ import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Repository
@@ -50,7 +54,10 @@ public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> impleme
     @Override
     public Flux<PnActivityReport> findAllFromPaIdAndStatus(String paId, String status) {
         QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId, null));
-        return this.getByFilter(conditional, null, null, null);
+        String filterExpression = ":statusReport = " + PnActivityReport.COL_STATUS;
+        Map<String, AttributeValue> values = new HashMap<>();
+        values.put(":statusReport", AttributeValue.builder().s(status).build());
+        return this.getByFilter(conditional, null, values, filterExpression);
     }
 
 }

@@ -51,7 +51,7 @@ public class ReportServiceImpl implements ReportService {
                                 .map(url -> FileMapper.toDownloadFile(pnActivityReport, url));
                     }
 
-                    if(!pnActivityReport.getStatus().equals(String.valueOf(ReportStatusEnum.READY))) {
+                    if(!pnActivityReport.getStatusReport().equals(String.valueOf(ReportStatusEnum.READY))) {
                         return Mono.error(new PnGenericException(STATUS_NOT_READY, STATUS_NOT_READY.getMessage()));
                     }
 
@@ -87,7 +87,7 @@ public class ReportServiceImpl implements ReportService {
         //caso in cui mi viene passato uno dei 4 stati previsti
         else {
             return activityReportMetaDAO.findAllFromPaIdAndStatus(paId, status.getValue())
-                    .filter(activityReport -> activityReport.getStatus().equals(status.getValue()))
+                    .filter(activityReport -> activityReport.getStatusReport().equals(status.getValue()))
                     .collectList()
                     .map(list ->
                             FileMapper.toPagination(pageable, list)
@@ -100,7 +100,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Flux<ReportDTO> getAllReportFile(String paId, String referenceMonth) {
         return this.activityReportMetaDAO.findAllFromPaId(paId, referenceMonth)
-                .filter(pnActivityReport ->  pnActivityReport.getStatus().equals(String.valueOf(ReportStatusEnum.READY)))
+                .filter(pnActivityReport ->  pnActivityReport.getStatusReport().equals(String.valueOf(ReportStatusEnum.READY)))
                 .map(pnActivityReport -> FileMapper.fromPnActivityReportToInfoDownloadDTO(paId, referenceMonth, pnActivityReport));
     }
 
@@ -109,7 +109,7 @@ public class ReportServiceImpl implements ReportService {
         return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
                 .doOnNext(activityReport -> {
-                    if (!activityReport.getStatus().equals(String.valueOf(ReportStatusEnum.ERROR))){
+                    if (!activityReport.getStatusReport().equals(String.valueOf(ReportStatusEnum.ERROR))){
                         throw new PnGenericException(STATUS_NOT_IN_ERROR, STATUS_NOT_IN_ERROR.getMessage());
                     }
                     this.awsBatchService.scheduleJob(paId, activityReport.getBucketName(), reportKey);

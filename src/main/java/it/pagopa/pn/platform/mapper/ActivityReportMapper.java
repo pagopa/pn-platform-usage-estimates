@@ -5,11 +5,8 @@ import it.pagopa.pn.platform.model.ActivityReport;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
 import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import org.apache.commons.csv.CSVRecord;
-import reactor.core.publisher.Flux;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ActivityReportMapper {
 
@@ -34,7 +31,7 @@ public class ActivityReportMapper {
         entity.setReportKey(record.getFileKey());
         entity.setPaId(record.getPaId());
         entity.setGenerationDate(Instant.now());
-        entity.setStatus(ReportStatusEnum.RAW.getValue());
+        entity.setStatusReport(ReportStatusEnum.RAW.getValue());
         entity.setPart(record.getPartNum());
 
         return entity;
@@ -59,7 +56,7 @@ public class ActivityReportMapper {
     }
 
     public static void changeReportStatus (PnActivityReport activityReport, ReportStatusEnum reportStatusEnum, String error){
-        activityReport.setStatus(reportStatusEnum.getValue());
+        activityReport.setStatusReport(reportStatusEnum.getValue());
         activityReport.setLastModifiedDate(Instant.now());
         activityReport.setErrorMessage(error);
     }

@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ActivityReport {
+    @JsonProperty("Records")
     private List<Record> records;
     @Getter
     @Setter

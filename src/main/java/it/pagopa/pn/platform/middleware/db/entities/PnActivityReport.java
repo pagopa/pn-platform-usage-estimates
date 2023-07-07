@@ -20,7 +20,7 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     public static final String INDEX_PA_REF_MONTH = "INDEX_PA_REF_MONTH";
     public static final String COL_PA_ID = "paId" ;
     public static final String COL_REFERENCE_MONTH = "referenceMonth";
-    public static final String COL_STATUS = "status";
+    public static final String COL_STATUS = "statusReport";
     public static final String COL_PART = "part";
     public static final String COL_BUCKET_NAME = "bucketName";
     public static final String COL_REPORT_ZIP_KEY = "reportZipKey";
@@ -39,7 +39,7 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     private String reportZipKey;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_STATUS)}))
-    private String status;
+    private String statusReport;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_PART)}))
     private String part;
