@@ -39,7 +39,7 @@ public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> impleme
     @Override
     public Flux<PnActivityReport> findAllFromPaId(String paId) {
         QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId, null));
-        return this.getByFilter(conditional, null, null, null);
+        return this.getByFilter(conditional, null, null, null,5);
     }
 
     @Override

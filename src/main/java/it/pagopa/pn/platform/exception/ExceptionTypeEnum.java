@@ -14,6 +14,7 @@ public enum ExceptionTypeEnum {
     PROFILATION_EXPIRED("PROFILATION_EXPIRED", "Profilazione scaduta"),
     PROFILATION_NOT_EXISTED("PROFILATION_NOT_EXISTED", "La profilazione non è presente nel sistema"),
     FUTURE_PROFILATION_NOT_EXIST("FUTURE_PROFILATION_NOT_EXIST", "Profilazione futura non esistente"),
+    REF_YEAR_NOT_VALID("REF_YEAR_NOT_VALID", "L'anno di riferimento non è valido." ),
     BAD_REQUEST("BAD_REQUEST", "Campi obbligatori mancanti."),
     FILE_KEY_NOT_EXISTED("FILE_KEY_NOT_EXISTED", "File key non esistente"),
     MAPPER_ERROR("MAPPER_ERROR", "Non è stato possibile mappare l'oggetto richiesto"),

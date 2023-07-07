@@ -177,6 +177,11 @@ components:
     Period:
       type: object
       properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
         status:
           type: string
           enum: [ VALIDATED, DRAFT, ABSENT ]

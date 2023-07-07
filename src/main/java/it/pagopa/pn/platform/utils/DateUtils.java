@@ -27,6 +27,13 @@ public class DateUtils {
             return Pair.of(start, end);
     }
 
+    public static Pair<Instant,Instant> getStartEndFromRefYear(Instant refYear){
+        Instant start = fromDayMonthYearStart(1, 11 , getYear(minusYear(refYear, 2)));
+        Instant end = fromDayMonthYear(31,10 , getYear(minusYear(refYear, 1)));
+
+        return Pair.of(start, end);
+    }
+
     public  static Instant getMaxDeadlineDate (){
         Instant today = Instant.now();
         int addMonth = (getDay(today) > 15) ? 1 : 0;
