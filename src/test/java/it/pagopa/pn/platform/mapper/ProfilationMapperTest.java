@@ -32,6 +32,7 @@ class ProfilationMapperTest {
         this.initialize();
     }
 
+
     @Test
     void dtoToPnProfilation(){
         PnProfilation pnProfilation = new PnProfilation();
