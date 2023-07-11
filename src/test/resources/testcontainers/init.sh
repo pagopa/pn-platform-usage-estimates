@@ -60,10 +60,10 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     --attribute-definitions \
         AttributeName=paId,AttributeType=S \
         AttributeName=referenceMonth,AttributeType=S \
-		AttributeName=fileKey,AttributeType=S \
+		    AttributeName=reportKey,AttributeType=S \
     --key-schema \
         AttributeName=paId,KeyType=HASH \
-        AttributeName=fileKey,KeyType=RANGE \
+        AttributeName=reportKey,KeyType=RANGE \
     --provisioned-throughput \
         ReadCapacityUnits=10,WriteCapacityUnits=5 \
 	--global-secondary-indexes \
@@ -84,7 +84,13 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 aws  --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb put-item \
     --table-name ActivityReportDynamoTable  \
-    --item '{"paId": {"S": "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a"}, "referenceMonth": {"S": "DIC-2022"}, "fileKey": {"S": "DICEMBRE-01"}, "status": {"S": "DOWNLOADED"}, "bucketName": {"S": "bucketName"}, "fileZipKey": {"S": "fileZipKey"}}'
+    --item '{"paId": {"S": "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a"}, "referenceMonth": {"S": "DIC-2022"}, "reportKey": {"S": "DICEMBRE-01"}, "status": {"S": "DOWNLOADED"}, "bucketName": {"S": "bucketName"}, "reportZipKey": {"S": "reportZipKey"}, "lastModifiedDate": {"S": "2023-02-15T10:15:30Z"}, "action": {"S": "ACTION"}, "errorMessage": {"S": "errorMessage"}}'
+
+aws  --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
+    dynamodb put-item \
+    --table-name ActivityReportDynamoTable  \
+    --item '{"paId": {"S": "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a"}, "referenceMonth": {"S": "DIC-2022"}, "reportKey": {"S": "DICEMBRE-02"}, "status": {"S": "DOWNLOADED"}, "bucketName": {"S": "bucketName"}, "reportZipKey": {"S": "reportZipKey"}, "lastModifiedDate": {"S": "2023-02-15T10:15:30Z"}, "action": {"S": "ACTION"}, "errorMessage": {"S": "errorMessage"}}'
+
 
 
 echo "Initialization terminated"

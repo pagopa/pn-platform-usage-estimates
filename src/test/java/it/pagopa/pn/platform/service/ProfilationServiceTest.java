@@ -2,6 +2,7 @@ package it.pagopa.pn.platform.service;
 
 import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.config.BaseTest;
+import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.middleware.db.dao.ProfilationDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.middleware.db.entities.PnProfilation;
@@ -23,13 +24,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.REFERENCE_YEAR_NOT_CORRECT;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class ProfilationServiceTest extends BaseTest {
@@ -47,11 +51,14 @@ public class ProfilationServiceTest extends BaseTest {
     private TimelineGenerator timelineGenerator;
 
     @MockBean
+    private DateUtils dateUtils;
+
+    @MockBean
     private S3Bucket s3Bucket;
 
     private final ProfilationCreateBody profilationCreateBody = new ProfilationCreateBody();
 
-    private String  referenceYear = null;
+    private String  referenceYear = "2023";
 
     @BeforeEach
     public void setUp(){
@@ -75,6 +82,48 @@ public class ProfilationServiceTest extends BaseTest {
         assertNotNull(profilationDetail);
 
     }
+
+    @Test
+    @DisplayName("profilationInDB")
+    void getProfilationDetailRefYearNull(){
+        String paId = "12345";
+
+
+        PnProfilation pnProfilation = getPnProfilation();
+        PaInfoDto paInfoDto = getPaInfoDto();
+
+        Mockito.when(this.profilationDAO.getProfilationDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnProfilation));
+        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
+
+        Mono<ProfilationDetail> result = profilationService.getProfilationDetail(paId, null);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof PnGenericException)
+                .verify();
+
+    }
+
+    @Test
+    @DisplayName("profilationInDB")
+    void getProfilationMaxDeadlineIsBeforeDeadlineYear(){
+        String paId = "12345";
+        Instant instant = Instant.parse("1900-01-01T00:00:00Z");
+
+        PnProfilation pnProfilation = getPnProfilation();
+        PaInfoDto paInfoDto = getPaInfoDto();
+
+        Mockito.when(this.profilationDAO.getProfilationDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnProfilation));
+        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
+        Mockito.when(this.dateUtils.getMaxDeadlineYearDate()).thenReturn(instant);
+
+        Mono<ProfilationDetail> result = profilationService.getProfilationDetail(paId, "1900");
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof PnGenericException)
+                .verify();
+
+    }
+
 
     private PnProfilation getPnProfilation(){
         PnProfilation profilation = new PnProfilation();
