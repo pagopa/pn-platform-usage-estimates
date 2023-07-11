@@ -30,6 +30,7 @@ public class EstimateMapper {
         pageableEstimateResponseDto.setHistory(page);
         pageableEstimateResponseDto.getActual().setStatus(EstimatePeriod.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
         pageableEstimateResponseDto.getActual().setReferenceMonth(timelineEstimate.getActual().getReferenceMonth());
+        pageableEstimateResponseDto.getActual().setPaId(timelineEstimate.getActual().getPaId());
         pageableEstimateResponseDto.getActual().setDeadlineDate(Date.from(timelineEstimate.getActual().getDeadlineDate()));
         if (timelineEstimate.getActual().getLastModifiedDate() != null){
             pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedDate()));
