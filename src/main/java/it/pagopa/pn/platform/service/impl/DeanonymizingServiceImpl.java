@@ -5,6 +5,7 @@ import it.pagopa.pn.platform.dao.CsvDAO;
 import it.pagopa.pn.platform.dao.ZipDAO;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
+import it.pagopa.pn.platform.msclient.DataVaultClient;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import it.pagopa.pn.platform.service.DeanonymizingService;
@@ -35,6 +36,8 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
     private ZipDAO zipDAO;
     @Autowired
     private SafeStorageClient safeStorageClient;
+    @Autowired
+    private DataVaultClient dataVaultClient;
 
     @Override
     public Mono<Void> execute(String paId, String reportKey) {
@@ -74,10 +77,11 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
 
     private ActivityReportCSV deanonymizing(ActivityReportCSV source){
         if (StringUtils.isNotBlank(source.getRecipientTaxId())){
-            //source.setRecipientTaxId(dataEncryption.decode(source.getRecipientTaxId()));
+            source.setRecipientTaxId(dataVaultClient.decode(source.getRecipientTaxId()));
             return source;
         }
         return source;
     }
+
 
 }
