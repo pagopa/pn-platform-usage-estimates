@@ -60,7 +60,7 @@ public class S3BucketImpl implements S3Bucket {
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(
                 this.awsBucketProperties.getName(),
                 fileKey,
-                HttpMethod.PUT
+                HttpMethod.GET
         );
         request.setExpiration(expiration);
         URL url = s3Client.generatePresignedUrl(request);
