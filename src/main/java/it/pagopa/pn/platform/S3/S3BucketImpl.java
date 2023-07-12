@@ -59,7 +59,7 @@ public class S3BucketImpl implements S3Bucket {
         expiration.setTime(expTimeMillis);
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(
                 this.awsBucketProperties.getName(),
-                fileKey,
+                bucket.concat(fileKey),
                 HttpMethod.GET
         );
         request.setExpiration(expiration);

@@ -46,7 +46,7 @@ public class ReportServiceImpl implements ReportService {
                     if (!type.equals("SOURCE") && !type.equals("TARGET")) return Mono.error(new PnGenericException(BAD_REQUEST, BAD_REQUEST.getMessage()));
 
                     if (type.equals("SOURCE")){
-                        return this.s3Bucket.getPresignedUrlFile(pnActivityReport.getReportKey(), pnActivityReport.getBucketName())
+                        return this.s3Bucket.getPresignedUrlFile(pnActivityReport.getBucketName(), pnActivityReport.getReportKey())
                                 .switchIfEmpty(Mono.error(new PnGenericException(FILE_KEY_NOT_EXISTED, FILE_KEY_NOT_EXISTED.getMessage())))
                                 .map(url -> FileMapper.toDownloadFile(pnActivityReport, url));
                     }
