@@ -3,12 +3,14 @@ package it.pagopa.pn.platform.rest;
 import it.pagopa.pn.platform.rest.v1.api.EstimateApi;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @RestController
 public class EstimateApiController implements EstimateApi {
 
@@ -28,6 +30,7 @@ public class EstimateApiController implements EstimateApi {
 
     @Override
     public Mono<ResponseEntity<PageableEstimateResponseDto>> getAllEstimate(String originFe, String paId, String taxId, String ipaId, Integer page, Integer size, ServerWebExchange exchange) {
+        log.debug("Query Params : {} page, {} size", page, size);
         return this.estimateService.getAllEstimate(originFe, paId, taxId, ipaId, page, size).map(ResponseEntity::ok);
     }
 
