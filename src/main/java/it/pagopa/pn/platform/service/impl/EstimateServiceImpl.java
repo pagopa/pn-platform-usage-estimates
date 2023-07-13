@@ -10,6 +10,7 @@ import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
+import it.pagopa.pn.platform.utils.Const;
 import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import it.pagopa.pn.platform.utils.Utility;
@@ -22,25 +23,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.Instant;
-import java.util.UUID;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
 @Slf4j
 @Service
 public class EstimateServiceImpl implements EstimateService {
-
-    private static final String PAID = "paid_";
-    private static final String MONTH = "month_";
-    private static final String SNAPSHOT = "snapshot";
-    private static final String LAST = "last";
-    private static final String MONTHLY = "monthlypreorder_";
-    private static final String EXTENSION = ".json";
-    private static final String SLASH = "/";
 
     @Autowired
     private EstimateDAO estimateDAO;
@@ -147,9 +137,13 @@ public class EstimateServiceImpl implements EstimateService {
     //PER HELP DESK
     @Override
     public Mono<PageableEstimateResponseDto> getAllEstimate(String originFe, String paId, String taxId, String ipaId, Integer page, Integer size) {
-        if (!originFe.equals("PN-PLATFORM-NOTIFICATION-FE") || paId ==  null ) {
+        if (
+                !originFe.equals(Const.OriginType.PN_PLATFORM.getValue()) &&
+                !originFe.equals(Const.OriginType.PN_HELP_DESK.getValue())
+        ) {
             throw new PnGenericException(BAD_REQUEST, BAD_REQUEST.getMessage(), HttpStatus.BAD_REQUEST);
         }
+
         Pageable pageable = PageRequest.of(page - 1, size);
         return this.externalRegistriesClient.getOnePa(paId)
                 .flatMap(paInfoDto ->
@@ -168,7 +162,7 @@ public class EstimateServiceImpl implements EstimateService {
     private Instant getInstantFromMonth(String referenceMonth) throws PnGenericException {
         Instant result = null;
         String[] splitMonth = referenceMonth.split("-");
-        if (!(splitMonth.length > 1)) {
+        if (splitMonth.length <= 1) {
             log.info("ReferenceMonth has not correct format");
             return null;
         }
@@ -189,44 +183,16 @@ public class EstimateServiceImpl implements EstimateService {
             MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate);
             String json = Utility.objectToJson(dtoDatalake);
             if (json != null) {
-                String prefix = PAID.concat(paId).concat(SLASH).concat(MONTH).concat(referenceMonth).concat(SLASH);
-                String snapshotPath = prefix.concat(SNAPSHOT).concat(SLASH);
-                String snapshotFilename = MONTHLY.concat(DateUtils.buildTimestamp(pnEstimate)).concat("_")
-                        .concat(UUID.randomUUID().toString()).concat(EXTENSION);
-                String lastPath = prefix.concat(LAST).concat(SLASH);
-                String lastFilename = MONTHLY.concat(referenceMonth).concat(EXTENSION);
-                File fileSnapshot = new File(snapshotFilename);
-                File fileLast = new File(lastFilename);
-                try {
-                    try (FileWriter snapshot = new FileWriter(fileSnapshot)) {
-                        snapshot.write(json);
-                        snapshot.flush();
-                    }
-                    try(FileWriter last = new FileWriter(fileLast)){
-                        last.write(json);
-                        last.flush();
-                    }
-                    s3Bucket.putObject(snapshotPath, fileSnapshot);
-                    s3Bucket.putObject(lastPath, fileLast);
 
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } finally{
-                    if (!fileSnapshot.delete()){
-                        log.info("fileSnapshot non eliminato: " + fileSnapshot);
-                    }
-                    if (!fileLast.delete()){
-                        log.info("fileLast non eliminato: " + fileLast);
-                    }
-                }
+                String snapshotFilename = Utility.getSnapshotFileName(DateUtils.buildTimestamp(pnEstimate.getDeadlineDate()));
+                String snapshotPath = Utility.getPath(paId, referenceMonth, Const.SNAPSHOT);
+                String lastPath = Utility.getPath(paId, referenceMonth, Const.LAST);
+                String lastFilename = Utility.getLastFileName(referenceMonth);
+
+                InputStream streamSnapshot = new ByteArrayInputStream(json.getBytes());
+                s3Bucket.putObject(snapshotPath, snapshotFilename, streamSnapshot);
+                s3Bucket.putObject(lastPath, lastFilename, streamSnapshot);
             }
         }
-    }
-
-    private Boolean checkStatusReport(String status){
-        return status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.READY)) ||
-                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.ENQUEUED)) ||
-                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.ERROR)) ||
-                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.DEANONIMIZING));
     }
 }

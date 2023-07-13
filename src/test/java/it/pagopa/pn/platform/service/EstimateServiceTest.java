@@ -27,7 +27,6 @@ import org.springframework.data.util.Pair;
 import reactor.core.publisher.Mono;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -258,7 +257,7 @@ class EstimateServiceTest extends BaseTest{
         PaInfoDto paInfoDto = getPaInfoDto();
         PnEstimate pnEstimate = getPnEstimate();
 
-        Mockito.when(s3Bucket.putObject(Mockito.anyString(), Mockito.any())).thenReturn(Mono.just(new File("tmp")));
+        Mockito.doNothing().when(s3Bucket).putObject(Mockito.anyString(), Mockito.any(),  Mockito.any());
         Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnEstimate));
         Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
         Mockito.when(this.estimateDAO.createOrUpdate(Mockito.any())).thenReturn(Mono.just(pnEstimate));

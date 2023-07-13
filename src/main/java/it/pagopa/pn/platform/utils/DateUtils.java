@@ -157,8 +157,8 @@ public class DateUtils {
     }
 
     @NotNull
-    public static String buildTimestamp(PnEstimate pnEstimate) {
-        Instant timeStamp = pnEstimate.getLastModifiedDate().truncatedTo(ChronoUnit.SECONDS);
+    public static String buildTimestamp(Instant instant) {
+        Instant timeStamp = instant.truncatedTo(ChronoUnit.SECONDS);
         return getYear(timeStamp).toString().concat("-")
                 .concat(getMonth(timeStamp).toString()).concat("-")
                 .concat(getDay(timeStamp).toString()).concat("T")
