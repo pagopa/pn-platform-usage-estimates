@@ -6,6 +6,7 @@ import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.middleware.db.entities.PnProfilation;
 import it.pagopa.pn.platform.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,23 @@ class ProfilationDAOImplTest extends BaseTest {
         assertEquals(profilation1.getSplitPayment(), pnProfilation.getSplitPayment());
         assertEquals(profilation1.getReferenceYear(),pnProfilation.getReferenceYear());
 
+    }
+
+    @Test
+    void getProfilation(){
+
+        this.profilationDAO.getProfilation(profilation1.getPaId())
+                .subscribe(pnProfilation -> {
+                    assertNotNull(pnProfilation);
+                    assertEquals(profilation1.getPaId(), pnProfilation.getPaId());
+                    assertEquals(profilation1.getStatus(), pnProfilation.getStatus());
+                    assertEquals(profilation1.getDeadlineDate(), pnProfilation.getDeadlineDate());
+                    assertEquals(profilation1.getLastModifiedDate(), pnProfilation.getLastModifiedDate());
+                    assertEquals(profilation1.getMailAddress(), pnProfilation.getMailAddress());
+                    assertEquals(profilation1.getDescription(), pnProfilation.getDescription());
+                    assertEquals(profilation1.getSplitPayment(), pnProfilation.getSplitPayment());
+                    assertEquals(profilation1.getReferenceYear(),pnProfilation.getReferenceYear());
+                });
     }
 
     private void initialValue() {
