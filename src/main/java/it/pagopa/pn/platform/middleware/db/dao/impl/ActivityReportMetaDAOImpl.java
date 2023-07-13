@@ -63,9 +63,9 @@ public class ActivityReportMetaDAOImpl extends BaseDAO<PnActivityReport> impleme
     @Override
     public Flux<PnActivityReport> findAllFromPaIdAndStatus(String paId, String status) {
         QueryConditional conditional = CONDITION_EQUAL_TO.apply(keyBuild(paId, null));
-        String filter = PnActivityReport.COL_STATUS.concat("= :status");
+        String filter = PnActivityReport.COL_STATUS.concat("= :valueStatus");
         Map<String, AttributeValue> attributes = new HashMap<>();
-        attributes.put(":status", AttributeValue.builder().s(status).build());
+        attributes.put(":valueStatus", AttributeValue.builder().s(status).build());
         return this.getByFilter(conditional, null, attributes, filter);
     }
 
