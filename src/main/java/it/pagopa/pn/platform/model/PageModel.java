@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Function;
 
 
+
 public class PageModel<T> extends PageImpl<T> {
 
     public static <A> PageModel<A> builder(List<A> content, Pageable pageable){

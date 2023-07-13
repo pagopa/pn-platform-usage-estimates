@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.util.Pair;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Instant;
@@ -34,7 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-class EstimateServiceTest extends BaseTest{
+class EstimateServiceTest extends BaseTest {
+    private static final String PA_ID_FUTURE = "PA_ID_FUTURE";
+    private static final String PA_ID = "PA_ID";
 
     @Autowired
     private EstimateServiceImpl estimateService;
@@ -46,29 +50,33 @@ class EstimateServiceTest extends BaseTest{
     private TimelineGenerator timelineGenerator;
     @MockBean
     private S3Bucket s3Bucket;
-
     private final EstimateCreateBody estimateCreateBody = new EstimateCreateBody();
 
     private String referenceMonth = "";
 
+
     @BeforeEach
     public void setUp(){
         initialize();
+        Instant instantOld = Instant.parse("2022-04-02T10:15:30Z");
+        Mockito.when(this.externalRegistriesClient.getOnePa(PA_ID))
+                .thenReturn(Mono.just(getPaInfoDTO(instantOld)));
+
+        Instant instantFuture = Instant.parse("2100-04-02T10:15:30Z");
+        Mockito.when(this.externalRegistriesClient.getOnePa(PA_ID_FUTURE))
+                .thenReturn(Mono.just(getPaInfoDTO(instantFuture)));
+
     }
 
     @Test
     @DisplayName("estimateInDB")
     void getEstimateDetailOk(){
-        String paId = "12345";
+        PnEstimate pnEstimate = getPnEstimate(PA_ID);
 
+        Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.just(pnEstimate));
 
-        PnEstimate pnEstimate = getPnEstimate();
-        PaInfoDto paInfoDto = getPaInfoDto();
-
-        Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnEstimate));
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
-
-        EstimateDetail estimateDetail = this.estimateService.getEstimateDetail(paId, referenceMonth).block();
+        EstimateDetail estimateDetail = this.estimateService.getEstimateDetail(PA_ID, referenceMonth).block();
 
         assertNotNull(estimateDetail);
 
@@ -77,82 +85,69 @@ class EstimateServiceTest extends BaseTest{
     @Test
     @DisplayName("estimateEmptyInDB")
     void getEstimateDetailEmpty(){
+        Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(Mono.empty());
 
-        String paId = "12345";
-
-        PaInfoDto paInfoDto = getPaInfoDto();
-
-        Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
-
-        EstimateDetail estimateDetail = this.estimateService.getEstimateDetail(paId, referenceMonth).block();
+        EstimateDetail estimateDetail = this.estimateService.getEstimateDetail(PA_ID, referenceMonth)
+                .block();
 
         assertNotNull(estimateDetail);
-
     }
 
     @Test
     @DisplayName("MaxDeadlineDateBeforeDeadlineRefMonth")
     void getEstimateDetailErrorBeforeDate(){
-
-        String paId = "12345";
         String referenceMonth = "GEN-2100";
-
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.getEstimateDetail(paId, referenceMonth).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, exception.getExceptionType());
-
+        StepVerifier.create(estimateService.getEstimateDetail(PA_ID, referenceMonth))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
     }
 
     @Test
     @DisplayName("DeadlineDateBeforeOnboardingDate")
     void getEstimateDetailErrorBeforeDate2(){
 
-        String paId = "12345";
         String referenceMonth = "APR-2021";
 
-        PaInfoDto paInfoDto = getPaInfoDto();
-
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
-
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.getEstimateDetail(paId, referenceMonth).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, exception.getExceptionType());
-
+        StepVerifier.create(estimateService.getEstimateDetail(PA_ID, referenceMonth))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
     }
 
     @Test
     @DisplayName("RefMonthInstantNull")
     void getEstimateDetailErrorRefMonthNull(){
-
-        String paId = "12345";
         String referenceMonthNull = " ";
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.getEstimateDetail(paId, referenceMonthNull).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, exception.getExceptionType());
-
+        StepVerifier.create(estimateService.getEstimateDetail(PA_ID, referenceMonthNull))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
     }
 
     @Test
-    @DisplayName("getAllEstimateok")
+    @DisplayName("getAllEstimateOK")
     void getAllEstimate (){
 
-        String paId = "12345";
-
-        PaInfoDto paInfoDto = getPaInfoDto();
         List<PnEstimate> pnEstimates = new ArrayList<>();
 
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
-        Mockito.when(this.estimateDAO.getAllEstimates(paId)).thenReturn(Mono.just(pnEstimates));
+        Mockito.when(this.estimateDAO.getAllEstimates(PA_ID))
+                .thenReturn(Mono.just(pnEstimates));
 
-        PageableEstimateResponseDto pageableEstimateResponseDto = this.estimateService.getAllEstimate("PN-PLATFORM-NOTIFICATION-FE", paId,null, null, 1, 5).block();
+        PageableEstimateResponseDto pageableEstimateResponseDto =
+                this.estimateService.getAllEstimate("PN-PLATFORM-NOTIFICATION-FE", PA_ID,null, null, 1, 5)
+                        .block();
 
         assertNotNull(pageableEstimateResponseDto);
         assertNotNull(pageableEstimateResponseDto.getActual());
@@ -164,66 +159,63 @@ class EstimateServiceTest extends BaseTest{
     @DisplayName("createOrUpdateReferenceMonthNotCorrectFormat")
     void createOrUpdateErrorReferenceMonth(){
 
-        String paId = "12345";
         String referenceMonthNotCorrect = "APR-";
         String status = "VALIDATED";
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.createOrUpdateEstimate(status, paId, referenceMonthNotCorrect, null).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, exception.getExceptionType());
+        StepVerifier.create(estimateService.createOrUpdateEstimate(status, PA_ID, referenceMonthNotCorrect, null))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
 
     }
 
     @Test
     @DisplayName("createOrUpdateReferenceMonthYearNotCorrectFormat")
     void createOrUpdateErrorReferenceMonth2(){
-
-        String paId = "12345";
         String referenceMonthNotCorrect = "APR-23";
         String status = "VALIDATED";
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.createOrUpdateEstimate(status, paId, referenceMonthNotCorrect, null).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, exception.getExceptionType());
-
+        StepVerifier.create(estimateService.createOrUpdateEstimate(status, PA_ID, referenceMonthNotCorrect, null))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
     }
 
     @Test
     @DisplayName("createOrUpdateReferenceMonthNotInRange")
     void createOrUpdateErrorAfterDate(){
 
-        String paId = "12345";
         String referenceMonth = "GEN-2023";
         String status = "VALIDATED";
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, null).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.ESTIMATE_EXPIRED, exception.getExceptionType());
+        StepVerifier.create(estimateService.createOrUpdateEstimate(status, PA_ID, referenceMonth, null))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.ESTIMATE_EXPIRED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
 
     }
 
     @Test
     @DisplayName("createOrUpdateDeadlineDateBeforeOnboardingDate")
     void createOrUpdateErrorBeforeDate(){
-
-        String paId = "12345";
         String status = "VALIDATED";
 
-        PaInfoDto paInfoDto = getPaInfoDtoErrorAgreementDate();
-
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
-
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, null).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, exception.getExceptionType());
+        StepVerifier.create(estimateService.createOrUpdateEstimate(status, PA_ID_FUTURE, referenceMonth, null))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.ON_BOARDING_DATE_INCOMPATIBLE, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
 
     }
 
@@ -231,17 +223,14 @@ class EstimateServiceTest extends BaseTest{
     @DisplayName("createOrUpdateestimateEmptyInDB")
     void createOrUpdateEstimateDetailEmpty(){
 
-        String paId = "12345";
         String status = "VALIDATED";
 
-        PaInfoDto paInfoDto = getPaInfoDto();
-        PnEstimate pnEstimate = getPnEstimate();
+        PnEstimate pnEstimate = getPnEstimate(PA_ID);
 
         Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
         Mockito.when(this.estimateDAO.createOrUpdate(Mockito.any())).thenReturn(Mono.just(pnEstimate));
 
-        EstimatePeriod estimatePeriod = this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, estimateCreateBody).block();
+        EstimatePeriod estimatePeriod = this.estimateService.createOrUpdateEstimate(status, PA_ID, referenceMonth, estimateCreateBody).block();
 
         assertNotNull(estimatePeriod);
 
@@ -250,19 +239,17 @@ class EstimateServiceTest extends BaseTest{
     @Test
     @DisplayName("createOrUpdateGetEstimateDetailNotEmpty")
     void createOrUpdateOk(){
-
-        String paId = "12345";
         String status = "VALIDATED";
 
-        PaInfoDto paInfoDto = getPaInfoDto();
-        PnEstimate pnEstimate = getPnEstimate();
+        PnEstimate pnEstimate = getPnEstimate(PA_ID);
 
         Mockito.doNothing().when(s3Bucket).putObject(Mockito.anyString(), Mockito.any(),  Mockito.any());
         Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnEstimate));
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
         Mockito.when(this.estimateDAO.createOrUpdate(Mockito.any())).thenReturn(Mono.just(pnEstimate));
 
-        EstimatePeriod estimatePeriod = this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, estimateCreateBody).block();
+        EstimatePeriod estimatePeriod =
+                this.estimateService.createOrUpdateEstimate(status, PA_ID, referenceMonth, estimateCreateBody)
+                        .block();
 
         assertNotNull(estimatePeriod);
 
@@ -272,119 +259,119 @@ class EstimateServiceTest extends BaseTest{
     @DisplayName("createOrUpdateGetEstimateDetailNotEmptyStatusAbsent")
     void createOrUpdateNotDraft(){
 
-        String paId = "12345";
         String referenceMonth = "GEN-2021";
         String status = "VALIDATED";
 
-        PaInfoDto paInfoDto = getPaInfoDto();
-        PnEstimate pnEstimate = getEstimateDetail();
+        PnEstimate pnEstimate = getEstimateDetail(PA_ID);
 
         Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnEstimate));
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
         Mockito.when(this.estimateDAO.createOrUpdate(Mockito.any())).thenReturn(Mono.just(pnEstimate));
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, estimateCreateBody).block();
-                });
-        assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, exception.getExceptionType());
+        StepVerifier.create(estimateService.createOrUpdateEstimate(status, PA_ID, referenceMonth, null))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
 
     }
 
     @Test
     @DisplayName("createOrUpdateGetEstimateDetailRequestStatusDraftDBValidate")
     void createOrUpdateRequestStatusDraftDbValidated(){
-
-        String paId = "12345";
         String status = "DRAFT";
 
-        PaInfoDto paInfoDto = getPaInfoDto();
-        PnEstimate pnEstimate = getEstimateDetail();
+        PnEstimate pnEstimate = getEstimateDetail(PA_ID);
 
         Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnEstimate));
-        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.createOrUpdateEstimate(status, paId, referenceMonth, estimateCreateBody).block();
-        });
-        assertEquals(ExceptionTypeEnum.OPERATION_NOT_ALLOWED, exception.getExceptionType());
+
+        StepVerifier.create(estimateService.createOrUpdateEstimate(status, PA_ID, referenceMonth, null))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.OPERATION_NOT_ALLOWED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
 
     }
 
     @Test
     @DisplayName("validateReferenceMonthYearFormatNotCorrect")
     void validateRefMonthFormatNotCorrect(){
-        String paId = "12345";
-        String referenceMonthNotCorrect = "APR-23";
-        String status = "VALIDATED";
-
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.validated(paId, referenceMonthNotCorrect).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, exception.getExceptionType());
+        StepVerifier.create(estimateService.validated(PA_ID, "PO_233"))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
     }
 
     @Test
     @DisplayName("validateReferenceMonthFormatNotCorrect")
     void validateRefMonthFormatNotCorrect2(){
-        String paId = "12345";
         String referenceMonthNotCorrect = "APR";
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.validated(paId, referenceMonthNotCorrect).block();
-        });
+        StepVerifier.create(estimateService.validated(PA_ID, referenceMonthNotCorrect))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
 
-        assertEquals(ExceptionTypeEnum.REFERENCE_MONTH_NOT_CORRECT, exception.getExceptionType());
     }
 
     @Test
     @DisplayName("validateReferenceMonthNotInRange")
     void validateRefMonthNonInRange(){
-        String paId = "12345";
         String referenceMonth = "GEN-2023";
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.validated(paId, referenceMonth).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.ESTIMATE_EXPIRED, exception.getExceptionType());
+        StepVerifier.create(estimateService.validated(PA_ID, referenceMonth))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.ESTIMATE_EXPIRED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
     }
 
     @Test
     @DisplayName("validateRecordDBEmpty")
     void validateDBEmpty(){
-        String paId = "";
-
         Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.empty());
 
-        PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
-            this.estimateService.validated(paId, referenceMonth).block();
-        });
-
-        assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, exception.getExceptionType());
+        StepVerifier.create(estimateService.validated(PA_ID, referenceMonth))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.ESTIMATE_NOT_EXISTED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
     }
 
     @Test
     @DisplayName("validateIsOK")
     void validateOK(){
-        String paId = "12345";
-        PnEstimate pnEstimate = getPnEstimateValidate();
+        PnEstimate pnEstimate = getPnEstimateValidate(PA_ID);
 
         Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnEstimate));
         Mockito.when(this.estimateDAO.createOrUpdate(Mockito.any())).thenReturn(Mono.just(pnEstimate));
 
-        EstimatePeriod estimatePeriod = this.estimateService.validated(paId, referenceMonth).block();
+        EstimatePeriod estimatePeriod = this.estimateService.validated(PA_ID, referenceMonth).block();
 
         assertNotNull(estimatePeriod);
 
     }
 
-    private PnEstimate getPnEstimate(){
+    private PnEstimate getPnEstimate(String paId){
         PnEstimate estimate = new PnEstimate();
         estimate.setStatus("DRAFT");
         estimate.setDescription("description");
         estimate.setReferenceMonth(referenceMonth);
-        estimate.setPaId("12345");
+        estimate.setPaId(paId);
         estimate.setSplitPayment(true);
         estimate.setDeadlineDate(DateUtils.fromDayMonthYear(15, DateUtils.getMonth(Instant.now()), DateUtils.getYear(Instant.now())));
         estimate.setTotal890Notif(100);
@@ -394,12 +381,12 @@ class EstimateServiceTest extends BaseTest{
         return estimate;
     }
 
-    private PnEstimate getPnEstimateValidate(){
+    private PnEstimate getPnEstimateValidate(String paId){
         PnEstimate estimate = new PnEstimate();
         estimate.setStatus("DRAFT");
         estimate.setDescription("description");
         estimate.setReferenceMonth(referenceMonth);
-        estimate.setPaId("12345");
+        estimate.setPaId(paId);
         estimate.setSplitPayment(true);
         estimate.setDeadlineDate(DateUtils.fromDayMonthYear(DateUtils.getDay(Instant.now()), DateUtils.getMonth(Instant.now()), DateUtils.getYear(Instant.now())));
         estimate.setTotal890Notif(100);
@@ -409,12 +396,12 @@ class EstimateServiceTest extends BaseTest{
         return estimate;
     }
 
-    private PnEstimate getEstimateDetail(){
+    private PnEstimate getEstimateDetail(String paId){
         PnEstimate estimate = new PnEstimate();
         estimate.setStatus("VALIDATED");
         estimate.setDescription("description");
         estimate.setReferenceMonth("APR-2023");
-        estimate.setPaId("12345");
+        estimate.setPaId(paId);
         estimate.setSplitPayment(true);
         estimate.setDeadlineDate(Instant.parse("2023-06-15T10:15:30Z"));
         estimate.setTotal890Notif(50);
@@ -424,9 +411,9 @@ class EstimateServiceTest extends BaseTest{
         return estimate;
     }
 
-    private PaInfoDto getPaInfoDto(){
+    private PaInfoDto getPaInfoDTO(Instant onBoardingDate){
         PaInfoDto paInfoDto = new PaInfoDto();
-        OffsetDateTime time = OffsetDateTime.ofInstant(Instant.parse("2022-12-12T11:51:43.777+00:00"), ZoneOffset.UTC);
+        OffsetDateTime time = OffsetDateTime.ofInstant(onBoardingDate, ZoneOffset.UTC);
         paInfoDto.setAgreementDate(time);
         paInfoDto.setId("b6c5b42a-8a07-436f-96ce-8c2ab7f4dbd2");
         paInfoDto.setSdiCode("s234");
@@ -435,29 +422,24 @@ class EstimateServiceTest extends BaseTest{
         return paInfoDto;
     }
 
-    private PaInfoDto getPaInfoDtoErrorAgreementDate(){
-        PaInfoDto paInfoDto = new PaInfoDto();
-        OffsetDateTime time = OffsetDateTime.ofInstant(Instant.parse("2100-12-12T11:51:43.777+00:00"), ZoneOffset.UTC);
-        paInfoDto.setAgreementDate(time);
-        paInfoDto.setId("b6c5b42a-8a07-436f-96ce-8c2ab7f4dbd2");
-        paInfoDto.setSdiCode("s234");
-        paInfoDto.setTaxId("03334231200");
-        paInfoDto.setName("Comune di Valsamoggia");
-        return paInfoDto;
+    private void initialize() {
+        getEstimateCreateBody();
+        createCurrentRefMonth();
     }
 
-    private void initialize(){
-
+    private void getEstimateCreateBody(){
         estimateCreateBody.setTotal890Notif(60);
         estimateCreateBody.setTotalAnalogNotif(50);
         estimateCreateBody.setTotalDigitalNotif(40);
         estimateCreateBody.setDescription("description");
         estimateCreateBody.mailAddress("mail.address@comune.it");
         estimateCreateBody.splitPayment(true);
+    }
 
+    private void createCurrentRefMonth(){
         Instant refMonthInstant = DateUtils.addOneMonth(Instant.now());
-        String month = "";
-        month = Month.getValueFromNumber(DateUtils.getMonth(refMonthInstant));
+        String month = Month.getValueFromNumber(DateUtils.getMonth(refMonthInstant));
+
         Pair<Instant, Instant> range = DateUtils.getStartEndFromRefMonth(refMonthInstant);
         Instant today = Instant.now();
         if (!(range.getFirst().isBefore(today) && range.getSecond().isAfter(today))){

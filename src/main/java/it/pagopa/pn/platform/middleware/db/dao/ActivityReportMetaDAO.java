@@ -9,13 +9,7 @@ public interface ActivityReportMetaDAO {
 
     Mono<PnActivityReport> createMetaData (PnActivityReport pnActivityReport);
 
-
-    /**
-     * @param paId NOT NULL
-     * @param referenceMonth CAN BE NULL
-     * @return List of estimate files from paId and referenceMonth if I have it
-     */
-    Flux<PnActivityReport> findAllFromPaId(String paId, String referenceMonth);
+    Flux<PnActivityReport> findAllFromPaId(String paId, String referenceMonth, String status);
     Flux<PnActivityReport> findAllFromPaId(String paId);
 
     Mono<PnActivityReport> findByPaIdAndReportKey(String paId, String reportKey);
