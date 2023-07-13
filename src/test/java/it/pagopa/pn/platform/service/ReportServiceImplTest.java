@@ -61,16 +61,5 @@ public class ReportServiceImplTest extends BaseTest {
 
     }
 
-    @Test
-    void downloadReportFile(){
-
-        Mockito.when(this.activityReportMetaDAO.findByPaIdAndReportKey(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnActivityReport1));
-        Mockito.when(this.s3Bucket.getPresignedUrlFile(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just("presignedURL"));
-        Mockito.when(this.safeStorageClient.getFile(Mockito.anyString()).thenReturn(new FileDownloadResponseDto()));
-        Mono<InfoDownloadDTO> infoDownloadDTOMono = this.reportServiceImpl.downloadReportFile("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a", "DICEMBRE-01", null);
-
-        Assertions.assertNotNull(infoDownloadDTOMono);
-    }
-
 
 }

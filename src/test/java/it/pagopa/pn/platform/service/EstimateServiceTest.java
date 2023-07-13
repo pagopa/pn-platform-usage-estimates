@@ -9,14 +9,12 @@ import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import it.pagopa.pn.platform.msclient.impl.ExternalRegistriesClientImpl;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateCreateBody;
-import it.pagopa.pn.platform.rest.v1.dto.EstimateDetail;
-import it.pagopa.pn.platform.rest.v1.dto.EstimatePeriod;
-import it.pagopa.pn.platform.rest.v1.dto.PageableEstimateResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.impl.EstimateServiceImpl;
 import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -159,6 +157,23 @@ class EstimateServiceTest extends BaseTest{
         assertNotNull(pageableEstimateResponseDto.getActual());
         assertNotNull(pageableEstimateResponseDto.getHistory());
 
+    }
+
+    @Test
+    @DisplayName("getAllEstimatePaIdNull")
+    void getAllEstimatePaIdNull (){
+
+        String paId = "12345";
+
+        PaInfoDto paInfoDto = getPaInfoDto();
+        List<PnEstimate> pnEstimates = new ArrayList<>();
+
+        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
+        Mockito.when(this.estimateDAO.getAllEstimates(paId)).thenReturn(Mono.just(pnEstimates));
+
+        Assertions.assertThrows(PnGenericException.class, () -> {
+            this.estimateService.getAllEstimate("", null,null, null, 1, 5).block();
+        });
     }
 
     @Test
