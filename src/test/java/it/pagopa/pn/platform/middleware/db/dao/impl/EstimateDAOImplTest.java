@@ -53,6 +53,24 @@ class EstimateDAOImplTest extends BaseTest {
         assertEquals(3, estimateList.size());
     }
 
+    @Test
+    void getProfilation(){
+
+        this.estimateDAO.getEstimate(estimate1.getPaId())
+                .subscribe(estimate -> {
+                    assertNotNull(estimate);
+                    assertEquals(estimate1.getPaId(), estimate.getPaId());
+                    assertEquals(estimate1.getStatus(), estimate.getStatus());
+                    assertEquals(estimate1.getDeadlineDate(), estimate.getDeadlineDate());
+                    assertEquals(estimate1.getLastModifiedDate(), estimate.getLastModifiedDate());
+                    assertEquals(estimate1.getMailAddress(), estimate.getMailAddress());
+                    assertEquals(estimate1.getDescription(), estimate.getDescription());
+                    assertEquals(estimate1.getSplitPayment(), estimate.getSplitPayment());
+                    assertEquals(estimate1.getRecordVersion(), estimate.getRecordVersion());
+                    assertEquals(estimate1.getReferenceMonth(),estimate.getReferenceMonth());
+                });
+    }
+
 
     private void initialValue() {
         estimate1.setPaId("1234");
