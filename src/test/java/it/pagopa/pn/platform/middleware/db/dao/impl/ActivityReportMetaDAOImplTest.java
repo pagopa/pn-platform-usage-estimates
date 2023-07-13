@@ -55,6 +55,35 @@ public class ActivityReportMetaDAOImplTest extends BaseTest {
     }
 
     @Test
+    void createMetaData(){
+
+        pnActivityReport1.setPaId("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a");
+        pnActivityReport1.setReportKey("DICEMBRE-03");
+        pnActivityReport1.setStatus("DOWNLOADED");
+        pnActivityReport1.setReferenceMonth("DIC-2022");
+        pnActivityReport1.setBucketName("BucketName");
+        pnActivityReport1.setLastModifiedDate(Instant.now());
+        pnActivityReport1.setAction("Action");
+        pnActivityReport1.setErrorMessage("Error message");
+
+        Mono<PnActivityReport> pnActivityReportMono =  this.activityReportMetaDAO.createMetaData(pnActivityReport1);
+
+        Assertions.assertNotNull(pnActivityReportMono);
+        pnActivityReportMono.subscribe(
+                result -> {
+                    Assertions.assertEquals(pnActivityReport1.getPaId(), result.getPaId());
+                    Assertions.assertEquals(pnActivityReport1.getReportKey(), result.getReportKey());
+                    Assertions.assertEquals(pnActivityReport1.getStatus(), result.getStatus());
+                    Assertions.assertEquals(pnActivityReport1.getReferenceMonth(), result.getReferenceMonth());
+                    Assertions.assertEquals(pnActivityReport1.getBucketName(), result.getBucketName());
+                    Assertions.assertEquals(pnActivityReport1.getLastModifiedDate(), result.getLastModifiedDate());
+                    Assertions.assertEquals(pnActivityReport1.getAction(), result.getAction());
+                    Assertions.assertEquals(pnActivityReport1.getErrorMessage(), result.getErrorMessage());
+                });
+
+    }
+
+    @Test
     void findAllFromPaId(){
         Flux<PnActivityReport> result = this.activityReportMetaDAO.findAllFromPaId("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a");
 
