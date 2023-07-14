@@ -284,16 +284,20 @@ class EstimateServiceTest extends BaseTest{
 
     }
 
-//    @Test
+    @Test
     @DisplayName("createOrUpdateGetEstimateDetailNotEmptyStatusAbsent")
     void createOrUpdateNotDraft(){
 
         String paId = "12345";
-        String referenceMonth = "GEN-2021";
+        Instant now = Instant.now();
+        Integer data = (DateUtils.getYear(now));
+        String month = Month.getValueFromNumber(DateUtils.getMonth(now)==12?1:DateUtils.getMonth(now)+1);
+        String referenceMonth = month+"-"+data;
         String status = "VALIDATED";
 
         PaInfoDto paInfoDto = getPaInfoDto();
         PnEstimate pnEstimate = getEstimateDetail();
+        pnEstimate.setStatus("ABSENT");
 
         Mockito.when(this.estimateDAO.getEstimateDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnEstimate));
         Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
