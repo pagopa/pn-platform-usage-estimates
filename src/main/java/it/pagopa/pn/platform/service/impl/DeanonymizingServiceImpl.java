@@ -2,7 +2,6 @@ package it.pagopa.pn.platform.service.impl;
 
 import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.config.PnPlatformConfig;
-import it.pagopa.pn.platform.config.PnPlatformConfig;
 import it.pagopa.pn.platform.dao.CsvDAO;
 import it.pagopa.pn.platform.dao.ZipDAO;
 import it.pagopa.pn.platform.exception.ExceptionTypeEnum;
