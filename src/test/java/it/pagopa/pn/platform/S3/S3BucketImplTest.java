@@ -17,7 +17,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,14 +26,14 @@ import java.io.ByteArrayInputStream;
 
 class S3BucketImplTest extends BaseTest {
     @MockBean
-    AmazonS3 s3Client;
+    private AmazonS3 s3Client;
 
     @Autowired
     @SpyBean
-    AwsBucketProperties awsBucketProperties;
+    private AwsBucketProperties awsBucketProperties;
 
     @Autowired
-    S3Bucket s3Bucket;
+    private S3Bucket s3Bucket;
 
     private HttpRequestBase httpRequest = new HttpRequestBase() {
         @Override

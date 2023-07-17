@@ -97,10 +97,6 @@ aws --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
 
 echo " - Inserting element on db"
 
-aws  --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
-    dynamodb put-item \
-    --table-name ActivityReportDynamoTable  \
-    --item '{"paId": {"S": "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a"}, "referenceMonth": {"S": "DIC-2022"}, "reportKey": {"S": "abc12345"}, "statusReport": {"S": "READY"}, "bucketName": {"S": "bucketName"}, "reportZipKey": {"S": "fileZipKey"}}'
 
 aws  --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb put-item \
@@ -111,7 +107,7 @@ aws  --profile default --region us-east-1 --endpoint-url=http://localstack:4566 
     dynamodb put-item \
     --table-name ActivityReportDynamoTable  \
     --item '{"paId": {"S": "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a"}, "referenceMonth": {"S": "FEB-2023"}, "reportKey": {"S": "abc123456"}, "statusReport": {"S": "RAW"}, "bucketName": {"S": "bucketName"}, "reportZipKey": {"S": "fileZipKey"}}'
-    --item '{"paId": {"S": "cc1c6a8e-5967-42c6-9d83-bfb12ba1665a"}, "referenceMonth": {"S": "DIC-2022"}, "reportKey": {"S": "DICEMBRE-01"}, "status": {"S": "DOWNLOADED"}, "bucketName": {"S": "bucketName"}, "reportZipKey": {"S": "reportZipKey"}, "lastModifiedDate": {"S": "2023-02-15T10:15:30Z"}, "action": {"S": "ACTION"}, "errorMessage": {"S": "errorMessage"}}'
+
 
 aws  --profile default --region us-east-1 --endpoint-url=http://localstack:4566 \
     dynamodb put-item \
