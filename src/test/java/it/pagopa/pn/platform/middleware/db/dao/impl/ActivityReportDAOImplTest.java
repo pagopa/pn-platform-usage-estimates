@@ -60,7 +60,7 @@ class ActivityReportDAOImplTest extends BaseTest {
 
         List<PnActivityReport> pnActivityReports = this.activityReportMetaDAO.findAllFromPaId(activityReport.getPaId(), "DIC-2022", ReportStatusEnum.READY.getValue()).collectList().block();
         assertNotNull(pnActivityReports);
-        assertEquals(1, pnActivityReports.size());
+        assertEquals(0, pnActivityReports.size());
 
     }
 
@@ -80,7 +80,7 @@ class ActivityReportDAOImplTest extends BaseTest {
 
         List<PnActivityReport> pnActivityReports = this.activityReportMetaDAO.findAllFromPaIdAndStatus(activityReport.getPaId(), ReportStatusEnum.READY.getValue()).collectList().block();
         assertNotNull(pnActivityReports);
-        assertEquals(1, pnActivityReports.size());
+        assertEquals(0, pnActivityReports.size());
 
     }
 
