@@ -10,7 +10,7 @@ import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
-import it.pagopa.pn.platform.msclient.DataVaultEncryptionClient;
+import it.pagopa.pn.platform.msclient.DataVaultClient;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.FileCreationResponseDto;
 import it.pagopa.pn.platform.msclient.generated.pnsafestorage.v1.dto.OperationResultCodeResponseDto;
@@ -47,7 +47,7 @@ class DeanonymizingServiceTest extends BaseTest{
     private ZipDAO zipDAO;
 
     @MockBean
-    private DataVaultEncryptionClient dataVaultEncryptionClient;
+    private DataVaultClient dataVaultClient;
 
     @MockBean
     private SafeStorageClient safeStorageClient;
@@ -63,7 +63,7 @@ class DeanonymizingServiceTest extends BaseTest{
         Mockito.when(this.activityReportMetaDAO.createMetaData(Mockito.any())).thenReturn(Mono.just(pnActivityReport));
         Mockito.when(this.s3Bucket.getObjectData(Mockito.anyString())).thenReturn(new InputStreamReader(InputStream.nullInputStream()));
         Mockito.when(this.csvDAO.toRows(Mockito.any())).thenReturn(Flux.just(activityReportCSV));
-        Mockito.when(dataVaultEncryptionClient.decode(Mockito.any())).thenReturn("returnOk");
+        Mockito.when(dataVaultClient.decode(Mockito.any())).thenReturn("returnOk");
         Mockito.doNothing().when(this.csvDAO).write(Mockito.any(), Mockito.anyString());
         Mockito.doNothing().when(this.zipDAO).zipFiles(Mockito.any());
         Mockito.when(this.safeStorageClient.getPresignedUrl()).thenReturn(Mono.just(creationResponseDto));
@@ -81,7 +81,7 @@ class DeanonymizingServiceTest extends BaseTest{
         Mockito.when(this.activityReportMetaDAO.createMetaData(Mockito.any())).thenReturn(Mono.just(pnActivityReport));
         Mockito.when(this.s3Bucket.getObjectData(Mockito.anyString())).thenReturn(new InputStreamReader(InputStream.nullInputStream()));
         Mockito.when(this.csvDAO.toRows(Mockito.any())).thenReturn(Flux.just(activityReportCSV));
-        Mockito.when(dataVaultEncryptionClient.decode(Mockito.any())).thenReturn("returnOk");
+        Mockito.when(dataVaultClient.decode(Mockito.any())).thenReturn("returnOk");
         Mockito.doThrow(new DAOException(DAOException.DaoName.CSVDAO, "Error with creating csv file from object")).when(this.csvDAO).write(Mockito.any(), Mockito.anyString());
         Mockito.doNothing().when(this.zipDAO).zipFiles(Mockito.any());
         PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
@@ -99,7 +99,7 @@ class DeanonymizingServiceTest extends BaseTest{
         Mockito.when(this.activityReportMetaDAO.createMetaData(Mockito.any())).thenReturn(Mono.just(pnActivityReport));
         Mockito.when(this.s3Bucket.getObjectData(Mockito.anyString())).thenReturn(new InputStreamReader(InputStream.nullInputStream()));
         Mockito.when(this.csvDAO.toRows(Mockito.any())).thenReturn(Flux.just(activityReportCSV));
-        Mockito.when(dataVaultEncryptionClient.decode(Mockito.any())).thenReturn("returnOk");
+        Mockito.when(dataVaultClient.decode(Mockito.any())).thenReturn("returnOk");
         Mockito.doNothing().when(this.csvDAO).write(Mockito.any(), Mockito.anyString());
         Mockito.doThrow(new DAOException(DAOException.DaoName.ZIPDAO, "The folder of the reports doesn't exist")).when(this.zipDAO).zipFiles(Mockito.any());
         PnGenericException exception = assertThrows(PnGenericException.class, ()-> {
@@ -117,7 +117,7 @@ class DeanonymizingServiceTest extends BaseTest{
         Mockito.when(this.activityReportMetaDAO.createMetaData(Mockito.any())).thenReturn(Mono.just(pnActivityReport));
         Mockito.when(this.s3Bucket.getObjectData(Mockito.anyString())).thenReturn(new InputStreamReader(InputStream.nullInputStream()));
         Mockito.when(this.csvDAO.toRows(Mockito.any())).thenReturn(Flux.just(activityReportCSV));
-        Mockito.when(dataVaultEncryptionClient.decode(Mockito.any())).thenReturn("returnOk");
+        Mockito.when(dataVaultClient.decode(Mockito.any())).thenReturn("returnOk");
         Mockito.doNothing().when(this.csvDAO).write(Mockito.any(), Mockito.anyString());
         Mockito.doNothing().when(this.zipDAO).zipFiles(Mockito.any());
         Mockito.when(this.safeStorageClient.getPresignedUrl()).thenReturn(Mono.just(creationResponseDto));

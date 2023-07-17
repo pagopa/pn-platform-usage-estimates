@@ -58,7 +58,7 @@ class ActivityReportDAOImplTest extends BaseTest {
     @Test
     void findAllFromPaIdAndRefMonth (){
 
-        List<PnActivityReport> pnActivityReports = this.activityReportMetaDAO.findAllFromPaId(activityReport.getPaId(), "DIC-2022").collectList().block();
+        List<PnActivityReport> pnActivityReports = this.activityReportMetaDAO.findAllFromPaId(activityReport.getPaId(), "DIC-2022", ReportStatusEnum.READY.getValue()).collectList().block();
         assertNotNull(pnActivityReports);
         assertEquals(1, pnActivityReports.size());
 
