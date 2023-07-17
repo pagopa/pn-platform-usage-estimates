@@ -2,6 +2,7 @@ package it.pagopa.pn.platform.service.impl;
 
 import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.config.PnPlatformConfig;
+import it.pagopa.pn.platform.config.PnPlatformConfig;
 import it.pagopa.pn.platform.dao.CsvDAO;
 import it.pagopa.pn.platform.dao.ZipDAO;
 import it.pagopa.pn.platform.exception.ExceptionTypeEnum;
@@ -9,7 +10,7 @@ import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.mapper.ActivityReportMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
-import it.pagopa.pn.platform.msclient.DataVaultEncryptionClient;
+import it.pagopa.pn.platform.msclient.DataVaultClient;
 import it.pagopa.pn.platform.msclient.SafeStorageClient;
 import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import it.pagopa.pn.platform.service.DeanonymizingService;
@@ -43,7 +44,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
     @Autowired
     private PnPlatformConfig pnPlatformConfig;
     @Autowired
-    private DataVaultEncryptionClient dataVaultEncryptionClient;
+    private DataVaultClient dataVaultClient;
 
     @Override
     public Mono<Void> execute(String paId, String reportKey) {
@@ -110,7 +111,7 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
             return Mono.error(ex);
         else {
             return Mono.delay(Duration.ofMillis( 100L ))
-                    .map(item -> dataVaultEncryptionClient.decode(taxId))
+                    .map(item -> dataVaultClient.decode(taxId))
                     .onErrorResume(exception -> {
                         log.error ("Error with retrieve {}", exception.getMessage());
                         return getDecodeTaxId(n - 1, taxId, exception);

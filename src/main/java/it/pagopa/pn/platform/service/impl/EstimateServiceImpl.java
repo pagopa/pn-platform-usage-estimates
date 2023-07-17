@@ -8,8 +8,10 @@ import it.pagopa.pn.platform.middleware.db.dao.EstimateDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.model.Month;
 import it.pagopa.pn.platform.msclient.ExternalRegistriesClient;
+import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import it.pagopa.pn.platform.rest.v1.dto.*;
 import it.pagopa.pn.platform.service.EstimateService;
+import it.pagopa.pn.platform.utils.Const;
 import it.pagopa.pn.platform.utils.DateUtils;
 import it.pagopa.pn.platform.utils.TimelineGenerator;
 import it.pagopa.pn.platform.utils.Utility;
@@ -22,32 +24,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.List;
 
 import static it.pagopa.pn.platform.exception.ExceptionTypeEnum.*;
 
 @Slf4j
 @Service
 public class EstimateServiceImpl implements EstimateService {
-
-    private static final String PAID = "paid_";
-    private static final String MONTH = "month_";
-    private static final String SNAPSHOT = "snapshot";
-    private static final String LAST = "last";
-    private static final String MONTHLY = "monthlypreorder_";
-    private static final String EXTENSION = ".json";
-    private static final String SLASH = "/";
-
     @Autowired
     private EstimateDAO estimateDAO;
-
     @Autowired
     private S3Bucket s3Bucket;
-
     @Autowired
     private ExternalRegistriesClient externalRegistriesClient;
 
@@ -66,25 +55,26 @@ public class EstimateServiceImpl implements EstimateService {
                     Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
                     if (refMonthInstant.isBefore(onBoardingDate)) {
                         log.error("ReferenceMonth inconsistent with onBoardindate {}", onBoardingDate);
-                        return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
+                        return Mono.error(new PnGenericException(ON_BOARDING_DATE_INCOMPATIBLE, ON_BOARDING_DATE_INCOMPATIBLE.getMessage()));
                     }
+
                     return this.estimateDAO.getEstimateDetail(paId, referenceMonth)
-                            .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)))
-                            .flatMap(pnEstimate -> {
-                                if (pnEstimate.getStatus().equals(EstimatePeriod.StatusEnum.ABSENT.getValue())) {
-                                    log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
-                                    return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage()));
-                                } else if (pnEstimate.getStatus().equalsIgnoreCase(EstimatePeriod.StatusEnum.VALIDATED.getValue())
+                            .switchIfEmpty(Mono.just(TimelineGenerator.getEstimate(paId, referenceMonth, null)));
+                })
+                .flatMap(pnEstimate -> {
+                    if (pnEstimate.getStatus().equals(EstimatePeriod.StatusEnum.ABSENT.getValue())) {
+                        log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
+                        return Mono.error(new PnGenericException(INCONSISTENT_STATUS, INCONSISTENT_STATUS.getMessage()));
+                    } else if (pnEstimate.getStatus().equalsIgnoreCase(EstimatePeriod.StatusEnum.VALIDATED.getValue())
                                                 && status.equalsIgnoreCase(EstimatePeriod.StatusEnum.DRAFT.getValue())) {
-                                    log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
-                                    return Mono.error(new PnGenericException(OPERATION_NOT_ALLOWED, OPERATION_NOT_ALLOWED.getMessage()));
-                                }
-                                PnEstimate forSave = EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate);
-                                saveFile(status, paId, referenceMonth, forSave);
-                                return estimateDAO.createOrUpdate(forSave);
-                            })
-                            .map(EstimateMapper::estimatePeriodToDto);
-                });
+                        log.error("PnEstimate inconsistent status. {}", pnEstimate.getStatus());
+                        return Mono.error(new PnGenericException(OPERATION_NOT_ALLOWED, OPERATION_NOT_ALLOWED.getMessage()));
+                    }
+                    PnEstimate forSave = EstimateMapper.dtoToPnEstimate(pnEstimate, status, estimate);
+                    saveFile(status, paId, referenceMonth, forSave);
+                    return estimateDAO.createOrUpdate(forSave);
+                })
+                .map(EstimateMapper::estimatePeriodToDto);
     }
 
     @Override
@@ -106,11 +96,12 @@ public class EstimateServiceImpl implements EstimateService {
                             && pnEstimate.getDeadlineDate().isAfter(today)){
                         pnEstimate.setStatus(EstimatePeriod.StatusEnum.VALIDATED.getValue());
                         pnEstimate.setLastModifiedDate(today);
-                        estimateDAO.createOrUpdate(pnEstimate);
-                        saveFile( EstimatePeriod.StatusEnum.VALIDATED.getValue(), paId, referenceMonth, pnEstimate);
+                        return estimateDAO.createOrUpdate(pnEstimate)
+                                        .doOnSuccess(entity -> saveFile(entity.getStatus(), paId, referenceMonth, pnEstimate));
                     }
                     return Mono.just(pnEstimate);
-                }).map(EstimateMapper::estimatePeriodToDto);
+                })
+                .map(EstimateMapper::estimatePeriodToDto);
     }
 
     @Override
@@ -124,7 +115,6 @@ public class EstimateServiceImpl implements EstimateService {
         Instant deadlineRefMonth = DateUtils.minusMonth(refMonthInstant,1);
         Instant maxDeadlineDate = DateUtils.getMaxDeadlineDate();
 
-
         if (maxDeadlineDate.isBefore(deadlineRefMonth))
             return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage(), HttpStatus.NOT_FOUND));
 
@@ -132,7 +122,7 @@ public class EstimateServiceImpl implements EstimateService {
                 .zipWhen(paInfo -> {
                     Instant onBoardingDate = DateUtils.addOneMonth(DateUtils.toInstant(paInfo.getAgreementDate()));
                     if (refMonthInstant.isBefore(onBoardingDate)){
-                        log.error("ReferenceMonth inconsistent with onBoardindate {}", onBoardingDate);
+                        log.error("ReferenceMonth inconsistent with onBoarding date {}", onBoardingDate);
                         return Mono.error(new PnGenericException(ESTIMATE_NOT_EXISTED, ESTIMATE_NOT_EXISTED.getMessage(), HttpStatus.NOT_FOUND));
                     }
                     log.debug("Retrieve estimate from db and create it if it's not present.");
@@ -143,39 +133,42 @@ public class EstimateServiceImpl implements EstimateService {
 
     }
 
-
-    //PER HELP DESK
     @Override
     public Mono<PageableEstimateResponseDto> getAllEstimate(String originFe, String paId, String taxId, String ipaId, Integer page, Integer size) {
-        if (!originFe.equals("PN-PLATFORM-NOTIFICATION-FE") || paId ==  null ) {
+        if (
+                !originFe.equals(Const.OriginType.PN_PLATFORM.getValue()) &&
+                !originFe.equals(Const.OriginType.PN_HELP_DESK.getValue())
+        ) {
             throw new PnGenericException(BAD_REQUEST, BAD_REQUEST.getMessage(), HttpStatus.BAD_REQUEST);
         }
+
         Pageable pageable = PageRequest.of(page - 1, size);
         return this.externalRegistriesClient.getOnePa(paId)
-                .flatMap(paInfoDto ->
-                        this.estimateDAO.getAllEstimates(paId)
-                                .map(pnEstimates -> {
-                                            log.debug("Build timeline.");
-                                            TimelineGenerator timelineGenerator = new TimelineGenerator(paId, pnEstimates);
-                                            return timelineGenerator.extractAllEstimates(DateUtils.toInstant(paInfoDto.getAgreementDate()));
-                                        }
-                                )
-                )
+                .zipWith(this.estimateDAO.getAllEstimates(paId))
+                .map(paInfoAndAllEstimates -> {
+                    log.debug("Build timeline.");
+
+                    PaInfoDto paInfo = paInfoAndAllEstimates.getT1();
+                    List<PnEstimate> fromDb = paInfoAndAllEstimates.getT2();
+
+                    TimelineGenerator timelineGenerator = new TimelineGenerator(paId, fromDb);
+                    return timelineGenerator.extractAllEstimates(DateUtils.toInstant(paInfo.getAgreementDate()));
+                })
                 .map(list -> EstimateMapper.toPageableResponse(pageable, list));
     }
 
-
     private Instant getInstantFromMonth(String referenceMonth) throws PnGenericException {
-        Instant result = null;
         String[] splitMonth = referenceMonth.split("-");
-        if (!(splitMonth.length > 1)) {
+        if (splitMonth.length <= 1) {
             log.info("ReferenceMonth has not correct format");
             return null;
         }
         Integer numberOfMonth = Month.getNumberMonth(splitMonth[0]);
         int year = Integer.parseInt(splitMonth[1]);
-        result = (numberOfMonth != null) && (splitMonth[1].length() == 4) ? DateUtils.fromDayMonthYear(15, numberOfMonth, year) : null;
-        return result;
+        if ((numberOfMonth != null) && (splitMonth[1].length() == 4))
+            return DateUtils.fromDayMonthYear(15, numberOfMonth, year);
+
+        return null;
     }
 
     private boolean todayIsNotInRange(Instant refMonthInstant){
@@ -189,44 +182,16 @@ public class EstimateServiceImpl implements EstimateService {
             MonthlyNotificationPreorderDto dtoDatalake = EstimateMapper.dtoToFile(pnEstimate);
             String json = Utility.objectToJson(dtoDatalake);
             if (json != null) {
-                String prefix = PAID.concat(paId).concat(SLASH).concat(MONTH).concat(referenceMonth).concat(SLASH);
-                String snapshotPath = prefix.concat(SNAPSHOT).concat(SLASH);
-                String snapshotFilename = MONTHLY.concat(DateUtils.buildTimestamp(pnEstimate)).concat("_")
-                        .concat(UUID.randomUUID().toString()).concat(EXTENSION);
-                String lastPath = prefix.concat(LAST).concat(SLASH);
-                String lastFilename = MONTHLY.concat(referenceMonth).concat(EXTENSION);
-                File fileSnapshot = new File(snapshotFilename);
-                File fileLast = new File(lastFilename);
-                try {
-                    try (FileWriter snapshot = new FileWriter(fileSnapshot)) {
-                        snapshot.write(json);
-                        snapshot.flush();
-                    }
-                    try(FileWriter last = new FileWriter(fileLast)){
-                        last.write(json);
-                        last.flush();
-                    }
-                    s3Bucket.putObject(snapshotPath, fileSnapshot);
-                    s3Bucket.putObject(lastPath, fileLast);
 
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } finally{
-                    if (!fileSnapshot.delete()){
-                        log.info("fileSnapshot non eliminato: " + fileSnapshot);
-                    }
-                    if (!fileLast.delete()){
-                        log.info("fileLast non eliminato: " + fileLast);
-                    }
-                }
+                String snapshotFilename = Utility.getSnapshotFileName(DateUtils.buildTimestamp(pnEstimate.getDeadlineDate()));
+                String snapshotPath = Utility.getPath(paId, referenceMonth, Const.SNAPSHOT);
+                String lastPath = Utility.getPath(paId, referenceMonth, Const.LAST);
+                String lastFilename = Utility.getLastFileName(referenceMonth);
+
+                InputStream streamSnapshot = new ByteArrayInputStream(json.getBytes());
+                s3Bucket.putObject(snapshotPath, snapshotFilename, streamSnapshot);
+                s3Bucket.putObject(lastPath, lastFilename, streamSnapshot);
             }
         }
-    }
-
-    private Boolean checkStatusReport(String status){
-        return status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.READY)) ||
-                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.ENQUEUED)) ||
-                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.ERROR)) ||
-                status.equalsIgnoreCase(String.valueOf(ReportStatusEnum.DEANONIMIZING));
     }
 }

@@ -17,11 +17,11 @@ import java.util.List;
 
 public class TimelineGenerator {
 
-    private String paId;
+    private final String paId;
 
-    private List<PnEstimate> dbList;
+    private final List<PnEstimate> dbList;
 
-    private List<PnEstimate> timelineList = new ArrayList<>();
+    private final List<PnEstimate> timelineList = new ArrayList<>();
 
     public TimelineGenerator(String paId, List<PnEstimate> dbList){
         this.paId = paId;
@@ -35,8 +35,7 @@ public class TimelineGenerator {
         log.info("startDeadlineDate: {} ",currentDate);
         int lastMonth = 0;
         while (currentDate.isAfter(onboardingDate)){
-                if (this.dbList != null && !this.dbList.isEmpty() && lastMonth < this.dbList.size()
-                        && DateUtils.isEqualMonth(currentDate, this.dbList.get(lastMonth).getDeadlineDate())) {
+                if (!this.dbList.isEmpty() && lastMonth < this.dbList.size() && DateUtils.isEqualMonth(currentDate, this.dbList.get(lastMonth).getDeadlineDate())) {
                     log.info("Sto per aggiungere stima presente a db nello storico: {}", currentDate);
                     this.timelineList.add(this.dbList.get(lastMonth));
                     lastMonth++;

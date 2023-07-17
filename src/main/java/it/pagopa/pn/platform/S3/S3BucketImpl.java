@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import reactor.core.publisher.Mono;
 
-import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.Instant;
@@ -26,19 +26,18 @@ public class S3BucketImpl implements S3Bucket {
     }
 
     @Override
-    public Mono<File> putObject(String filePath, File file) {
+    public void putObject(String filePath, String fileName, InputStream file) {
         try {
-            PutObjectRequest request = new PutObjectRequest(this.awsBucketProperties.getName(), filePath.concat(file.getName()), file);
+            PutObjectRequest request = new PutObjectRequest(this.awsBucketProperties.getName(), filePath.concat(fileName), file, null);
             // set metadata
             ObjectMetadata metadata = new ObjectMetadata();
-            metadata.addUserMetadata("title", file.getName());
+            metadata.addUserMetadata("title", fileName);
             metadata.setContentType(JSON_CONTENT_TYPE);
             request.setMetadata(metadata);
             s3Client.putObject(request);
         } catch (Exception e) {
             log.error("Error in upload object in s3 {}", e.getMessage());
         }
-        return Mono.just(file);
     }
 
     @Override
@@ -59,8 +58,8 @@ public class S3BucketImpl implements S3Bucket {
         expiration.setTime(expTimeMillis);
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(
                 this.awsBucketProperties.getName(),
-                fileKey,
-                HttpMethod.PUT
+                bucket.concat(fileKey),
+                HttpMethod.GET
         );
         request.setExpiration(expiration);
         URL url = s3Client.generatePresignedUrl(request);

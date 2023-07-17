@@ -30,8 +30,6 @@ public class QueueListener {
         log.info(node);
         ActivityReport activityReport = convertToObject(node, ActivityReport.class);
         this.queueListenerService.activityReportListener(activityReport);
-
-
     }
 
     private <T> T convertToObject(String body, Class<T> tClass){
