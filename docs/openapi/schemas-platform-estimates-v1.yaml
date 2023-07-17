@@ -1,4 +1,3 @@
-
 components:
   schemas:
     Problem:
@@ -43,6 +42,7 @@ components:
       required:
         - status
         - errors
+
     ProblemError:
       properties:
         code:
@@ -67,7 +67,7 @@ components:
         paInfo:
           $ref: '#/components/schemas/PAInfo'
         billing:
-          $ref: '#/components/schemas/Billing'
+          $ref: '#/components/schemas/Profilation'
         estimate:
           $ref: '#/components/schemas/Estimate'
       allOf:
@@ -79,6 +79,61 @@ components:
         - referenceMonth
         - estimate
         - showEdit
+
+    Estimate:
+      type: object
+      properties:
+        totalDigitalNotif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        total890Notif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        totalAnalogNotif:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+      required:
+        - totalDigitalNotif
+        - total890Notif
+        - totalAnalogNotif
+
+    EstimateCreateBody:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Estimate'
+        - $ref: '#/components/schemas/Profilation'
+
+    EstimatePeriod:
+      type: object
+      properties:
+        estimate:
+          $ref: '#/components/schemas/Estimate'
+        billing:
+          $ref: '#/components/schemas/Profilation'
+      allOf:
+        - $ref: '#/components/schemas/Period'
+
+    EstimateHistory:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Period'
+
+    PageableEstimateResponseDto:
+      type: object
+      properties:
+        actual:
+          $ref: '#/components/schemas/EstimatePeriod'
+        history:
+          $ref: '#/components/schemas/Page'
+      additionalProperties: false
+      required:
+        - content
 
     PAInfo:
       type: object
@@ -122,6 +177,11 @@ components:
     Period:
       type: object
       properties:
+        paId:
+          type: string
+          example: '12345678900'
+          format: '/^[0-9]{11}$/'
+          maxLength: 32
         status:
           type: string
           enum: [ VALIDATED, DRAFT, ABSENT ]
@@ -141,61 +201,16 @@ components:
         - deadlineDate
         - showEdit
 
-    Estimate:
-      type: object
-      properties:
-        totalDigitalNotif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        total890Notif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        totalAnalogNotif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-      required:
-        - totalDigitalNotif
-        - total890Notif
-        - totalAnalogNotif
-
-    EstimateCreateBody:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Estimate'
-        - $ref: '#/components/schemas/Billing'
-
     ProfilationCreateBody:
       type: object
       allOf:
-        - $ref: '#/components/schemas/Billing'
-
-    EstimatePeriod:
-      type: object
-      properties:
-        estimate:
-          $ref: '#/components/schemas/Estimate'
-        billing:
-          $ref: '#/components/schemas/Billing'
-      allOf:
-        - $ref: '#/components/schemas/Period'
-
-    EstimateHistory:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Period'
-
+        - $ref: '#/components/schemas/Profilation'
 
     ProfilationPeriod:
       type: object
       properties:
-        billing:
-          $ref: '#/components/schemas/Billing'
+        profilation:
+          $ref: '#/components/schemas/Profilation'
       allOf:
         - $ref: '#/components/schemas/PeriodForProfilation'
 
@@ -204,15 +219,127 @@ components:
       allOf:
         - $ref: '#/components/schemas/PeriodForProfilation'
 
+    PageForProfilation:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfilationHistory'
+          maxItems: 999999999
+          minItems: 1
+        empty:
+          type: boolean
+        first:
+          type: boolean
+        last:
+          type: boolean
+        number:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        numberOfElements:
+          type: integer
+          format: int32
+          maximum: 999999999
+          minimum: 1
+        pageable:
+          $ref: '#/components/schemas/Pageable'
+        size:
+          type: integer
+          format: int32
+          maximum: 1024
+          minimum: 1
+        sort:
+          $ref: '#/components/schemas/Sort'
+        totalElements:
+          type: integer
+          format: int64
+          maximum: 1
+          minimum: 1
+        totalPages:
+          type: integer
+          format: int64
+          maximum: 999999999
+          minimum: 1
+      additionalProperties: false
+      required:
+        - number
+        - numberOfElements
+        - size
+        - totalElements
+        - totalPages
 
+    PageableProfilationResponseDto:
+      type: object
+      properties:
+        actual:
+          $ref: '#/components/schemas/ProfilationPeriod'
+        history:
+          $ref: '#/components/schemas/PageForProfilation'
+      additionalProperties: false
+      required:
+        - content
 
-    listEstimateFile:
+    ProfilationDetail:
+      type: object
+      properties:
+        paInfo:
+          $ref: '#/components/schemas/PAInfo'
+        profilation:
+          $ref: '#/components/schemas/Profilation'
+      allOf:
+        - $ref: '#/components/schemas/PeriodForProfilation'
+
+    PeriodForProfilation:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ VALIDATED, DRAFT, ABSENT ]
+        deadlineDate:
+          type: string
+          format: date
+        referenceYear:
+          type: string
+        lastModifiedDate:
+          type: string
+          format: date
+        showEdit:
+          type: boolean
+      required:
+        - status
+        - referenceYear
+        - deadlineDate
+        - showEdit
+
+    Profilation:
+      type: object
+      properties:
+        splitPayment:
+          type: boolean
+          example: 'true'
+        description:
+          type: string
+          example: 'altre info'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+        mailAddress:
+          type: string
+          example: 'test@comune.milano.it'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
+      required:
+        - splitPayment
+        - mailAddress
+
+    ListReports:
       type: array
       items:
-        $ref: '#/components/schemas/InfoDownloadDTO'
+        $ref: '#/components/schemas/ReportDTO'
       maxItems: 999999999
       minItems: 1
-
 
     PageableDeanonymizedFilesResponseDto:
       type: object
@@ -222,32 +349,9 @@ components:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/InfoDownloadDTO'
+            $ref: '#/components/schemas/ReportDTO'
           maxItems: 999999999
           minItems: 1
-      additionalProperties: false
-      required:
-        - content
-
-
-    PageableEstimateResponseDto:
-      type: object
-      properties:
-        actual:
-          $ref: '#/components/schemas/EstimatePeriod'
-        history:
-          $ref: '#/components/schemas/Page'
-      additionalProperties: false
-      required:
-        - content
-
-    PageableProfilationResponseDto:
-      type: object
-      properties:
-        actual:
-          $ref: '#/components/schemas/ProfilationPeriod'
-        history:
-          $ref: '#/components/schemas/PageForProfilation'
       additionalProperties: false
       required:
         - content
@@ -347,7 +451,7 @@ components:
         content:
           type: array
           items:
-            $ref: '#/components/schemas/InfoDownloadDTO'
+            $ref: '#/components/schemas/ReportDTO'
           maxItems: 999999999
           minItems: 1
         empty:
@@ -393,73 +497,29 @@ components:
         - totalElements
         - totalPages
 
-    PageForProfilation:
+    ReportStatusEnum:
+      type: string
+      enum:
+        - DEANONIMIZING
+        - RAW
+        - ENQUEUED
+        - READY
+        - ERROR
+
+    ReportDTO:
       type: object
       properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProfilationHistory'
-          maxItems: 999999999
-          minItems: 1
-        empty:
-          type: boolean
-        first:
-          type: boolean
-        last:
-          type: boolean
-        number:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        numberOfElements:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        pageable:
-          $ref: '#/components/schemas/Pageable'
-        size:
-          type: integer
-          format: int32
-          maximum: 1024
-          minimum: 1
-        sort:
-          $ref: '#/components/schemas/Sort'
-        totalElements:
-          type: integer
-          format: int64
-          maximum: 1
-          minimum: 1
-        totalPages:
-          type: integer
-          format: int64
-          maximum: 999999999
-          minimum: 1
-      additionalProperties: false
-      required:
-        - number
-        - numberOfElements
-        - size
-        - totalElements
-        - totalPages
-
-
-    InfoDownloadDTO:
-      type: object
-      properties:
+        paId:
+          type: string
+          example: 'A12C34D56789E0'
+          format: '/[^A-Za-z0-9]+/'
+          maxLength: 32
         reportKey:
           type: string
           example: 'A12C34D56789E0'
           format: '/[^A-Za-z0-9]+/'
           maxLength: 32
         reportZipKey:
-          type: string
-          example: 'A12C34D56789E0'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        paId:
           type: string
           example: 'A12C34D56789E0'
           format: '/[^A-Za-z0-9]+/'
@@ -474,67 +534,15 @@ components:
           format: date
         errorMessage:
           type: string
-        action:
-          type: string
-        status:
-          type: string
-          enum:
-            - DEANONIMIZING
-            - ENQUEUED
-            - READY
-            - ERROR
-
-    ProfilationDetail:
-      type: object
-      properties:
-        paInfo:
-          $ref: '#/components/schemas/PAInfo'
-        billing:
-          $ref: '#/components/schemas/Billing'
-      allOf:
-        - $ref: '#/components/schemas/PeriodForProfilation'
-
-    PeriodForProfilation:
-      type: object
-      properties:
-        status:
-          type: string
-          enum: [ VALIDATED, DRAFT, ABSENT ]
-        deadlineDate:
+        generationDate:
           type: string
           format: date
-        referenceYear:
+        part:
           type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        showEdit:
-          type: boolean
-      required:
-        - status
-        - referenceYear
-        - deadlineDate
-        - showEdit
+        status:
+          $ref: "#/components/schemas/ReportStatusEnum"
 
-    Billing:
-      type: object
-      properties:
-        splitPayment:
-          type: boolean
-          example: 'true'
-        description:
-          type: string
-          example: 'altre info'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        mailAddress:
-          type: string
-          example: 'test@comune.milano.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-      required:
-        - splitPayment
-        - mailAddress
+
 
   parameters:
     pathPaId:
@@ -597,12 +605,7 @@ components:
       in: query
       required: false
       schema:
-        type: string
-        enum:
-          - DEANONIMIZING
-          - ENQUEUED
-          - READY
-          - ERROR
+        $ref: "#/components/schemas/ReportStatusEnum"
 
 
     queryFileType:

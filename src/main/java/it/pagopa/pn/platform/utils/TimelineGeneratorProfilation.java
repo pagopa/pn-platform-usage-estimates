@@ -13,11 +13,11 @@ import java.util.List;
 
 @Slf4j
 public class TimelineGeneratorProfilation {
-    private String paId;
+    private final String paId;
 
-    private List<PnProfilation> dbList;
+    private final List<PnProfilation> dbList;
 
-    private List<PnProfilation> timelineList = new ArrayList<>();
+    private final List<PnProfilation> timelineList = new ArrayList<>();
 
     public TimelineGeneratorProfilation(String paId, List<PnProfilation> dbList){
         this.paId = paId;
@@ -31,7 +31,7 @@ public class TimelineGeneratorProfilation {
         log.info("startDeadlineDate: {} ",currentDeadlineDate);
         int lastYear = 0;
         while (currentDeadlineDate.isAfter(onboardingDate)){
-            if (this.dbList != null && !this.dbList.isEmpty() && lastYear < this.dbList.size()
+            if (!this.dbList.isEmpty() && lastYear < this.dbList.size()
                     && DateUtils.isEqualYear(currentDeadlineDate, this.dbList.get(lastYear).getDeadlineDate())) {
                 log.info("Sto per aggiungere profilazione presente a db nello storico: {}", currentDeadlineDate);
                 this.timelineList.add(this.dbList.get(lastYear));

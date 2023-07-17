@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -41,12 +42,8 @@ public class ProfilationServiceImpl implements ProfilationService {
             return Mono.error(new PnGenericException(REFERENCE_YEAR_NOT_CORRECT, REFERENCE_YEAR_NOT_CORRECT.getMessage()));
         }
 
-        if (Integer.parseInt(referenceYear) < DateUtils.getYear(refTodayInstant)){
-            return Mono.error(new PnGenericException(PROFILATION_EXPIRED, PROFILATION_EXPIRED.getMessage()));
-        }
-
-        if (Integer.parseInt(referenceYear) >= DateUtils.getYear(refTodayInstant) + 2){
-            return Mono.error(new PnGenericException(FUTURE_PROFILATION_NOT_EXIST, FUTURE_PROFILATION_NOT_EXIST.getMessage()));
+        if(!todayIsNotInRange(refTodayInstant)) {
+            return Mono.error(new PnGenericException(REF_YEAR_NOT_VALID, REF_YEAR_NOT_VALID.getMessage()));
         }
 
         return this.externalRegistriesClient.getOnePa(paId)
@@ -132,12 +129,8 @@ public class ProfilationServiceImpl implements ProfilationService {
             return Mono.error(new PnGenericException(REFERENCE_YEAR_NOT_CORRECT, REFERENCE_YEAR_NOT_CORRECT.getMessage()));
         }
 
-        if (Integer.parseInt(referenceYear) < DateUtils.getYear(refYearInstant)){
-            return Mono.error(new PnGenericException(PROFILATION_EXPIRED, PROFILATION_EXPIRED.getMessage()));
-        }
-
-        if (Integer.parseInt(referenceYear) > DateUtils.getYear(refYearInstant)){
-            return Mono.error(new PnGenericException(FUTURE_PROFILATION_NOT_EXIST, FUTURE_PROFILATION_NOT_EXIST.getMessage()));
+        if(!todayIsNotInRange(refYearInstant)) {
+            return Mono.error(new PnGenericException(REF_YEAR_NOT_VALID, REF_YEAR_NOT_VALID.getMessage()));
         }
 
         return this.profilationDAO.getProfilationDetail(paId, referenceYear)
@@ -147,10 +140,15 @@ public class ProfilationServiceImpl implements ProfilationService {
                             && pnProfilation.getDeadlineDate().isAfter(refYearInstant)){
                         pnProfilation.setStatus(ProfilationPeriod.StatusEnum.VALIDATED.getValue());
                         pnProfilation.setLastModifiedDate(refYearInstant);
-                        profilationDAO.createOrUpdate(pnProfilation);
+                        return profilationDAO.createOrUpdate(pnProfilation);
                     }
                     return Mono.just(pnProfilation);
                 }).map(ProfilationMapper::profilationPeriodToDto);
     }
 
+    private boolean todayIsNotInRange(Instant refYear){
+        Pair<Instant,Instant> range = DateUtils.getStartEndFromRefYear(refYear);
+        Instant today = Instant.now();
+        return !(range.getFirst().isBefore(today) && range.getSecond().isAfter(today));
+    }
 }

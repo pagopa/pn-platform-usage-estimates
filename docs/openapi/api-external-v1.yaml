@@ -38,37 +38,37 @@ paths:
       summary: Inserimento o modifica di una stima.
       description: API che consente di aggiungere o di modificare i dettagli di una stima.
       parameters:
-        - $ref: '#/components/parameters/queryStatus'
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceMonth'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryStatus'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceMonth'
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EstimateCreateBody'
+              $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/EstimateCreateBody'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EstimatePeriod'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/EstimatePeriod'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
 
   /pn-usage-estimates/{paId}/estimate/{referenceMonth}/validated:
@@ -81,31 +81,31 @@ paths:
       summary: Validazione stima.
       description: API che consente di modificare lo stato di una stima.
       parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceMonth'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceMonth'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EstimatePeriod'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/EstimatePeriod'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
   /pn-usage-estimates/estimates:
     get:
@@ -117,35 +117,35 @@ paths:
       summary: ritorna elenco di stime in base alla partita iva, al nome della pa o al codice Ipa.
       description: API che estrae la lista di stime
       parameters:
-        - $ref: '#/components/parameters/OriginFe'
-        - $ref: '#/components/parameters/queryPaId'
-        - $ref: '#/components/parameters/queryTaxId'
-        - $ref: '#/components/parameters/queryIpaId'
-        - $ref: '#/components/parameters/queryNumberPage'
-        - $ref: '#/components/parameters/querySizePage'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/OriginFe'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryTaxId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryIpaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryNumberPage'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/querySizePage'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PageableEstimateResponseDto'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/PageableEstimateResponseDto'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
   /pn-usage-estimates/estimate/{paId}/detail/{referenceMonth}:
     get:
@@ -157,31 +157,31 @@ paths:
       summary: ritorna il dettaglio delle stime in base al mese di riferimento e al paId.
       description: API che ritorna il dettaglio di una stima.
       parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceMonth'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceMonth'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EstimateDetail'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/EstimateDetail'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
   /pn-usage-estimates/{paId}/reports/{referenceMonth}:
     get:
@@ -193,31 +193,31 @@ paths:
       summary: estrae tutti i consuntivi delle stime associate al paId e al mese di riferimento.
       description: API che consente di estrarre l'elenco fatture delle stime.
       parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceMonth'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceMonth'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/listEstimateFile'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ListReports'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
   /pn-usage-estimates/estimate/{paId}/reports/{reportKey}:
     get:
@@ -229,32 +229,32 @@ paths:
       summary: Download file di un report
       description: API che consente il download del file di un report relativo alla reportKey.
       parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReportKey'
-        - $ref: '#/components/parameters/queryFileType'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReportKey'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryFileType'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InfoDownloadDTO'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ReportDTO'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
 
   /pn-usage-estimates/reports/{paId}:
@@ -267,33 +267,33 @@ paths:
       summary: ritorna elenco di file deanonimizzati in base al paId e allo stato.
       description: API che estrae la lista di file deanonimizzati.
       parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/queryDeanonymizationStatus'
-        - $ref: '#/components/parameters/queryNumberPage'
-        - $ref: '#/components/parameters/querySizePage'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryDeanonymizationStatus'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryNumberPage'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/querySizePage'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PageableDeanonymizedFilesResponseDto'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/PageableDeanonymizedFilesResponseDto'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
   /pn-usage-estimates/reports/{paId}/schedule/{reportKey}:
     get:
@@ -305,8 +305,8 @@ paths:
       summary: rischedula il caricamento dell'elenco elenco di file deanonimizzati in base al paId e al reportKey.
       description: API che rischedula la lista di file deanonimizzati.
       parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReportKey'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReportKey'
       responses:
         '200':
           description: OK
@@ -315,17 +315,17 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
   /pn-usage-estimates/{paId}/profilation/{referenceYear}:
     post:
@@ -337,37 +337,37 @@ paths:
       summary: salva o aggiorna i dati della profilazione.
       description: API che salva o aggiorna i dettagli della profilazione.
       parameters:
-        - $ref: '#/components/parameters/queryStatus'
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceYear'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryStatus'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceYear'
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProfilationCreateBody'
+              $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ProfilationCreateBody'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfilationPeriod'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ProfilationPeriod'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
 
   /pn-usage-estimates/profilations:
@@ -380,34 +380,34 @@ paths:
       summary: Ritorna elenco di profilazioni in base alla partita iva, al nome della pa o al codice Ipa.
       description: API che estrae la lista di profilazioni
       parameters:
-        - $ref: '#/components/parameters/queryPaId'
-        - $ref: '#/components/parameters/queryTaxId'
-        - $ref: '#/components/parameters/queryIpaId'
-        - $ref: '#/components/parameters/queryNumberPage'
-        - $ref: '#/components/parameters/querySizePage'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryTaxId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryIpaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/queryNumberPage'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/querySizePage'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PageableProfilationResponseDto'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/PageableProfilationResponseDto'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
   /pn-usage-estimates/profilation/{paId}/detail/{referenceYear}:
     get:
@@ -419,31 +419,31 @@ paths:
       summary: ritorna il dettaglio della profilazione in base al paId e al referenceYear.
       description: API che ritorna il dettaglio della profilazione.
       parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceYear'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceYear'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfilationDetail'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ProfilationDetail'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
 
   /pn-usage-estimates/{paId}/profilation/{referenceYear}/validated:
@@ -456,700 +456,29 @@ paths:
       summary: Validazione profilazione.
       description: API che consente di modificare lo stato di una profilazione.
       parameters:
-        - $ref: '#/components/parameters/pathPaId'
-        - $ref: '#/components/parameters/pathReferenceYear'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathPaId'
+        - $ref: 'schemas-platform-estimates-v1.yaml#/components/parameters/pathReferenceYear'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProfilationPeriod'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/ProfilationPeriod'
         '400':
           description: Errore di validazione sintattica della richiesta
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Problem'
+                $ref: 'schemas-platform-estimates-v1.yaml#/components/schemas/Problem'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotFound'
         '405':
-          $ref: '#/components/responses/NotAllowed'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/NotAllowed'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: 'schemas-platform-estimates-v1.yaml#/components/responses/InternalError'
 
-
-
-components:
-  schemas:
-    Problem:
-      properties:
-        type:
-          description: URI reference of type definition
-          type: string
-        status:
-          description: The HTTP status code generated by the origin server for this occurrence of the problem.
-          type: integer
-          format: int32
-          example: 503
-          maximum: 600
-          minimum: 100
-          exclusiveMaximum: true
-        title:
-          description: A short, summary of the problem type. Written in english and readable
-          example: Service Unavailable
-          maxLength: 64
-          pattern: ^[ -~]{0,64}$
-          type: string
-        detail:
-          description: A human readable explanation of the problem.
-          example: Request took too long to complete.
-          maxLength: 4096
-          pattern: ^.{0,4096}$
-          type: string
-        traceId:
-          description: Internal support identifier associated to error
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        timestamp:
-          description: date and time referred to UTC
-          example: 2022-07-27T12:22:33.444Z
-          type: string
-          format: date-time
-        errors:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ProblemError'
-      required:
-        - status
-        - errors
-    ProblemError:
-      properties:
-        code:
-          description: Internal code of the error, in human-readable format
-          example: PN_PARAMETER_TOO_LONG | PN_PARAMETER_TOO_SHORT | PN_DUPLICATE_ENTRY | etc...
-          type: string
-        element:
-          description: Parameter or request body field name for validation error
-          example: 'body.order.item[2].quantity'
-          type: string
-        detail:
-          description: A human readable explanation specific to this occurrence of the problem.
-          example: Parameter not valid
-          maxLength: 1024
-          type: string
-      required:
-        - code
-
-    EstimateDetail:
-      type: object
-      properties:
-        paInfo:
-          $ref: '#/components/schemas/PAInfo'
-        billing:
-          $ref: '#/components/schemas/Billing'
-        estimate:
-          $ref: '#/components/schemas/Estimate'
-      allOf:
-        - $ref: '#/components/schemas/Period'
-      required:
-        - paInfo
-        - billing
-        - status
-        - referenceMonth
-        - estimate
-        - showEdit
-
-    PAInfo:
-      type: object
-      properties:
-        paId:
-          type: string
-          example: '12345678900'
-          format: '/^[0-9]{11}$/'
-          maxLength: 32
-        paName:
-          type: string
-          example: 'Comune di Roma'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        taxId:
-          type: string
-          example: '3242214145'
-          format: '/^[0-9]{11}$/'
-          maxLength: 32
-        registeredOffice:
-          type: string
-          example: 'piazza gaeaulenti 56, Milano'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        pec:
-          type: string
-          example: 'test@pec.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        ipaCode:
-          type: string
-          example: 'abc12324'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        sdiCode:
-          type: string
-          example: 'abc1334324'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-
-    Period:
-      type: object
-      properties:
-        status:
-          type: string
-          enum: [ VALIDATED, DRAFT, ABSENT ]
-        deadlineDate:
-          type: string
-          format: date
-        referenceMonth:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        showEdit:
-          type: boolean
-      required:
-        - status
-        - referenceMonth
-        - deadlineDate
-        - showEdit
-
-    Estimate:
-      type: object
-      properties:
-        totalDigitalNotif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        total890Notif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        totalAnalogNotif:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-      required:
-        - totalDigitalNotif
-        - total890Notif
-        - totalAnalogNotif
-
-    EstimateCreateBody:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Estimate'
-        - $ref: '#/components/schemas/Billing'
-
-    ProfilationCreateBody:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Billing'
-
-    EstimatePeriod:
-      type: object
-      properties:
-        estimate:
-          $ref: '#/components/schemas/Estimate'
-        billing:
-          $ref: '#/components/schemas/Billing'
-      allOf:
-        - $ref: '#/components/schemas/Period'
-
-    EstimateHistory:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Period'
-
-
-    ProfilationPeriod:
-      type: object
-      properties:
-        billing:
-          $ref: '#/components/schemas/Billing'
-      allOf:
-        - $ref: '#/components/schemas/PeriodForProfilation'
-
-    ProfilationHistory:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/PeriodForProfilation'
-
-
-
-    listEstimateFile:
-      type: array
-      items:
-        $ref: '#/components/schemas/InfoDownloadDTO'
-      maxItems: 999999999
-      minItems: 1
-
-
-    PageableDeanonymizedFilesResponseDto:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/FilePage'
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/InfoDownloadDTO'
-          maxItems: 999999999
-          minItems: 1
-      additionalProperties: false
-      required:
-        - content
-
-
-    PageableEstimateResponseDto:
-      type: object
-      properties:
-        actual:
-          $ref: '#/components/schemas/EstimatePeriod'
-        history:
-          $ref: '#/components/schemas/Page'
-      additionalProperties: false
-      required:
-        - content
-
-    PageableProfilationResponseDto:
-      type: object
-      properties:
-        actual:
-          $ref: '#/components/schemas/ProfilationPeriod'
-        history:
-          $ref: '#/components/schemas/PageForProfilation'
-      additionalProperties: false
-      required:
-        - content
-
-    Pageable:
-      type: object
-      properties:
-        offset:
-          type: integer
-          format: int64
-          maximum: 999999999
-          minimum: 1
-        pageNumber:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        pageSize:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        paged:
-          type: boolean
-        sort:
-          $ref: '#/components/schemas/Sort'
-        unpaged:
-          type: boolean
-      additionalProperties: false
-
-    Sort:
-      type: object
-      properties:
-        empty:
-          type: boolean
-        sorted:
-          type: boolean
-        unsorted:
-          type: boolean
-      additionalProperties: false
-
-    Page:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/EstimateHistory'
-          maxItems: 999999999
-          minItems: 1
-        empty:
-          type: boolean
-        first:
-          type: boolean
-        last:
-          type: boolean
-        number:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        numberOfElements:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        pageable:
-          $ref: '#/components/schemas/Pageable'
-        size:
-          type: integer
-          format: int32
-          maximum: 1024
-          minimum: 1
-        sort:
-          $ref: '#/components/schemas/Sort'
-        totalElements:
-          type: integer
-          format: int64
-          maximum: 1
-          minimum: 1
-        totalPages:
-          type: integer
-          format: int64
-          maximum: 999999999
-          minimum: 1
-      additionalProperties: false
-      required:
-        - number
-        - numberOfElements
-        - size
-        - totalElements
-        - totalPages
-
-    FilePage:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/InfoDownloadDTO'
-          maxItems: 999999999
-          minItems: 1
-        empty:
-          type: boolean
-        first:
-          type: boolean
-        last:
-          type: boolean
-        number:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        numberOfElements:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        pageable:
-          $ref: '#/components/schemas/Pageable'
-        size:
-          type: integer
-          format: int32
-          maximum: 1024
-          minimum: 1
-        sort:
-          $ref: '#/components/schemas/Sort'
-        totalElements:
-          type: integer
-          format: int64
-          maximum: 1
-          minimum: 1
-        totalPages:
-          type: integer
-          format: int64
-          maximum: 999999999
-          minimum: 1
-      additionalProperties: false
-      required:
-        - number
-        - numberOfElements
-        - size
-        - totalElements
-        - totalPages
-
-    PageForProfilation:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProfilationHistory'
-          maxItems: 999999999
-          minItems: 1
-        empty:
-          type: boolean
-        first:
-          type: boolean
-        last:
-          type: boolean
-        number:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        numberOfElements:
-          type: integer
-          format: int32
-          maximum: 999999999
-          minimum: 1
-        pageable:
-          $ref: '#/components/schemas/Pageable'
-        size:
-          type: integer
-          format: int32
-          maximum: 1024
-          minimum: 1
-        sort:
-          $ref: '#/components/schemas/Sort'
-        totalElements:
-          type: integer
-          format: int64
-          maximum: 1
-          minimum: 1
-        totalPages:
-          type: integer
-          format: int64
-          maximum: 999999999
-          minimum: 1
-      additionalProperties: false
-      required:
-        - number
-        - numberOfElements
-        - size
-        - totalElements
-        - totalPages
-
-
-    InfoDownloadDTO:
-      type: object
-      properties:
-        reportKey:
-          type: string
-          example: 'A12C34D56789E0'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        reportZipKey:
-          type: string
-          example: 'A12C34D56789E0'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        paId:
-          type: string
-          example: 'A12C34D56789E0'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        url:
-          type: string
-          example: 'http://file.com'
-        referenceMonth:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        errorMessage:
-          type: string
-        action:
-          type: string
-        status:
-          type: string
-          enum:
-            - DEANONIMIZING
-            - ENQUEUED
-            - READY
-            - ERROR
-
-    ProfilationDetail:
-      type: object
-      properties:
-        paInfo:
-          $ref: '#/components/schemas/PAInfo'
-        billing:
-          $ref: '#/components/schemas/Billing'
-      allOf:
-        - $ref: '#/components/schemas/PeriodForProfilation'
-
-    PeriodForProfilation:
-      type: object
-      properties:
-        status:
-          type: string
-          enum: [ VALIDATED, DRAFT, ABSENT ]
-        deadlineDate:
-          type: string
-          format: date
-        referenceYear:
-          type: string
-        lastModifiedDate:
-          type: string
-          format: date
-        showEdit:
-          type: boolean
-      required:
-        - status
-        - referenceYear
-        - deadlineDate
-        - showEdit
-
-    Billing:
-      type: object
-      properties:
-        splitPayment:
-          type: boolean
-          example: 'true'
-        description:
-          type: string
-          example: 'altre info'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-        mailAddress:
-          type: string
-          example: 'test@comune.milano.it'
-          format: '/[^A-Za-z0-9]+/'
-          maxLength: 32
-      required:
-        - splitPayment
-        - mailAddress
-
-  parameters:
-    pathPaId:
-      name: paId
-      in: path
-      required: true
-      schema:
-        type: string
-
-    pathReportKey:
-      name: reportKey
-      in: path
-      required: true
-      schema:
-        type: string
-
-    OriginFe:
-      name: originFe
-      schema:
-        type: string
-        enum:
-          - PN-PLATFORM-NOTIFICATION-FE
-          - PN-HELPDESK-FE
-      in: header
-      required: true
-
-    queryPaId:
-      name: paId
-      in: query
-      required: false
-      schema:
-        type: string
-
-    queryTaxId:
-      name: taxId
-      in: query
-      required: false
-      schema:
-        type: string
-
-    queryIpaId:
-      name: ipaId
-      in: query
-      required: false
-      schema:
-        type: string
-
-    queryStatus:
-      name: status
-      in: query
-      required: true
-      schema:
-        type: string
-        enum:
-          - VALIDATED
-          - DRAFT
-
-    queryDeanonymizationStatus:
-      name: status
-      in: query
-      required: false
-      schema:
-        type: string
-        enum:
-          - DEANONIMIZING
-          - ENQUEUED
-          - READY
-          - ERROR
-
-
-    queryFileType:
-      name: type
-      in: query
-      required: true
-      schema:
-        type: string
-        enum:
-          - SOURCE
-          - TARGET
-
-    pathReferenceMonth:
-      name: referenceMonth
-      in: path
-      required: true
-      example: "MAR-2023"
-      schema:
-        type: string
-
-    pathReferenceYear:
-      name: referenceYear
-      in: path
-      required: true
-      schema:
-        type: string
-
-    querySizePage:
-      name: size
-      in: query
-      description: Numero di elementi per pagina.
-      required: false
-      schema:
-        type: integer
-        default: 5
-        format: int32
-        maximum: 999999999
-        minimum: 1
-
-    queryNumberPage:
-      name: page
-      in: query
-      description: Risultati di pagina che si vuole ottenere (0..N)
-      required: false
-      schema:
-        type: integer
-        default: 0
-        format: int32
-        maximum: 999999999
-        minimum: 0
-
-  responses:
-    Forbidden:
-      description: Forbidden
-    NotFound:
-      description: Not found
-    Invalid:
-      description: Bad Request
-    NotAllowed:
-      description: Method not allowed
-    InternalError:
-      description: Internal Server Error
-    Unauthorized:
-      description: Unauthorized
-              

@@ -27,4 +27,6 @@ public class PnPlatformConfig {
 
     private String jobQueueName;
     private String jobDefinitionName;
+
+    private Integer attemptDataVault;
 }

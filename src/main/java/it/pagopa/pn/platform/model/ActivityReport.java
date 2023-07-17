@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ActivityReport {
+    @JsonProperty("Records")
     private List<Record> records;
     @Getter
     @Setter
@@ -29,6 +30,12 @@ public class ActivityReport {
             int start = bucketName.indexOf("report_attivita_pn_from_datalake/");
             int end = bucketName.indexOf("/");
             return bucketName.substring(start + 1, end);
+        }
+
+        public String getPartNum() {
+            int start = bucketName.indexOf("part-");
+            int end = bucketName.indexOf(".csv");
+            return bucketName.substring(start +1, end);
         }
 
     }

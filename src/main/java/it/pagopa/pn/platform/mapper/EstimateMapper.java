@@ -30,6 +30,7 @@ public class EstimateMapper {
         pageableEstimateResponseDto.setHistory(page);
         pageableEstimateResponseDto.getActual().setStatus(EstimatePeriod.StatusEnum.fromValue(timelineEstimate.getActual().getStatus()));
         pageableEstimateResponseDto.getActual().setReferenceMonth(timelineEstimate.getActual().getReferenceMonth());
+        pageableEstimateResponseDto.getActual().setPaId(timelineEstimate.getActual().getPaId());
         pageableEstimateResponseDto.getActual().setDeadlineDate(Date.from(timelineEstimate.getActual().getDeadlineDate()));
         if (timelineEstimate.getActual().getLastModifiedDate() != null){
             pageableEstimateResponseDto.getActual().setLastModifiedDate(Date.from(timelineEstimate.getActual().getLastModifiedDate()));
@@ -78,6 +79,7 @@ public class EstimateMapper {
 
     public static EstimateHistory estimatesToDto(PnEstimate entity){
         EstimateHistory dto = new EstimateHistory();
+        dto.setPaId(entity.getPaId());
         dto.setReferenceMonth(entity.getReferenceMonth());
         dto.setDeadlineDate(Date.from(entity.getDeadlineDate()));
         dto.setLastModifiedDate(entity.getLastModifiedDate() != null ? Date.from(entity.getLastModifiedDate()) : null);
@@ -93,7 +95,7 @@ public class EstimateMapper {
     public static EstimatePeriod estimatePeriodToDto(PnEstimate pnEstimate) {
         EstimatePeriod estimatePeriod = new EstimatePeriod();
         Estimate estimate = new Estimate();
-        Billing billing = new Billing();
+        Profilation billing = new Profilation();
 
         //STIME
         estimate.setTotalDigitalNotif(pnEstimate.getTotalDigitalNotif());
@@ -124,7 +126,7 @@ public class EstimateMapper {
         EstimateDetail estimateDetail = new EstimateDetail();
         Estimate estimate = new Estimate();
         PAInfo paInfo = new PAInfo();
-        Billing billing = new Billing();
+        Profilation profilation = new Profilation();
 
         //INFO PA
         paInfo.setPaId(paInfoDto.getId());
@@ -138,14 +140,14 @@ public class EstimateMapper {
 
 
         //FATTURAZIONE
-        billing.setMailAddress(pnEstimate.getMailAddress());
-        billing.setDescription(pnEstimate.getDescription());
-        billing.setSplitPayment(pnEstimate.getSplitPayment());
+        profilation.setMailAddress(pnEstimate.getMailAddress());
+        profilation.setDescription(pnEstimate.getDescription());
+        profilation.setSplitPayment(pnEstimate.getSplitPayment());
 
         //PERIODO
         estimateDetail.setEstimate(estimate);
         estimateDetail.setPaInfo(paInfo);
-        estimateDetail.setBilling(billing);
+        estimateDetail.setBilling(profilation);
 
         estimateDetail.setStatus(EstimateDetail.StatusEnum.fromValue(pnEstimate.getStatus()));
         estimateDetail.setReferenceMonth(pnEstimate.getReferenceMonth());

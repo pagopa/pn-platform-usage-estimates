@@ -27,6 +27,13 @@ public class DateUtils {
             return Pair.of(start, end);
     }
 
+    public static Pair<Instant,Instant> getStartEndFromRefYear(Instant refYear){
+        Instant start = fromDayMonthYearStart(1, 11 , getYear(minusYear(refYear, 2)));
+        Instant end = fromDayMonthYear(31,10 , getYear(minusYear(refYear, 1)));
+
+        return Pair.of(start, end);
+    }
+
     public  static Instant getMaxDeadlineDate (){
         Instant today = Instant.now();
         int addMonth = (getDay(today) > 15) ? 1 : 0;
@@ -150,8 +157,8 @@ public class DateUtils {
     }
 
     @NotNull
-    public static String buildTimestamp(PnEstimate pnEstimate) {
-        Instant timeStamp = pnEstimate.getLastModifiedDate().truncatedTo(ChronoUnit.SECONDS);
+    public static String buildTimestamp(Instant instant) {
+        Instant timeStamp = instant.truncatedTo(ChronoUnit.SECONDS);
         return getYear(timeStamp).toString().concat("-")
                 .concat(getMonth(timeStamp).toString()).concat("-")
                 .concat(getDay(timeStamp).toString()).concat("T")

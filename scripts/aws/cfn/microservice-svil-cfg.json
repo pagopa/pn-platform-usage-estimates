@@ -2,6 +2,7 @@
   "Parameters" : {
     "SafeStorageCxId": "pn-cons-000",
     "DataVaultBaseUrl": "http://alb.confidential.pn.internal:8080",
-    "ScheduleExpression": "cron(0 10,11,20 * * ? *)"
+    "ScheduleExpression": "cron(0 10,11,20 * * ? *)",
+    "AttemptDataVault": "4"
   }
 }

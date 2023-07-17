@@ -8,15 +8,27 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 
+import java.util.UUID;
+
 @Slf4j
 public class Utility {
-    public static String convertToHash(String string) {
-        if(string==null){
-            return null;
-        }
-        string = string.toLowerCase().replaceAll("\\s", "");
-        return DigestUtils.sha256Hex(string);
+
+    private Utility(){
+        // private constructor
     }
+
+    public static String getPath(String paId, String refMonth, String folder){
+        return String.format("paid_%s/month_%s/%s/", paId, refMonth, folder );
+    }
+
+    public static String  getSnapshotFileName(String timestamp){
+        return String.format("%s_%s_%s.json", Const.MONTHLY, timestamp, UUID.randomUUID());
+    }
+
+    public static String  getLastFileName(String refMonth){
+        return String.format("%s_%s.json", Const.MONTHLY, refMonth);
+    }
+
     public static <T> String objectToJson (T data){
         try{
             ObjectMapper objectMapper = new ObjectMapper()

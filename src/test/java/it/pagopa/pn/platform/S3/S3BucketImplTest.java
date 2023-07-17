@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.io.ByteArrayInputStream;
 
 
 
@@ -45,14 +46,13 @@ class S3BucketImplTest extends BaseTest {
     @Test
     void putObjectOkTest(){
         Mockito.when(this.s3Client.putObject(Mockito.any())).thenReturn(new PutObjectResult());
-        this.s3Bucket.putObject("pippo.txt", new File("pippo.txt"));
+        this.s3Bucket.putObject("", "pippo.txt",new ByteArrayInputStream("pippo".getBytes()));
     }
 
     @Test
     void putObjectErrorTest(){
         Mockito.when(this.s3Client.putObject(Mockito.any())).thenThrow(new AmazonClientException("ERROR"));
-        this.s3Bucket.putObject("pippo.txt", new File("pippo.txt"));
-
+        this.s3Bucket.putObject("", "pippo.txt", new ByteArrayInputStream("pippo".getBytes()));
     }
 
     @Test
