@@ -3,6 +3,7 @@ package it.pagopa.pn.platform.middleware.db.dao.impl;
 import it.pagopa.pn.platform.config.BaseTest;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
+import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,10 +13,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.List;
 
 @Slf4j
-public class ActivityReportMetaDAOImplTest extends BaseTest {
+class ActivityReportMetaDAOImplTest extends BaseTest {
 
     @Autowired
     private ActivityReportMetaDAO activityReportMetaDAO;
@@ -31,11 +31,10 @@ public class ActivityReportMetaDAOImplTest extends BaseTest {
     private void initialValue(){
         pnActivityReport1.setPaId("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a");
         pnActivityReport1.setReportKey("DICEMBRE-03");
-        pnActivityReport1.setStatus("DOWNLOADED");
+        pnActivityReport1.setStatusReport("DOWNLOADED");
         pnActivityReport1.setReferenceMonth("DIC-2022");
         pnActivityReport1.setBucketName("BucketName");
         pnActivityReport1.setLastModifiedDate(Instant.now());
-        pnActivityReport1.setAction("Action");
         pnActivityReport1.setErrorMessage("Error message");
 
         this.activityReportMetaDAO.createMetaData(pnActivityReport1);
@@ -43,7 +42,7 @@ public class ActivityReportMetaDAOImplTest extends BaseTest {
 
     @Test
     void findAllFromPaIdAndReferenceMonth(){
-        Flux<PnActivityReport> result = this.activityReportMetaDAO.findAllFromPaId("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a", "DIC-2022");
+        Flux<PnActivityReport> result = this.activityReportMetaDAO.findAllFromPaId("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a", "DIC-2022", ReportStatusEnum.READY.getValue());
 
         Assertions.assertNotNull(result);
         result
@@ -59,11 +58,10 @@ public class ActivityReportMetaDAOImplTest extends BaseTest {
 
         pnActivityReport1.setPaId("cc1c6a8e-5967-42c6-9d83-bfb12ba1665a");
         pnActivityReport1.setReportKey("DICEMBRE-03");
-        pnActivityReport1.setStatus("DOWNLOADED");
+        pnActivityReport1.setStatusReport("DOWNLOADED");
         pnActivityReport1.setReferenceMonth("DIC-2022");
         pnActivityReport1.setBucketName("BucketName");
         pnActivityReport1.setLastModifiedDate(Instant.now());
-        pnActivityReport1.setAction("Action");
         pnActivityReport1.setErrorMessage("Error message");
 
         Mono<PnActivityReport> pnActivityReportMono =  this.activityReportMetaDAO.createMetaData(pnActivityReport1);
@@ -73,11 +71,10 @@ public class ActivityReportMetaDAOImplTest extends BaseTest {
                 result -> {
                     Assertions.assertEquals(pnActivityReport1.getPaId(), result.getPaId());
                     Assertions.assertEquals(pnActivityReport1.getReportKey(), result.getReportKey());
-                    Assertions.assertEquals(pnActivityReport1.getStatus(), result.getStatus());
+                    Assertions.assertEquals(pnActivityReport1.getStatusReport(), result.getStatusReport());
                     Assertions.assertEquals(pnActivityReport1.getReferenceMonth(), result.getReferenceMonth());
                     Assertions.assertEquals(pnActivityReport1.getBucketName(), result.getBucketName());
                     Assertions.assertEquals(pnActivityReport1.getLastModifiedDate(), result.getLastModifiedDate());
-                    Assertions.assertEquals(pnActivityReport1.getAction(), result.getAction());
                     Assertions.assertEquals(pnActivityReport1.getErrorMessage(), result.getErrorMessage());
                 });
 

@@ -2,8 +2,10 @@ package it.pagopa.pn.platform.mapper;
 
 import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.PageModel;
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
+
 import it.pagopa.pn.platform.rest.v1.dto.PageableDeanonymizedFilesResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.ReportDTO;
+import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,20 +30,20 @@ class FileMapperTest {
     @Test
     void toDownloadFileoOk() {
         String url = "url";
-        InfoDownloadDTO infoDownloadDTO = FileMapper.toDownloadFile(activityReport1, url);
-
+        ReportDTO infoDownloadDTO = FileMapper.toDownloadFile(activityReport1, url);
+        
         Assertions.assertNotNull(infoDownloadDTO);
         Assertions.assertEquals(activityReport1.getPaId(),infoDownloadDTO.getPaId());
         Assertions.assertEquals(url,infoDownloadDTO.getUrl());
         Assertions.assertEquals(activityReport1.getReportKey(),infoDownloadDTO.getReportKey());
-        Assertions.assertEquals(InfoDownloadDTO.StatusEnum.READY,infoDownloadDTO.getStatus());
+        Assertions.assertEquals(ReportStatusEnum.READY,infoDownloadDTO.getStatus());
     }
 
     @Test
     void fromPnActivityReportToInfoDownloadDTOOK() {
 
         String url = "url";
-        InfoDownloadDTO infoDownloadDTO = FileMapper.fromPnActivityReportToInfoDownloadDTO("12345","APR-2023",activityReport1);
+        ReportDTO infoDownloadDTO = FileMapper.fromPnActivityReportToInfoDownloadDTO("12345","APR-2023",activityReport1);
 
         Assertions.assertNotNull(infoDownloadDTO);
         Assertions.assertEquals(activityReport1.getPaId(),infoDownloadDTO.getPaId());
@@ -71,28 +73,28 @@ class FileMapperTest {
 
     @Test
     void deanonymizedFilesToDto() {
-        InfoDownloadDTO infoDownloadDTO = FileMapper.deanonymizedFilesToDto(activityReport1);
+        ReportDTO infoDownloadDTO = FileMapper.deanonymizedFilesToDto(activityReport1);
 
         Assertions.assertNotNull(infoDownloadDTO);
         Assertions.assertEquals(activityReport1.getPaId(),infoDownloadDTO.getPaId());
         Assertions.assertEquals(activityReport1.getReferenceMonth(),infoDownloadDTO.getReferenceMonth());
         Assertions.assertEquals(activityReport1.getReportKey(),infoDownloadDTO.getReportKey());
         Assertions.assertEquals(activityReport1.getLastModifiedDate().getEpochSecond(),infoDownloadDTO.getLastModifiedDate().toInstant().getEpochSecond());
-        Assertions.assertEquals(activityReport1.getStatus(),String.valueOf(infoDownloadDTO.getStatus()));
+        Assertions.assertEquals(activityReport1.getStatusReport(),String.valueOf(infoDownloadDTO.getStatus()));
         Assertions.assertNull(infoDownloadDTO.getErrorMessage());
 
     }
 
     @Test
     void deanonymizedFilesToDtoWithError() {
-        InfoDownloadDTO infoDownloadDTO = FileMapper.deanonymizedFilesToDto(activityReport2);
+        ReportDTO infoDownloadDTO = FileMapper.deanonymizedFilesToDto(activityReport2);
 
         Assertions.assertNotNull(infoDownloadDTO);
         Assertions.assertEquals(activityReport2.getPaId(),infoDownloadDTO.getPaId());
         Assertions.assertEquals(activityReport2.getReferenceMonth(),infoDownloadDTO.getReferenceMonth());
         Assertions.assertEquals(activityReport2.getReportKey(),infoDownloadDTO.getReportKey());
         Assertions.assertNull(activityReport2.getLastModifiedDate());
-        Assertions.assertEquals(activityReport2.getStatus(),String.valueOf(infoDownloadDTO.getStatus()));
+        Assertions.assertEquals(activityReport2.getStatusReport(),String.valueOf(infoDownloadDTO.getStatus()));
         Assertions.assertEquals(activityReport2.getErrorMessage(), infoDownloadDTO.getErrorMessage());
 
     }
@@ -102,21 +104,19 @@ class FileMapperTest {
         activityReport1.setPaId("12345");
         activityReport1.setReferenceMonth("APR-2023");
         activityReport1.setReportKey("ReportZipKey");
-        activityReport1.setStatus("READY");
+        activityReport1.setStatusReport("READY");
         activityReport1.setBucketName("bucketName");
         activityReport1.setReportKey("reportKey");
         activityReport1.setLastModifiedDate(Instant.now());
-        activityReport1.setAction("Action");
         activityReport1.setErrorMessage(null);
 
         activityReport2.setPaId("12345");
         activityReport2.setReferenceMonth("MAG-2023");
         activityReport2.setReportKey("ReportZipKey");
-        activityReport2.setStatus("ERROR");
+        activityReport2.setStatusReport("ERROR");
         activityReport2.setBucketName("bucketName");
         activityReport2.setReportKey("reportKey");
         activityReport2.setLastModifiedDate(null);
-        activityReport2.setAction("Action");
         activityReport2.setErrorMessage("error message");
 
     }

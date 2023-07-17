@@ -1,7 +1,7 @@
 package it.pagopa.pn.platform.rest;
 
-import it.pagopa.pn.platform.rest.v1.dto.InfoDownloadDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableDeanonymizedFilesResponseDto;
+import it.pagopa.pn.platform.rest.v1.dto.ReportDTO;
 import it.pagopa.pn.platform.service.ReportService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,7 +26,7 @@ public class ReportApiControllerTest {
     @Test
     public void downloadReportFile() {
 
-        InfoDownloadDTO response = new InfoDownloadDTO();
+        ReportDTO response = new ReportDTO();
         String path = "/pn-usage-estimates/estimate/12345/reports/A12C34D56789E0";
 
         Mockito.when(this.reportService.downloadReportFile(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -40,7 +40,7 @@ public class ReportApiControllerTest {
 
     @Test
     public void getAllReportFile() {
-        Flux<InfoDownloadDTO> response = Flux.empty();
+        Flux<ReportDTO> response = Flux.empty();
         String path = "/pn-usage-estimates/12345/reports/APR-2023";
 
         Mockito.when(this.reportService.getAllReportFile(Mockito.any(), Mockito.any()))

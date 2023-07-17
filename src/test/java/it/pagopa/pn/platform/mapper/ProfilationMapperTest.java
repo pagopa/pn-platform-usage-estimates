@@ -1,16 +1,12 @@
 package it.pagopa.pn.platform.mapper;
 
-import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
 import it.pagopa.pn.platform.middleware.db.entities.PnProfilation;
 import it.pagopa.pn.platform.model.TimelineProfilation;
 import it.pagopa.pn.platform.msclient.generated.pnexternalregistries.v1.dto.PaInfoDto;
 import it.pagopa.pn.platform.rest.v1.dto.*;
-import it.pagopa.pn.platform.utils.TimelineGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -55,9 +51,9 @@ class ProfilationMapperTest {
         Assertions.assertEquals(paInfoDto.getId(), profilationDetail.getPaInfo().getPaId());
         Assertions.assertEquals(paInfoDto.getName(), profilationDetail.getPaInfo().getPaName());
         Assertions.assertEquals(paInfoDto.getTaxId(), profilationDetail.getPaInfo().getTaxId());
-        Assertions.assertEquals(pnProfilation.getMailAddress(), profilationDetail.getBilling().getMailAddress());
-        Assertions.assertEquals(pnProfilation.getDescription(), profilationDetail.getBilling().getDescription());
-        Assertions.assertEquals(pnProfilation.getSplitPayment(), profilationDetail.getBilling().getSplitPayment());
+        Assertions.assertEquals(pnProfilation.getMailAddress(), profilationDetail.getProfilation().getMailAddress());
+        Assertions.assertEquals(pnProfilation.getDescription(), profilationDetail.getProfilation().getDescription());
+        Assertions.assertEquals(pnProfilation.getSplitPayment(), profilationDetail.getProfilation().getSplitPayment());
         Assertions.assertEquals(pnProfilation.getStatus(), profilationDetail.getStatus().toString());
         Assertions.assertEquals(pnProfilation.getReferenceYear(), profilationDetail.getReferenceYear());
         Assertions.assertEquals(pnProfilation.getLastModifiedDate().getEpochSecond(), profilationDetail.getLastModifiedDate().toInstant().getEpochSecond());
@@ -75,9 +71,9 @@ class ProfilationMapperTest {
         Assertions.assertEquals(paInfoDto.getId(), profilationDetail.getPaInfo().getPaId());
         Assertions.assertEquals(paInfoDto.getName(), profilationDetail.getPaInfo().getPaName());
         Assertions.assertEquals(paInfoDto.getTaxId(), profilationDetail.getPaInfo().getTaxId());
-        Assertions.assertEquals(pnProfilation.getMailAddress(), profilationDetail.getBilling().getMailAddress());
-        Assertions.assertEquals(pnProfilation.getDescription(), profilationDetail.getBilling().getDescription());
-        Assertions.assertEquals(pnProfilation.getSplitPayment(), profilationDetail.getBilling().getSplitPayment());
+        Assertions.assertEquals(pnProfilation.getMailAddress(), profilationDetail.getProfilation().getMailAddress());
+        Assertions.assertEquals(pnProfilation.getDescription(), profilationDetail.getProfilation().getDescription());
+        Assertions.assertEquals(pnProfilation.getSplitPayment(), profilationDetail.getProfilation().getSplitPayment());
         Assertions.assertEquals(pnProfilation.getStatus(), profilationDetail.getStatus().toString());
         Assertions.assertEquals(pnProfilation.getReferenceYear(), profilationDetail.getReferenceYear());
         Assertions.assertNull(pnProfilation.getLastModifiedDate());
@@ -91,9 +87,9 @@ class ProfilationMapperTest {
         ProfilationPeriod profilationPeriod = ProfilationMapper.profilationPeriodToDto(pnProfilation);
 
         Assertions.assertNotNull(profilationPeriod);
-        Assertions.assertEquals(pnProfilation.getMailAddress(), profilationPeriod.getBilling().getMailAddress());
-        Assertions.assertEquals(pnProfilation.getDescription(), profilationPeriod.getBilling().getDescription());
-        Assertions.assertEquals(pnProfilation.getSplitPayment(), profilationPeriod.getBilling().getSplitPayment());
+        Assertions.assertEquals(pnProfilation.getMailAddress(), profilationPeriod.getProfilation().getMailAddress());
+        Assertions.assertEquals(pnProfilation.getDescription(), profilationPeriod.getProfilation().getDescription());
+        Assertions.assertEquals(pnProfilation.getSplitPayment(), profilationPeriod.getProfilation().getSplitPayment());
         Assertions.assertEquals(pnProfilation.getStatus(), profilationPeriod.getStatus().toString());
         Assertions.assertEquals(pnProfilation.getReferenceYear(), profilationPeriod.getReferenceYear());
         Assertions.assertEquals(pnProfilation.getLastModifiedDate().getEpochSecond(), profilationPeriod.getLastModifiedDate().toInstant().getEpochSecond());
