@@ -52,7 +52,7 @@ public class ReportServiceImpl implements ReportService {
                                 .map(url -> FileMapper.toDownloadFile(pnActivityReport, url));
                     }
 
-                    if(!pnActivityReport.getStatus().equals(String.valueOf(ReportStatusEnum.READY))) {
+                    if(!pnActivityReport.getStatusReport().equals(String.valueOf(ReportStatusEnum.READY))) {
                         return Mono.error(new PnGenericException(STATUS_NOT_READY, STATUS_NOT_READY.getMessage()));
                     }
 
@@ -96,7 +96,7 @@ public class ReportServiceImpl implements ReportService {
         return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .switchIfEmpty(Mono.error(new PnGenericException(REPORT_NOT_EXISTS, REPORT_NOT_EXISTS.getMessage())))
                 .doOnNext(activityReport -> {
-                    if (!activityReport.getStatus().equals(String.valueOf(ReportStatusEnum.ERROR))){
+                    if (!activityReport.getStatusReport().equals(String.valueOf(ReportStatusEnum.ERROR))){
                         throw new PnGenericException(STATUS_NOT_IN_ERROR, STATUS_NOT_IN_ERROR.getMessage());
                     }
                     this.awsBatchService.scheduleJob(paId, activityReport.getBucketName(), reportKey);

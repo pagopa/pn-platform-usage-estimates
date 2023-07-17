@@ -1,8 +1,12 @@
 package it.pagopa.pn.platform.service.impl;
 
 import it.pagopa.pn.platform.S3.S3Bucket;
+import it.pagopa.pn.platform.config.PnPlatformConfig;
 import it.pagopa.pn.platform.dao.CsvDAO;
 import it.pagopa.pn.platform.dao.ZipDAO;
+import it.pagopa.pn.platform.exception.ExceptionTypeEnum;
+import it.pagopa.pn.platform.exception.PnGenericException;
+import it.pagopa.pn.platform.mapper.ActivityReportMapper;
 import it.pagopa.pn.platform.middleware.db.dao.ActivityReportMetaDAO;
 import it.pagopa.pn.platform.model.ActivityReportCSV;
 import it.pagopa.pn.platform.msclient.DataVaultClient;
@@ -17,7 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.*;
-
+import java.time.Duration;
 
 
 @Service
@@ -37,34 +41,49 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
     @Autowired
     private SafeStorageClient safeStorageClient;
     @Autowired
+    private PnPlatformConfig pnPlatformConfig;
+    @Autowired
     private DataVaultClient dataVaultClient;
 
     @Override
     public Mono<Void> execute(String paId, String reportKey) {
         return this.activityReportMetaDAO.findByPaIdAndReportKey(paId, reportKey)
                 .flatMap(pnActivityReport -> {
-                    pnActivityReport.setStatus(ReportStatusEnum.DEANONIMIZING.name());
+                    pnActivityReport.setStatusReport(ReportStatusEnum.DEANONIMIZING.name());
                     return this.activityReportMetaDAO.createMetaData(pnActivityReport);
                 })
                 .flatMap(pnActivityReport -> this.getCSV(pnActivityReport.getReportKey())
                             .parallel()
-                            .map(this::deanonymizing)
+                            .flatMap(this::deanonymizing)
                             .sequential()
                             .collectList()
                             .doOnNext(reportsDeanonymized -> this.csvDAO.write(reportsDeanonymized, FILES_DEANONYMIZED))
                             .doOnNext(reportsDeanonymized -> this.zipDAO.zipFiles(FOLDER_DEANONYMIZED))
+                            .onErrorResume(ex -> {
+                                ActivityReportMapper.changeReportStatus(pnActivityReport, ReportStatusEnum.ERROR, ex.getMessage());
+                                return activityReportMetaDAO.createMetaData(pnActivityReport)
+                                        .flatMap(report -> Mono.error(new PnGenericException(ExceptionTypeEnum.DEANONIMIZING_JOB_EXCEPTION, ExceptionTypeEnum.DEANONIMIZING_JOB_EXCEPTION.getMessage())));
+                            })
                             .map(i -> pnActivityReport)
                 )
-                .flatMap(report -> this.safeStorageClient.getPresignedUrl()
+                .flatMap(pnActivityReport -> this.safeStorageClient.getPresignedUrl()
                             .flatMap(responseSafeStorage -> {
-                                report.setKeySafeStorage(responseSafeStorage.getKey());
+                                pnActivityReport.setKeySafeStorage(responseSafeStorage.getKey());
                                 byte[] zipBytes = this.zipDAO.getZipFile(FOLDER_DEANONYMIZED);
                                 return this.safeStorageClient.uploadFile(responseSafeStorage.getUploadUrl(), zipBytes)
-                                        .then(Mono.just(report));
+                                        .flatMap(item -> safeStorageClient.notifyFileUploaded(responseSafeStorage.getKey()))
+                                        .then(Mono.just(pnActivityReport));
+                            }).onErrorResume(ex -> {
+
+                                ActivityReportMapper.changeReportStatus(pnActivityReport, ReportStatusEnum.ERROR, ex.getMessage());
+
+                                return activityReportMetaDAO.createMetaData(pnActivityReport)
+                                    .flatMap(report -> Mono.error(new PnGenericException(ExceptionTypeEnum.DEANONIMIZING_JOB_EXCEPTION, ExceptionTypeEnum.DEANONIMIZING_JOB_EXCEPTION.getMessage())));
+
                             })
                 )
-                .map(activityReport -> {
-                    activityReport.setStatus(ReportStatusEnum.READY.name());
+                .flatMap(activityReport -> {
+                    activityReport.setStatusReport(ReportStatusEnum.ENQUEUED.name());
                     return this.activityReportMetaDAO.createMetaData(activityReport);
                 })
                 .then();
@@ -75,13 +94,28 @@ public class DeanonymizingServiceImpl implements DeanonymizingService {
         return csvDAO.toRows(file);
     }
 
-    private ActivityReportCSV deanonymizing(ActivityReportCSV source){
+    private Mono<ActivityReportCSV> deanonymizing(ActivityReportCSV source){
         if (StringUtils.isNotBlank(source.getRecipientTaxId())){
-            source.setRecipientTaxId(dataVaultClient.decode(source.getRecipientTaxId()));
-            return source;
+            return getDecodeTaxId(pnPlatformConfig.getAttemptDataVault(), source.getRecipientTaxId(), null)
+                    .map(taxId -> {
+                        source.setRecipientTaxId(taxId);
+                        return source;
+                    });
         }
-        return source;
+        return Mono.just(source);
     }
 
+    public Mono<String> getDecodeTaxId(Integer n, String taxId, Throwable ex){
+        if (n<0)
+            return Mono.error(ex);
+        else {
+            return Mono.delay(Duration.ofMillis( 100L ))
+                    .map(item -> dataVaultClient.decode(taxId))
+                    .onErrorResume(exception -> {
+                        log.error ("Error with retrieve {}", exception.getMessage());
+                        return getDecodeTaxId(n - 1, taxId, exception);
+                    });
+        }
+    }
 
 }

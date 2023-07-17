@@ -219,6 +219,10 @@ Parameters:
     Type: String
     Description: 'DataVault BaseUrl'
 
+  AttemptDataVault:
+    type: Number
+    Description: 'Number of attempts for retrieve decode value'
+
 Resources:
 
   ## JobQueue
@@ -434,6 +438,7 @@ Resources:
         ContainerEnvEntry14: !Sub
           - 'PN_PLATFORMUSAGEESTIMATES_JOBDEFINITIONNAME=${JobDefinitionArn}'
           - JobDefinitionArn: !Ref BatchDeanonimizingJobDefinition
+        ContainerEnvEntry15: !Sub 'PN_PLATFORMUSAGEESTIMATES_ATTEMPTDATAVAULT=${AttemptDataVault}'
         MappedPaths:  '/pn-usage-estimates-bo/*, /pn-usage-estimates/*'
         ECSClusterName: !Ref ECSClusterName
         Subnets: !Ref SubnetsIds

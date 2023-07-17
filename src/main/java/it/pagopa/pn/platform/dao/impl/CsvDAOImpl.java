@@ -37,7 +37,7 @@ public class CsvDAOImpl implements CsvDAO {
                     .map(ActivityReportMapper::csvToObject)
                     .sequential();
         } catch (IOException exception) {
-            throw new DAOException("Error with parsing csv");
+            throw new DAOException(DAOException.DaoName.CSVDAO, "Error with parsing csv");
         }
     }
 
@@ -53,7 +53,7 @@ public class CsvDAOImpl implements CsvDAO {
             }
             csvPrinter.flush();
         } catch (IOException ex) {
-            throw new DAOException("Error with creating csv file from object");
+            throw new DAOException(DAOException.DaoName.CSVDAO, "Error with creating csv file from object");
         }
     }
 }

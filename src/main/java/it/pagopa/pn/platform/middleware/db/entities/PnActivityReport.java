@@ -39,7 +39,7 @@ public class PnActivityReport implements Comparable<PnActivityReport>{
     private String reportZipKey;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_STATUS)}))
-    private String status;
+    private String statusReport;
 
     @Getter(onMethod = @__({@DynamoDbAttribute(COL_PART)}))
     private String part;

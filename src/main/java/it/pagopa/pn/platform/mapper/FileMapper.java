@@ -4,7 +4,6 @@ import it.pagopa.pn.platform.middleware.db.entities.PnActivityReport;
 import it.pagopa.pn.platform.model.PageModel;
 import it.pagopa.pn.platform.rest.v1.dto.ReportDTO;
 import it.pagopa.pn.platform.rest.v1.dto.PageableDeanonymizedFilesResponseDto;
-import it.pagopa.pn.platform.rest.v1.dto.ReportDTO;
 import it.pagopa.pn.platform.rest.v1.dto.ReportStatusEnum;
 import org.springframework.data.domain.Pageable;
 
@@ -62,11 +61,11 @@ public class FileMapper {
         filesList.setPaId(activityReport.getPaId());
         filesList.setReferenceMonth(activityReport.getReferenceMonth());
         filesList.setLastModifiedDate(activityReport.getLastModifiedDate() != null ? Date.from(activityReport.getLastModifiedDate()) : null);
-        filesList.setStatus(ReportStatusEnum.valueOf(activityReport.getStatus()));
+        filesList.setStatus(ReportStatusEnum.valueOf(activityReport.getStatusReport()));
         filesList.setReportKey(activityReport.getReportKey());
         filesList.setPart(activityReport.getPart());
         filesList.setGenerationDate(Date.from(activityReport.getGenerationDate()));
-        if (activityReport.getStatus().equals(String.valueOf(ReportStatusEnum.ERROR))){
+        if (activityReport.getStatusReport().equals(String.valueOf(ReportStatusEnum.ERROR))){
             filesList.setErrorMessage(activityReport.getErrorMessage());
         }
 
