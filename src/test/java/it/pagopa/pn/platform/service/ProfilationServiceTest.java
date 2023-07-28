@@ -2,6 +2,7 @@ package it.pagopa.pn.platform.service;
 
 import it.pagopa.pn.platform.S3.S3Bucket;
 import it.pagopa.pn.platform.config.BaseTest;
+import it.pagopa.pn.platform.exception.ExceptionTypeEnum;
 import it.pagopa.pn.platform.exception.PnGenericException;
 import it.pagopa.pn.platform.middleware.db.dao.ProfilationDAO;
 import it.pagopa.pn.platform.middleware.db.entities.PnEstimate;
@@ -140,34 +141,67 @@ class ProfilationServiceTest extends BaseTest {
     }
 
     @Test
-    @Disabled
-    @DisplayName("createOrUpdateProfilationYearMinorRefToday")
-    void createOrUpdateProfilationYearMinorRefToday(){
+    @DisplayName("createOrUpdateProfilationYearMinoreOnboardingDate")
+    void createOrUpdateProfilationYearMinoreOnboardingDate(){
+        String paId = "12345";
+        Instant date =Instant.now();
+        Integer plusTwo = DateUtils.getYear(date) - 4;
+        PaInfoDto paInfoDto = getPaInfoDto();
+        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
 
-        profilationService.createOrUpdateProfilation(getPnProfilation().getStatus(), getPnProfilation().getPaId(), "2010",profilationCreateBody)
-                .subscribe(
-                        value -> Assertions.fail("Expected an error"),
-                        error -> {
-                            Assertions.assertTrue(error instanceof PnGenericException);
-                        }
-                );
+        StepVerifier.create(profilationService.createOrUpdateProfilation(getPnProfilation().getStatus(), getPnProfilation().getPaId(), plusTwo.toString(),profilationCreateBody))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.PROFILATION_NOT_EXISTED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
 
     }
 
     @Test
-    @Disabled
-    @DisplayName("createOrUpdateProfilationYearMaggioreUgualeRefTodayPlusTwo")
-    void createOrUpdateProfilationYearMaggioreUgualeRefTodayPlusTwo(){
-
+    @DisplayName("createOrUpdateProfilationgetProfilationDetailStatusAbsent")
+    void createOrUpdateProfilationgetProfilationDetailStatusAbsent(){
+        String paId = "12345";
         Instant date =Instant.now();
         Integer plusTwo = DateUtils.getYear(date) + 4;
-        profilationService.createOrUpdateProfilation(getPnProfilation().getStatus(), getPnProfilation().getPaId(), plusTwo.toString(),profilationCreateBody)
-                .subscribe(
-                        value -> Assertions.fail("Expected an error"),
-                        error -> {
-                            Assertions.assertTrue(error instanceof PnGenericException);
-                        }
-                );
+        PnProfilation pnProfilation = getPnProfilation();
+        pnProfilation.setStatus("ABSENT");
+        PaInfoDto paInfoDto = getPaInfoDto();
+
+        Mockito.when(this.profilationDAO.getProfilationDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnProfilation));
+        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
+
+        StepVerifier.create(profilationService.createOrUpdateProfilation(getPnProfilation().getStatus(), getPnProfilation().getPaId(), plusTwo.toString(),profilationCreateBody))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.PROFILATION_NOT_EXISTED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
+
+    }
+
+    @Test
+    @DisplayName("createOrUpdateProfilationgetProfilationDetailStatusVALIDATED")
+    void createOrUpdateProfilationgetProfilationDetailStatusValidated(){
+        String paId = "12345";
+        Instant date =Instant.now();
+        Integer plusTwo = DateUtils.getYear(date) + 4;
+        PnProfilation pnProfilation = getPnProfilation();
+        pnProfilation.setStatus("VALIDATED");
+        PaInfoDto paInfoDto = getPaInfoDto();
+
+        Mockito.when(this.profilationDAO.getProfilationDetail(Mockito.anyString(), Mockito.anyString())).thenReturn(Mono.just(pnProfilation));
+        Mockito.when(this.externalRegistriesClient.getOnePa(paId)).thenReturn(Mono.just(paInfoDto));
+
+        StepVerifier.create(profilationService.createOrUpdateProfilation("DRAFT", getPnProfilation().getPaId(), plusTwo.toString(),profilationCreateBody))
+                .expectErrorMatches(ex -> {
+                    assertEquals(PnGenericException.class, ex.getClass());
+                    assertEquals(ExceptionTypeEnum.OPERATION_NOT_ALLOWED, ((PnGenericException) ex).getExceptionType());
+                    return true;
+                })
+                .verify();
 
     }
 
